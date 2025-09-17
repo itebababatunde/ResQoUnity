@@ -75,15 +75,34 @@ from rsl_rl.runners import OnPolicyRunner
 
 
 import rclpy
-from ros2 import RobotBaseNode, add_camera, add_rtx_lidar, pub_robo_data_ros2
+from ros2_bridge import RobotBaseNode, add_camera, add_rtx_lidar, pub_robo_data_ros2
 from geometry_msgs.msg import Twist
 
 
-from agent_cfg import unitree_go2_agent_cfg, unitree_g1_agent_cfg
-from custom_rl_env import UnitreeGo2CustomEnvCfg, G1RoughEnvCfg
+import agent_cfg as agent_cfg_module
+import custom_rl_env as custom_env_module
 import custom_rl_env
 
 from omnigraph import create_front_cam_omnigraph
+
+
+class _RslRlEnvShim:
+    """Shim to adapt env.get_observations() to return only observations for older rsl_rl versions.
+
+    Some versions of rsl_rl expect env.get_observations() -> dict (no info tuple).
+    IsaacLab/gymnasium returns (obs, info). This shim unwraps the tuple for the runner.
+    """
+    def __init__(self, env):
+        self._env = env
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def get_observations(self):
+        result = self._env.get_observations()
+        if isinstance(result, tuple):
+            return result[0]
+        return result
 
 
 def sub_keyboard_event(event, *args, **kwargs) -> bool:
@@ -139,6 +158,7 @@ def cmd_vel_cb(msg, num_robot):
     x = msg.linear.x
     y = msg.linear.y
     z = msg.angular.z
+    _ensure_base_command_dict()
     custom_rl_env.base_command[str(num_robot)] = [x, y, z]
 
 
@@ -150,10 +170,23 @@ def add_cmd_sub(num_envs):
     # Spin in a separate thread
     thread = threading.Thread(target=rclpy.spin, args=(node_test,), daemon=True)
     thread.start()
+def _ensure_base_command_dict():
+    """Ensure base_command is a dict keyed by string indices.
+
+    Some environments may accidentally set it to a list. Convert to dict if so.
+    """
+    if not isinstance(custom_rl_env.base_command, dict):
+        try:
+            seq = list(custom_rl_env.base_command)
+            custom_rl_env.base_command = {str(i): list(seq[i]) for i in range(len(seq))}
+        except Exception:
+            custom_rl_env.base_command = {}
+
 
 
 
 def specify_cmd_for_robots(numv_envs):
+    _ensure_base_command_dict()
     for i in range(numv_envs):
         custom_rl_env.base_command[str(i)] = [0, 0, 0]
 def run_sim():
@@ -167,10 +200,13 @@ def run_sim():
     """Play with RSL-RL agent."""
     # parse configuration
     
-    env_cfg = UnitreeGo2CustomEnvCfg()
-    
+    # choose env cfg based on robot type, fall back if G1 is unavailable
+    env_cfg = custom_env_module.UnitreeGo2CustomEnvCfg()
     if args_cli.robot == "g1":
-        env_cfg = G1RoughEnvCfg()
+        if hasattr(custom_env_module, "G1RoughEnvCfg"):
+            env_cfg = custom_env_module.G1RoughEnvCfg()
+        else:
+            print("[WARN] G1RoughEnvCfg not found. Falling back to UnitreeGo2CustomEnvCfg.")
 
     # add N robots to env 
     env_cfg.scene.num_envs = args_cli.robot_amount
@@ -181,25 +217,31 @@ def run_sim():
         
     specify_cmd_for_robots(env_cfg.scene.num_envs)
 
-    agent_cfg: RslRlOnPolicyRunnerCfg = unitree_go2_agent_cfg
+    # copy to avoid mutating the imported dict
+    agent_cfg_data: RslRlOnPolicyRunnerCfg = dict(agent_cfg_module.unitree_go2_agent_cfg)
 
-    if args_cli.robot == "g1":
-        agent_cfg: RslRlOnPolicyRunnerCfg = unitree_g1_agent_cfg
+    if args_cli.robot == "g1" and hasattr(agent_cfg_module, "unitree_g1_agent_cfg"):
+        agent_cfg_data = dict(agent_cfg_module.unitree_g1_agent_cfg)
 
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg)
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
     # specify directory for logging experiments
-    log_root_path = os.path.join("logs", "rsl_rl", agent_cfg["experiment_name"])
+    log_root_path = os.path.join("logs", "rsl_rl", agent_cfg_data["experiment_name"])
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
 
-    resume_path = get_checkpoint_path(log_root_path, agent_cfg["load_run"], agent_cfg["load_checkpoint"])
+    resume_path = get_checkpoint_path(log_root_path, agent_cfg_data["load_run"], agent_cfg_data["load_checkpoint"])
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 
-    # load previously trained model
-    ppo_runner = OnPolicyRunner(env, agent_cfg, log_dir=None, device=agent_cfg["device"])
+    # ensure obs_groups is defined for rsl_rl runner
+    if "obs_groups" not in agent_cfg_data:
+        agent_cfg_data["obs_groups"] = {"policy": ["policy"]}
+
+    # load previously trained model (shimmed env for rsl_rl)
+    env_for_runner = _RslRlEnvShim(env)
+    ppo_runner = OnPolicyRunner(env_for_runner, agent_cfg_data, log_dir=None, device=agent_cfg_data["device"])
     ppo_runner.load(resume_path)
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 

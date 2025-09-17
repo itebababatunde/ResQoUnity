@@ -60,11 +60,24 @@ base_command = {}
 
 def constant_commands(env: RLTaskEnvCfg) -> torch.Tensor:
     global base_command
-    """The generated command from the command generator."""
-    tensor_lst = torch.tensor([0.0, 0.0, 0.0], dtype=torch.float32, device=env.device).repeat(env.num_envs, 1)
-    for i in range(env.num_envs):
-        tensor_lst[i] = torch.tensor(base_command[str(i)], dtype=torch.float32, device=env.device)
-    return tensor_lst
+    """Return per-env base velocity commands (vx, vy, wz).
+
+    Falls back to zeros if a command is missing, and tolerates various
+    base_command container types.
+    """
+    commands = torch.zeros((env.num_envs, 3), dtype=torch.float32, device=env.device)
+    # only attempt to read dict-like values; otherwise keep zeros
+    if isinstance(base_command, dict):
+        for i in range(env.num_envs):
+            key = str(i)
+            if key in base_command:
+                try:
+                    val = base_command[key]
+                    commands[i] = torch.as_tensor(val, dtype=torch.float32, device=env.device)
+                except Exception:
+                    # keep zeros on parse failure
+                    pass
+    return commands
 
 
 @configclass

@@ -31,7 +31,8 @@ def create_front_cam_omnigraph(robot_num):
 
     keys = og.Controller.Keys
 
-    graph_path = f"/ROS_" + f"front_cam{robot_num}"
+    ns = f"robot{robot_num}"
+    graph_path = f"/ROS_front_cam{robot_num}"
     og.Controller.edit(
         {
             "graph_path": graph_path,
@@ -49,8 +50,8 @@ def create_front_cam_omnigraph(robot_num):
                 ("IsaacCreateRenderProduct.inputs:cameraPrim", f"/World/envs/env_{robot_num}/Robot/base/front_cam"),
                 ("IsaacCreateRenderProduct.inputs:enabled", True),
                 ("ROS2CameraHelper.inputs:type", "rgb"),
-                ("ROS2CameraHelper.inputs:topicName", f"robot{robot_num}/front_cam/rgb"),
-                ("ROS2CameraHelper.inputs:frameId", f"robot{robot_num}"),
+                ("ROS2CameraHelper.inputs:topicName", f"{ns}/front_cam/rgb"),
+                ("ROS2CameraHelper.inputs:frameId", ns),
             ],
 
             keys.CONNECT: [
