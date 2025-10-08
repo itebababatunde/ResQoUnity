@@ -158,9 +158,12 @@ echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Starting Isaac Sim${NC}"
 echo -e "  Configuration: ${YELLOW}omniverse_sim.py${NC}"
+echo -e "  Note: ${YELLOW}Enable extensions via Window→Extensions if needed${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
+# Note: If you need Pegasus or other extensions, enable them manually via GUI first
+# The replicator.agent.core extension needs to be enabled before Pegasus can be installed
 ${ISAACSIM_PYTHON_EXE} main.py
 
 echo ""

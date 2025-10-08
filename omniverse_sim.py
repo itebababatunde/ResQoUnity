@@ -25,7 +25,7 @@ parser.add_argument("--seed", type=int, default=None, help="Seed used for the en
 parser.add_argument("--custom_env", type=str, default="office", help="Setup the environment")
 parser.add_argument("--robot", type=str, default="go2", help="Setup the robot")
 parser.add_argument("--terrain", type=str, default="rough", help="Setup the robot")
-parser.add_argument("--robot_amount", type=int, default=4, help="Setup the robot amount")
+parser.add_argument("--robot_amount", type=int, default=1, help="Setup the robot amount")
 
 
 # append RSL-RL cli arguments
