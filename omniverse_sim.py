@@ -25,7 +25,7 @@ parser.add_argument("--seed", type=int, default=None, help="Seed used for the en
 parser.add_argument("--custom_env", type=str, default="office", help="Setup the environment")
 parser.add_argument("--robot", type=str, default="go2", help="Setup the robot")
 parser.add_argument("--terrain", type=str, default="rough", help="Setup the robot")
-parser.add_argument("--robot_amount", type=int, default=1, help="Setup the robot amount")
+parser.add_argument("--robot_amount", type=int, default=2, help="Setup the robot amount")
 
 
 # append RSL-RL cli arguments
@@ -291,6 +291,43 @@ def run_sim():
     print(f"  - Middle mouse: Pan camera")
     print(f"  - Alt+Left mouse: Orbit view")
     print(f"  - WASD keys: Move robot (forward/back/left/right)")
+    
+    # Add drone to the scene - AFTER everything is set up
+    print("\n[INFO] Adding Crazyflie drone to scene...")
+    try:
+        import omni.isaac.core.utils.prims as prim_utils
+        from omni.isaac.core.utils.stage import add_reference_to_stage
+        from omni.isaac.core.utils.nucleus import get_assets_root_path
+        from pxr import UsdGeom, Gf
+        # Don't import omni.usd here - causes scoping issues. Use omni from module level
+        
+        assets_root = get_assets_root_path()
+        if not assets_root:
+            assets_root = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/2023.1.1"
+        
+        drone_asset_path = f"{assets_root}/Isaac/Robots/Crazyflie/cf2x.usd"
+        drone_prim_path = "/World/Drone"  # At world level
+        drone_position = (2.0, 2.0, 2.5)  # Offset, hovering at 2.5m
+        
+        # Use the globally imported 'omni' module
+        import omni.usd as omni_usd_module
+        stage = omni_usd_module.get_context().get_stage()
+        if stage.GetPrimAtPath(drone_prim_path):
+            stage.RemovePrim(drone_prim_path)
+        
+        add_reference_to_stage(drone_asset_path, drone_prim_path)
+        drone_prim = prim_utils.get_prim_at_path(drone_prim_path)
+        
+        if drone_prim and drone_prim.IsValid():
+            prim_utils.set_prim_attribute_value(drone_prim_path, "xformOp:translate", drone_position)
+            xformable = UsdGeom.Xformable(drone_prim)
+            scale_op = xformable.AddScaleOp()
+            scale_op.Set(Gf.Vec3d(5.0, 5.0, 5.0))
+            print(f"[SUCCESS] ✓ Drone spawned at {drone_position} (scaled 5x for visibility)")
+        else:
+            print("[WARN] Drone prim not valid")
+    except Exception as e:
+        print(f"[WARN] Could not add drone: {e}")
     
     start_time = time.time()
     # simulate environment
