@@ -25,7 +25,7 @@ parser.add_argument("--seed", type=int, default=None, help="Seed used for the en
 parser.add_argument("--custom_env", type=str, default="office", help="Setup the environment")
 parser.add_argument("--robot", type=str, default="go2", help="Setup the robot")
 parser.add_argument("--terrain", type=str, default="rough", help="Setup the robot")
-parser.add_argument("--robot_amount", type=int, default=1, help="Setup the robot amount")
+parser.add_argument("--robot_amount", type=int, default=4, help="Setup the robot amount")
 
 
 # append RSL-RL cli arguments
@@ -101,8 +101,14 @@ class _RslRlEnvShim:
     def get_observations(self):
         result = self._env.get_observations()
         if isinstance(result, tuple):
-            return result[0]
-        return result
+            result = result[0]
+        # Ensure rsl_rl gets a dict when obs_groups are defined
+        if isinstance(result, dict):
+            return result
+        return {"policy": result}
+
+
+ 
 
 
 def sub_keyboard_event(event, *args, **kwargs) -> bool:
@@ -224,9 +230,13 @@ def run_sim():
         agent_cfg_data = dict(agent_cfg_module.unitree_g1_agent_cfg)
 
     # create isaac environment
+    print(f"[INFO] Creating environment: {args_cli.task}")
+    print(f"[INFO] Robot: {args_cli.robot}, Amount: {args_cli.robot_amount}, Terrain: {args_cli.terrain}")
     env = gym.make(args_cli.task, cfg=env_cfg)
+    print("[INFO] Environment created successfully!")
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
+    print("[INFO] Environment wrapped for RSL-RL")
     # specify directory for logging experiments
     log_root_path = os.path.join("logs", "rsl_rl", agent_cfg_data["experiment_name"])
     log_root_path = os.path.abspath(log_root_path)
@@ -235,9 +245,8 @@ def run_sim():
     resume_path = get_checkpoint_path(log_root_path, agent_cfg_data["load_run"], agent_cfg_data["load_checkpoint"])
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 
-    # ensure obs_groups is defined for rsl_rl runner
-    if "obs_groups" not in agent_cfg_data:
-        agent_cfg_data["obs_groups"] = {"policy": ["policy"]}
+    # ensure obs_groups is a dict with a default "policy" group to match the shimmed observations
+    agent_cfg_data["obs_groups"] = {"policy": ["policy"]}
 
     # load previously trained model (shimmed env for rsl_rl)
     env_for_runner = _RslRlEnvShim(env)
@@ -249,7 +258,11 @@ def run_sim():
     policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
 
     # reset environment
+    print("[INFO] Resetting environment and getting initial observations...")
     obs, _ = env.get_observations()
+    if not isinstance(obs, dict):
+        obs = {"policy": obs}
+    print("[INFO] Environment reset complete, starting simulation loop...")
 
     # initialize ROS2 node
     rclpy.init()
@@ -260,6 +273,25 @@ def run_sim():
     add_camera(env_cfg.scene.num_envs, args_cli.robot)
     setup_custom_env()
     
+    # Set up viewport camera to see the robot
+    print("[INFO] Setting up viewport camera...")
+    try:
+        from omni.isaac.core.utils.viewports import set_camera_view
+        # Position camera to look at the robot from a good angle
+        # eye: camera position, target: what camera looks at
+        set_camera_view(eye=[3.0, 3.0, 2.0], target=[0.0, 0.0, 0.5], camera_prim_path="/OmniverseKit_Persp")
+        print("[INFO] Camera positioned to view robot")
+    except Exception as e:
+        print(f"[WARN] Could not set camera view: {e}")
+    
+    print(f"[INFO] Robot(s) should now be visible in the viewport!")
+    print(f"[INFO] Use these controls to navigate:")
+    print(f"  - Press 'F' to focus on robot")
+    print(f"  - Mouse wheel: Zoom in/out")
+    print(f"  - Middle mouse: Pan camera")
+    print(f"  - Alt+Left mouse: Orbit view")
+    print(f"  - WASD keys: Move robot (forward/back/left/right)")
+    
     start_time = time.time()
     # simulate environment
     while simulation_app.is_running():
@@ -269,5 +301,7 @@ def run_sim():
             actions = policy(obs)
             # env stepping
             obs, _, _, _ = env.step(actions)
+            if not isinstance(obs, dict):
+                obs = {"policy": obs}
             pub_robo_data_ros2(args_cli.robot, env_cfg.scene.num_envs, base_node, env, annotator_lst, start_time)
     env.close()
