@@ -57,8 +57,9 @@ def generate_launch_description():
             ('scan', [robot_name, '/scan'])
         ],
         parameters=[{
-            'target_frame': 'base_link',
-            'transform_tolerance': 0.01,
+            'target_frame': '',  # Empty = use input cloud frame
+            'transform_tolerance': 1.0,  # Increased tolerance
+            'queue_size': 50,  # Increased queue size
             'min_height': -0.5,
             'max_height': 2.0,
             'angle_min': -3.14159,

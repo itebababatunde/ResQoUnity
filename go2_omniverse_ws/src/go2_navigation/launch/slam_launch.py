@@ -9,33 +9,24 @@ This launch file starts:
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
+def launch_setup(context, *args, **kwargs):
+    # Get launch configurations
+    robot_name = LaunchConfiguration('robot_name').perform(context)
+    use_sim_time = LaunchConfiguration('use_sim_time').perform(context)
+    
     # Get package directories
     go2_nav_dir = get_package_share_directory('go2_navigation')
-    slam_toolbox_dir = get_package_share_directory('slam_toolbox')
     
     # Configuration paths
     slam_params_file = os.path.join(go2_nav_dir, 'config', 'slam_toolbox_params.yaml')
     
-    # Launch arguments
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-    robot_name = LaunchConfiguration('robot_name', default='robot0')
-    
-    declare_use_sim_time_cmd = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='false',
-        description='Use simulation (Gazebo) clock if true')
-    
-    declare_robot_name_cmd = DeclareLaunchArgument(
-        'robot_name',
-        default_value='robot0',
-        description='Robot namespace (e.g., robot0, robot1)')
+    # Create base_frame with robot namespace
+    base_frame = f"{robot_name}/base_link"
     
     # Pointcloud to LaserScan conversion node
     pointcloud_to_laserscan_node = Node(
@@ -43,12 +34,12 @@ def generate_launch_description():
         executable='pointcloud_to_laserscan_node',
         name='pointcloud_to_laserscan',
         remappings=[
-            ('cloud_in', [robot_name, '/point_cloud2']),
-            ('scan', [robot_name, '/scan'])
+            ('cloud_in', f'/{robot_name}/point_cloud2'),
+            ('scan', f'/{robot_name}/scan')
         ],
         parameters=[{
-            'target_frame': 'base_link',
-            'transform_tolerance': 0.01,
+            'target_frame': '',  # Empty = use input cloud frame
+            'transform_tolerance': 1.0,  # Increased tolerance
             'min_height': -0.5,
             'max_height': 2.0,
             'angle_min': -3.14159,  # -180 degrees
@@ -59,6 +50,7 @@ def generate_launch_description():
             'range_max': 20.0,
             'use_inf': True,
             'inf_epsilon': 1.0,
+            'queue_size': 50,  # Increased queue size
         }]
     )
     
@@ -69,13 +61,33 @@ def generate_launch_description():
         name='slam_toolbox',
         parameters=[
             slam_params_file,
-            {'use_sim_time': use_sim_time}
+            {
+                'use_sim_time': use_sim_time == 'true',
+                'base_frame': base_frame,  # e.g., robot0/base_link
+                'odom_frame': 'odom',
+                'map_frame': 'map'
+            }
         ],
         remappings=[
-            ('scan', [robot_name, '/scan'])
+            ('scan', f'/{robot_name}/scan')
         ],
         output='screen'
     )
+    
+    return [pointcloud_to_laserscan_node, slam_toolbox_node]
+
+
+def generate_launch_description():
+    # Launch arguments
+    declare_use_sim_time_cmd = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='false',
+        description='Use simulation (Gazebo) clock if true')
+    
+    declare_robot_name_cmd = DeclareLaunchArgument(
+        'robot_name',
+        default_value='robot0',
+        description='Robot namespace (e.g., robot0, robot1)')
     
     # Create launch description
     ld = LaunchDescription()
@@ -84,9 +96,7 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_robot_name_cmd)
     
-    # Add nodes
-    ld.add_action(pointcloud_to_laserscan_node)
-    ld.add_action(slam_toolbox_node)
+    # Add opaque function to set up nodes
+    ld.add_action(OpaqueFunction(function=launch_setup))
     
     return ld
-
