@@ -134,10 +134,9 @@ def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, star
             if (time.time() - start_time) > 1/20:
                 for j in range(num_envs):
                     data = annotator_lst[j].get_data()
-                    point_cloud = update_meshes_for_cloud2(
-                        data['data'], env.env.scene["robot"].data.root_state_w[j, :3], 
-                        env.env.scene["robot"].data.root_state_w[j, 3:7]
-                        )
+                    # Use raw lidar data - don't transform to world frame
+                    # Frame_id is set to robot{j}/base_link in publish_lidar
+                    point_cloud = data['data']
                     base_node.publish_lidar(point_cloud, j)
                 start_time = time.time()
         except :
@@ -242,7 +241,7 @@ class RobotBaseNode(Node):
     def publish_lidar(self, points, robot_num):
 
         point_cloud = PointCloud2()
-        point_cloud.header = Header(frame_id="odom")
+        point_cloud.header = Header(frame_id=f"robot{robot_num}/base_link")
         point_cloud.header.stamp = self.get_clock().now().to_msg()  # Add timestamp!
         fields = [
             PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
