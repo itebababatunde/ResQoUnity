@@ -38,8 +38,8 @@ def launch_setup(context, *args, **kwargs):
             ('scan', f'/{robot_name}/scan')
         ],
         parameters=[{
-            'target_frame': '',  # Empty = use input cloud frame
-            'transform_tolerance': 1.0,  # Increased tolerance
+            'target_frame': '',  # Empty = pass through, no transform at all
+            'transform_tolerance': 0.01,
             'min_height': -0.5,
             'max_height': 2.0,
             'angle_min': -3.14159,  # -180 degrees
@@ -50,7 +50,6 @@ def launch_setup(context, *args, **kwargs):
             'range_max': 20.0,
             'use_inf': True,
             'inf_epsilon': 1.0,
-            'queue_size': 50,  # Increased queue size
         }]
     )
     
@@ -65,7 +64,12 @@ def launch_setup(context, *args, **kwargs):
                 'use_sim_time': use_sim_time == 'true',
                 'base_frame': base_frame,  # e.g., robot0/base_link
                 'odom_frame': 'odom',
-                'map_frame': 'map'
+                'map_frame': 'map',
+                'scan_topic': f'/{robot_name}/scan',
+                'use_scan_matching': True,
+                'use_scan_barycenter': False,
+                'minimum_time_interval': 0.1,
+                'transform_publish_period': 0.05,
             }
         ],
         remappings=[
