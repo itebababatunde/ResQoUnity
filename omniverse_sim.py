@@ -127,6 +127,20 @@ def sub_keyboard_event(event, *args, **kwargs) -> bool:
                 custom_rl_env.base_command["0"] = [0, 0, 1]
             if event.input.name == 'E':
                 custom_rl_env.base_command["0"] = [0, 0, -1]
+            # Drone altitude controls (T for up, G for down)
+            # Note: For drones, we may want to use Z-axis velocity instead of yaw
+            # Keeping Q/E for yaw, T/G for vertical
+            if event.input.name == 'T':
+                # Move up (positive Z velocity) - for drone mode
+                if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                    # For drones, override Y with Z-axis control
+                    current = custom_rl_env.base_command.get("0", [0, 0, 0])
+                    custom_rl_env.base_command["0"] = [current[0], 1.0, current[2]]  # +Y = up
+            if event.input.name == 'G':
+                # Move down (negative Z velocity) - for drone mode
+                if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                    current = custom_rl_env.base_command.get("0", [0, 0, 0])
+                    custom_rl_env.base_command["0"] = [current[0], -1.0, current[2]]  # -Y = down
 
             if len(custom_rl_env.base_command) > 1:
                 if event.input.name == 'I':
@@ -141,6 +155,15 @@ def sub_keyboard_event(event, *args, **kwargs) -> bool:
                     custom_rl_env.base_command["1"] = [0, 0, 1]
                 if event.input.name == 'O':
                     custom_rl_env.base_command["1"] = [0, 0, -1]
+                # Drone altitude controls for robot1 (Y for up, H for down)
+                if event.input.name == 'Y':
+                    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                        current = custom_rl_env.base_command.get("1", [0, 0, 0])
+                        custom_rl_env.base_command["1"] = [current[0], 1.0, current[2]]  # +Y = up
+                if event.input.name == 'H':
+                    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                        current = custom_rl_env.base_command.get("1", [0, 0, 0])
+                        custom_rl_env.base_command["1"] = [current[0], -1.0, current[2]]  # -Y = down
         elif event.type == carb.input.KeyboardEventType.KEY_RELEASE:
             for i in range(len(custom_rl_env.base_command)):
                 custom_rl_env.base_command[str(i)] = [0, 0, 0]
@@ -213,6 +236,11 @@ def run_sim():
             env_cfg = custom_env_module.G1RoughEnvCfg()
         else:
             print("[WARN] G1RoughEnvCfg not found. Falling back to UnitreeGo2CustomEnvCfg.")
+    elif args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+        if hasattr(custom_env_module, "QuadcopterEnvCfg"):
+            env_cfg = custom_env_module.QuadcopterEnvCfg()
+        else:
+            print("[WARN] QuadcopterEnvCfg not found. Falling back to UnitreeGo2CustomEnvCfg.")
 
     # add N robots to env 
     env_cfg.scene.num_envs = args_cli.robot_amount
@@ -228,6 +256,8 @@ def run_sim():
 
     if args_cli.robot == "g1" and hasattr(agent_cfg_module, "unitree_g1_agent_cfg"):
         agent_cfg_data = dict(agent_cfg_module.unitree_g1_agent_cfg)
+    elif (args_cli.robot == "drone" or args_cli.robot == "quadcopter") and hasattr(agent_cfg_module, "quadcopter_agent_cfg"):
+        agent_cfg_data = dict(agent_cfg_module.quadcopter_agent_cfg)
 
     # create isaac environment
     print(f"[INFO] Creating environment: {args_cli.task}")
@@ -291,43 +321,12 @@ def run_sim():
     print(f"  - Middle mouse: Pan camera")
     print(f"  - Alt+Left mouse: Orbit view")
     print(f"  - WASD keys: Move robot (forward/back/left/right)")
+    print(f"  - Q/E keys: Rotate left/right")
+    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+        print(f"  - T/G keys: Altitude up/down (for drone)")
     
-    # Add drone to the scene - AFTER everything is set up
-    print("\n[INFO] Adding Crazyflie drone to scene...")
-    try:
-        import omni.isaac.core.utils.prims as prim_utils
-        from omni.isaac.core.utils.stage import add_reference_to_stage
-        from omni.isaac.core.utils.nucleus import get_assets_root_path
-        from pxr import UsdGeom, Gf
-        # Don't import omni.usd here - causes scoping issues. Use omni from module level
-        
-        assets_root = get_assets_root_path()
-        if not assets_root:
-            assets_root = "http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/2023.1.1"
-        
-        drone_asset_path = f"{assets_root}/Isaac/Robots/Crazyflie/cf2x.usd"
-        drone_prim_path = "/World/Drone"  # At world level
-        drone_position = (2.0, 2.0, 2.5)  # Offset, hovering at 2.5m
-        
-        # Use the globally imported 'omni' module
-        import omni.usd as omni_usd_module
-        stage = omni_usd_module.get_context().get_stage()
-        if stage.GetPrimAtPath(drone_prim_path):
-            stage.RemovePrim(drone_prim_path)
-        
-        add_reference_to_stage(drone_asset_path, drone_prim_path)
-        drone_prim = prim_utils.get_prim_at_path(drone_prim_path)
-        
-        if drone_prim and drone_prim.IsValid():
-            prim_utils.set_prim_attribute_value(drone_prim_path, "xformOp:translate", drone_position)
-            xformable = UsdGeom.Xformable(drone_prim)
-            scale_op = xformable.AddScaleOp()
-            scale_op.Set(Gf.Vec3d(5.0, 5.0, 5.0))
-            print(f"[SUCCESS] ✓ Drone spawned at {drone_position} (scaled 5x for visibility)")
-        else:
-            print("[WARN] Drone prim not valid")
-    except Exception as e:
-        print(f"[WARN] Could not add drone: {e}")
+    # Note: Drone is now spawned by the environment configuration (not statically added)
+    # If robot type is 'drone' or 'quadcopter', the QuadcopterEnvCfg handles spawning
     
     start_time = time.time()
     # simulate environment

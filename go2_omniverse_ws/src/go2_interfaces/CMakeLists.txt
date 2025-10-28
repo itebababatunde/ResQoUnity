@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Go2Move.msg"
   "msg/Go2RpyCmd.msg"
   "msg/IMU.msg"
+  "msg/DroneState.msg"
 
   DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )

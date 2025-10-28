@@ -17,11 +17,36 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Go2 Robot Simulation Startup${NC}"
+echo -e "${GREEN}ResQoUnity Robot Simulation Startup${NC}"
 echo -e "${GREEN}========================================${NC}"
 
-# All configuration (robot amount, type, terrain) should be set in omniverse_sim.py
-# This script just handles environment setup and launches the simulation
+# Parse command line arguments
+ROBOT_TYPE="${1:-go2}"        # Default: go2 (also accepts: drone, quadcopter, g1)
+ROBOT_AMOUNT="${2:-1}"        # Default: 1 robot
+TERRAIN="${3:-flat}"          # Default: flat (also accepts: rough)
+CUSTOM_ENV="${4:-office}"     # Default: office (also accepts: warehouse)
+
+echo -e "${YELLOW}Configuration:${NC}"
+echo -e "  Robot Type:    ${GREEN}$ROBOT_TYPE${NC}"
+echo -e "  Robot Amount:  ${GREEN}$ROBOT_AMOUNT${NC}"
+echo -e "  Terrain:       ${GREEN}$TERRAIN${NC}"
+echo -e "  Environment:   ${GREEN}$CUSTOM_ENV${NC}"
+echo ""
+
+# Show controls based on robot type
+if [[ "$ROBOT_TYPE" == "drone" || "$ROBOT_TYPE" == "quadcopter" ]]; then
+    echo -e "${YELLOW}Drone Controls:${NC}"
+    echo -e "  W/S - Forward/Backward    |  I/K - Robot1 Forward/Backward"
+    echo -e "  A/D - Strafe Left/Right   |  J/L - Robot1 Strafe Left/Right"
+    echo -e "  Q/E - Yaw Left/Right      |  U/O - Robot1 Yaw Left/Right"
+    echo -e "  ${GREEN}T/G - Altitude Up/Down${NC}    |  ${GREEN}Y/H - Robot1 Altitude Up/Down${NC}"
+else
+    echo -e "${YELLOW}Ground Robot Controls:${NC}"
+    echo -e "  W/S - Forward/Backward    |  I/K - Robot1 Forward/Backward"
+    echo -e "  A/D - Strafe Left/Right   |  J/L - Robot1 Strafe Left/Right"
+    echo -e "  Q/E - Rotate Left/Right   |  U/O - Robot1 Rotate Left/Right"
+fi
+echo ""
 
 echo -e "${GREEN}[1/8]${NC} Deactivating conda environment..."
 # Must deactivate conda first - Isaac Sim doesn't work with conda active
@@ -157,14 +182,20 @@ cd ~/ResQoUnity
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Starting Isaac Sim${NC}"
-echo -e "  Configuration: ${YELLOW}omniverse_sim.py${NC}"
+echo -e "  Robot Type:    ${YELLOW}$ROBOT_TYPE${NC}"
+echo -e "  Robot Amount:  ${YELLOW}$ROBOT_AMOUNT${NC}"
+echo -e "  Terrain:       ${YELLOW}$TERRAIN${NC}"
+echo -e "  Environment:   ${YELLOW}$CUSTOM_ENV${NC}"
 echo -e "  Note: ${YELLOW}Enable extensions via Window→Extensions if needed${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# Note: If you need Pegasus or other extensions, enable them manually via GUI first
-# The replicator.agent.core extension needs to be enabled before Pegasus can be installed
-${ISAACSIM_PYTHON_EXE} main.py
+# Launch simulation with specified parameters
+${ISAACSIM_PYTHON_EXE} main.py \
+    --robot $ROBOT_TYPE \
+    --robot_amount $ROBOT_AMOUNT \
+    --terrain $TERRAIN \
+    --custom_env $CUSTOM_ENV
 
 echo ""
 echo -e "${GREEN}========================================${NC}"

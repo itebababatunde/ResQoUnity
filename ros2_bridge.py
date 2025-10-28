@@ -72,7 +72,15 @@ def add_rtx_lidar(num_envs, robot_type, debug=False):
                                     orientation=(1.0, 0.0, 0.0, 0.0),
                                     config_file_name= "Unitree_L1",
                                 )
-        
+        elif robot_type == "drone" or robot_type == "quadcopter":
+            # Drone lidar mounted on base/body, pointing downward for altitude sensing
+            lidar_sensor = LidarRtx(f'/World/envs/env_{i}/Robot/base/lidar_sensor',
+                                    rotation_frequency = 200,
+                                    pulse_time=1, 
+                                    translation=(0.0, 0.0, 0.0),
+                                    orientation=(1.0, 0.0, 0.0, 0.0),
+                                    config_file_name= "Unitree_L1",
+                                    )
         else:
             lidar_sensor = LidarRtx(f'/World/envs/env_{i}/Robot/base/lidar_sensor',
                                     rotation_frequency = 200,
@@ -110,6 +118,10 @@ def add_camera(num_envs, robot_type):
         if robot_type == "g1":
             cameraCfg.prim_path = f"/World/envs/env_{i}/Robot/head_link/front_cam"
             cameraCfg.offset = CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.0), rot=(0.5, -0.5, 0.5, -0.5), convention="ros")
+        elif robot_type == "drone" or robot_type == "quadcopter":
+            # Drone camera mounted on body, pointing forward/downward for navigation
+            cameraCfg.prim_path = f"/World/envs/env_{i}/Robot/base/front_cam"
+            cameraCfg.offset = CameraCfg.OffsetCfg(pos=(0.1, 0.0, -0.05), rot=(0.5, -0.5, 0.5, -0.5), convention="ros")
 
         Camera(cameraCfg)
 
@@ -117,12 +129,12 @@ def add_camera(num_envs, robot_type):
 def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, start_time):
 
     for i in range(num_envs):
-        # publish ros2 info
+        # publish ros2 info - joints, odometry, IMU (common to all robots)
         base_node.publish_joints(env.env.scene["robot"].data.joint_names, env.env.scene["robot"].data.joint_pos[i], i)
         base_node.publish_odom(env.env.scene["robot"].data.root_state_w[i, :3], env.env.scene["robot"].data.root_state_w[i, 3:7], i)
         base_node.publish_imu(env.env.scene["robot"].data.root_state_w[i, 3:7], env.env.scene["robot"].data.root_lin_vel_b[i, :], env.env.scene["robot"].data.root_ang_vel_b[i, :], i)
         
-        
+        # Robot-specific telemetry
         if robot_type == "go2":
             base_node.publish_robot_state([
                 env.env.scene["contact_forces"].data.net_forces_w[i][4][2], 
@@ -130,6 +142,11 @@ def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, star
                 env.env.scene["contact_forces"].data.net_forces_w[i][14][2], 
                 env.env.scene["contact_forces"].data.net_forces_w[i][18][2]
                 ], i)
+        elif robot_type == "drone" or robot_type == "quadcopter":
+            # Drone-specific state (altitude is already in odometry Z position)
+            # Could publish rotor speeds from joint velocities if needed
+            # For now, standard topics (odom, imu) provide sufficient telemetry
+            pass
 
         try:
             if (time.time() - start_time) > 1/20:

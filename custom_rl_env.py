@@ -51,6 +51,7 @@ import omni.isaac.orbit_tasks.locomotion.velocity.mdp as mdp
 
 from terrain_cfg import ROUGH_TERRAINS_CFG
 from robots.g1.config import G1_CFG
+from robots.quadcopter.config import QUADCOPTER_CFG
 
 from omniverse_sim import args_cli
 
@@ -353,3 +354,38 @@ class G1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
 
         # Terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = ["torso_link"]
+
+
+@configclass
+class QuadcopterEnvCfg(LocomotionVelocityRoughEnvCfg):
+    """Configuration for the quadcopter drone environment."""
+    def __post_init__(self):
+        # post init of parent
+        super().__post_init__()
+        
+        # Scene - use quadcopter configuration
+        self.scene.robot = QUADCOPTER_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        # Drone doesn't need height scanner as it flies, but keep for compatibility
+        # Point to the drone's base/body link
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base"
+        
+        # Actions - adjust scale for rotor control (4 motors vs 12+ joints)
+        # Smaller action scale for more stable flight control
+        self.actions.joint_pos.scale = 0.1
+        
+        # Rewards - disable ground locomotion rewards, focus on flight stability
+        # Drones don't have feet, so disable feet_air_time
+        self.rewards.feet_air_time.weight = 0.0
+        # Disable undesired contacts (no thighs for drone)
+        self.rewards.undesired_contacts = None
+        # Increase penalties for unstable flight
+        self.rewards.ang_vel_xy_l2.weight = -0.1  # Penalize tilting
+        self.rewards.lin_vel_z_l2.weight = -1.0   # Penalize vertical oscillation
+        # Reduce torque penalties (rotors are different from joints)
+        self.rewards.dof_torques_l2.weight = -1.0e-6
+        # Keep orientation flat for stable flight
+        self.rewards.flat_orientation_l2.weight = -1.0
+        
+        # Terminations - drone crashes if body touches ground
+        # Use base/body contact as termination condition
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["base"]
