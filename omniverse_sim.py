@@ -60,6 +60,7 @@ ext_manager.set_extension_enabled_immediate("omni.isaac.ros2_bridge", True)
 """Rest everything follows."""
 import gymnasium as gym
 import torch
+import numpy as np
 import carb
 
 
@@ -128,19 +129,15 @@ def sub_keyboard_event(event, *args, **kwargs) -> bool:
             if event.input.name == 'E':
                 custom_rl_env.base_command["0"] = [0, 0, -1]
             # Drone altitude controls (T for up, G for down)
-            # Note: For drones, we may want to use Z-axis velocity instead of yaw
-            # Keeping Q/E for yaw, T/G for vertical
+            # Store altitude command separately for Z-axis control
             if event.input.name == 'T':
                 # Move up (positive Z velocity) - for drone mode
                 if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
-                    # For drones, override Y with Z-axis control
-                    current = custom_rl_env.base_command.get("0", [0, 0, 0])
-                    custom_rl_env.base_command["0"] = [current[0], 1.0, current[2]]  # +Y = up
+                    custom_rl_env.drone_altitude = 1.0  # Altitude up
             if event.input.name == 'G':
                 # Move down (negative Z velocity) - for drone mode
                 if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
-                    current = custom_rl_env.base_command.get("0", [0, 0, 0])
-                    custom_rl_env.base_command["0"] = [current[0], -1.0, current[2]]  # -Y = down
+                    custom_rl_env.drone_altitude = -1.0  # Altitude down
 
             if len(custom_rl_env.base_command) > 1:
                 if event.input.name == 'I':
@@ -158,15 +155,21 @@ def sub_keyboard_event(event, *args, **kwargs) -> bool:
                 # Drone altitude controls for robot1 (Y for up, H for down)
                 if event.input.name == 'Y':
                     if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
-                        current = custom_rl_env.base_command.get("1", [0, 0, 0])
-                        custom_rl_env.base_command["1"] = [current[0], 1.0, current[2]]  # +Y = up
+                        if not hasattr(custom_rl_env, 'drone_altitude_1'):
+                            custom_rl_env.drone_altitude_1 = 0.0
+                        custom_rl_env.drone_altitude_1 = 1.0  # Altitude up
                 if event.input.name == 'H':
                     if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
-                        current = custom_rl_env.base_command.get("1", [0, 0, 0])
-                        custom_rl_env.base_command["1"] = [current[0], -1.0, current[2]]  # -Y = down
+                        if not hasattr(custom_rl_env, 'drone_altitude_1'):
+                            custom_rl_env.drone_altitude_1 = 0.0
+                        custom_rl_env.drone_altitude_1 = -1.0  # Altitude down
         elif event.type == carb.input.KeyboardEventType.KEY_RELEASE:
             for i in range(len(custom_rl_env.base_command)):
                 custom_rl_env.base_command[str(i)] = [0, 0, 0]
+            # Reset altitude commands for drones
+            custom_rl_env.drone_altitude = 0.0
+            if hasattr(custom_rl_env, 'drone_altitude_1'):
+                custom_rl_env.drone_altitude_1 = 0.0
     return True
 
 
@@ -184,18 +187,183 @@ def setup_custom_env():
 
 
 def cmd_vel_cb(msg, num_robot):
+    """Handle velocity commands - only active in VELOCITY or ALTITUDE_HOLD modes"""
+    # Check if drone is in velocity-accepting mode
+    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+        controller = custom_rl_env.drone_controllers.get(str(num_robot))
+        if controller:
+            # Only accept velocity commands in these modes
+            if controller.mode.value not in ['VELOCITY', 'ALTITUDE_HOLD', 'IDLE']:
+                # Ignore velocity commands in position/loiter/landing modes
+                print(f"[Drone {num_robot}] Ignoring cmd_vel in mode {controller.mode.value}")
+                return
+            
+            # Set mode to VELOCITY when receiving cmd_vel
+            if controller.mode.value == 'IDLE' or controller.mode.value == 'ALTITUDE_HOLD':
+                from drone_controller import DroneState
+                controller.set_mode(DroneState.VELOCITY)
+    
     x = msg.linear.x
     y = msg.linear.y
-    z = msg.angular.z
+    
+    # For drones: use linear.z (altitude), for ground robots: use angular.z (yaw)
+    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+        z = msg.angular.z  # Yaw for XY plane rotation
+        # Store altitude separately for drones
+        if num_robot == "0":
+            custom_rl_env.drone_altitude = msg.linear.z
+        elif num_robot == "1":
+            if not hasattr(custom_rl_env, 'drone_altitude_1'):
+                custom_rl_env.drone_altitude_1 = 0.0
+            custom_rl_env.drone_altitude_1 = msg.linear.z
+    else:
+        z = msg.angular.z  # Yaw for ground robots
+    
     _ensure_base_command_dict()
     custom_rl_env.base_command[str(num_robot)] = [x, y, z]
 
 
 
+def cmd_position_cb(msg, num_robot):
+    """Handle position setpoint commands"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    if controller and controller.armed:
+        target_x = msg.pose.position.x
+        target_y = msg.pose.position.y
+        target_z = msg.pose.position.z
+        controller.set_target_position(target_x, target_y, target_z)
+        controller.set_mode(DroneState.POSITION)
+    else:
+        if not controller:
+            print(f"[Drone {num_robot}] No controller found for position command")
+        else:
+            print(f"[Drone {num_robot}] Drone not armed, ignoring position command")
+
+
+def cmd_altitude_cb(msg, num_robot):
+    """Handle altitude setpoint commands"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    if controller and controller.armed:
+        controller.set_target_altitude(msg.data)
+        controller.set_mode(DroneState.ALTITUDE_HOLD)
+    else:
+        if not controller:
+            print(f"[Drone {num_robot}] No controller found for altitude command")
+        else:
+            print(f"[Drone {num_robot}] Drone not armed, ignoring altitude command")
+
+
+def takeoff_service_cb(request, response, num_robot):
+    """Takeoff to default altitude (1.5m)"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    
+    if not controller:
+        response.success = False
+        response.message = f"Controller not initialized for robot{num_robot}"
+        return response
+    
+    if not controller.armed:
+        response.success = False
+        response.message = "Drone is not armed. Call /arm service first."
+        return response
+    
+    if controller.mode != DroneState.IDLE:
+        response.success = False
+        response.message = f"Cannot takeoff from mode {controller.mode.value}"
+        return response
+    
+    # Set target altitude and switch to position mode
+    current_pos = controller.current_position
+    controller.set_target_position(current_pos[0], current_pos[1], 1.5)  # 1.5m altitude
+    controller.set_mode(DroneState.POSITION)
+    
+    response.success = True
+    response.message = "Takeoff initiated to 1.5m"
+    return response
+
+
+def land_service_cb(request, response, num_robot):
+    """Initiate landing sequence"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    
+    if not controller or not controller.armed:
+        response.success = False
+        response.message = "Drone not armed or controller missing"
+        return response
+    
+    controller.set_mode(DroneState.LANDING)
+    response.success = True
+    response.message = "Landing sequence initiated"
+    return response
+
+
+def emergency_stop_cb(request, response, num_robot):
+    """Emergency stop - zero all velocities immediately"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    
+    if controller:
+        controller.set_mode(DroneState.EMERGENCY)
+        custom_rl_env.base_command[str(num_robot)] = [0, 0, 0]
+        if num_robot == "0":
+            custom_rl_env.drone_altitude = 0.0
+        elif num_robot == "1":
+            custom_rl_env.drone_altitude_1 = 0.0
+    
+    response.success = True
+    response.message = "Emergency stop activated"
+    return response
+
+
+def arm_service_cb(request, response, num_robot):
+    """Arm or disarm the drone"""
+    from drone_controller import DroneState
+    controller = custom_rl_env.drone_controllers.get(str(num_robot))
+    
+    if not controller:
+        response.success = False
+        response.message = "Controller not found"
+        return response
+    
+    controller.armed = request.data
+    controller.set_mode(DroneState.IDLE if request.data else DroneState.DISARMED)
+    
+    response.success = True
+    response.message = f"Drone {'armed' if request.data else 'disarmed'}"
+    return response
+
+
 def add_cmd_sub(num_envs):
-    node_test = rclpy.create_node('position_velocity_publisher')
+    from geometry_msgs.msg import PoseStamped
+    from std_msgs.msg import Float32
+    from std_srvs.srv import Trigger, SetBool
+    
+    node_test = rclpy.create_node('drone_control_node')
     for i in range(num_envs):
+        # Velocity commands (all robots)
         node_test.create_subscription(Twist, f'robot{i}/cmd_vel', lambda msg, i=i: cmd_vel_cb(msg, str(i)), 10)
+        
+        # Position and altitude commands (drones only)
+        if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+            node_test.create_subscription(PoseStamped, f'robot{i}/cmd_position',
+                                         lambda msg, i=i: cmd_position_cb(msg, str(i)), 10)
+            node_test.create_subscription(Float32, f'robot{i}/cmd_altitude',
+                                         lambda msg, i=i: cmd_altitude_cb(msg, str(i)), 10)
+            
+            # Services
+            node_test.create_service(Trigger, f'robot{i}/takeoff',
+                                    lambda req, res, i=i: takeoff_service_cb(req, res, str(i)))
+            node_test.create_service(Trigger, f'robot{i}/land',
+                                    lambda req, res, i=i: land_service_cb(req, res, str(i)))
+            node_test.create_service(Trigger, f'robot{i}/emergency_stop',
+                                    lambda req, res, i=i: emergency_stop_cb(req, res, str(i)))
+            node_test.create_service(SetBool, f'robot{i}/arm',
+                                    lambda req, res, i=i: arm_service_cb(req, res, str(i)))
+    
     # Spin in a separate thread
     thread = threading.Thread(target=rclpy.spin, args=(node_test,), daemon=True)
     thread.start()
@@ -272,21 +440,71 @@ def run_sim():
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
 
-    resume_path = get_checkpoint_path(log_root_path, agent_cfg_data["load_run"], agent_cfg_data["load_checkpoint"])
-    print(f"[INFO]: Loading model checkpoint from: {resume_path}")
+    # Check if checkpoint exists (for drones in testing mode, may not have trained policy)
+    use_trained_policy = os.path.exists(log_root_path)
+    
+    if use_trained_policy:
+        resume_path = get_checkpoint_path(log_root_path, agent_cfg_data["load_run"], agent_cfg_data["load_checkpoint"])
+        print(f"[INFO]: Loading model checkpoint from: {resume_path}")
 
-    # ensure obs_groups is a dict with a default "policy" group to match the shimmed observations
-    agent_cfg_data["obs_groups"] = {"policy": ["policy"]}
+        # ensure obs_groups is a dict with a default "policy" group to match the shimmed observations
+        agent_cfg_data["obs_groups"] = {"policy": ["policy"]}
 
-    # load previously trained model (shimmed env for rsl_rl)
-    env_for_runner = _RslRlEnvShim(env)
-    ppo_runner = OnPolicyRunner(env_for_runner, agent_cfg_data, log_dir=None, device=agent_cfg_data["device"])
-    ppo_runner.load(resume_path)
-    print(f"[INFO]: Loading model checkpoint from: {resume_path}")
+        # load previously trained model (shimmed env for rsl_rl)
+        env_for_runner = _RslRlEnvShim(env)
+        ppo_runner = OnPolicyRunner(env_for_runner, agent_cfg_data, log_dir=None, device=agent_cfg_data["device"])
+        ppo_runner.load(resume_path)
+        print(f"[INFO]: Checkpoint loaded successfully")
 
-    # obtain the trained policy for inference
-    policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
+        # obtain the trained policy for inference
+        policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
+    else:
+        print(f"[WARN] No checkpoint found at {log_root_path}")
+        print(f"[INFO] Running in MANUAL CONTROL mode (keyboard only, no RL policy)")
+        # Create a velocity-based controller for drone
+        # Get action space size from environment
+        num_envs = env.unwrapped.num_envs
+        num_actions = env.unwrapped.action_manager.action.shape[1]
+        device = env.unwrapped.device
+        
+        def drone_velocity_controller(obs_dict):
+            # For drones: we'll apply velocities directly in the main loop
+            # Still return zero actions (we bypass motor control)
+            return torch.zeros((num_envs, num_actions), device=device)
+        
+        # Policy must return shape (num_envs, num_actions)
+        policy = drone_velocity_controller
 
+    # Initialize drone controllers (if using drones)
+    if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+        from drone_controller import DroneController
+        print("[INFO] Initializing drone controllers...")
+        
+        for i in range(env.unwrapped.num_envs):
+            custom_rl_env.drone_controllers[str(i)] = DroneController(
+                robot_id=str(i),
+                kp_pos=0.8,      # Position PID gains
+                ki_pos=0.01,
+                kd_pos=0.4,
+                kp_alt=1.5,      # Altitude PID gains
+                ki_alt=0.05,
+                kd_alt=0.8,
+                kp_att=2.0,      # Attitude PID gains
+                ki_att=0.0,
+                kd_att=0.5,
+                kp_yaw=1.0,      # Yaw rate PID gains
+                ki_yaw=0.0,
+                kd_yaw=0.2,
+                max_vel=2.0,
+                max_climb_rate=1.5,
+                max_angle_rate=2.0,    # Max roll/pitch rate (rad/s)
+                max_yaw_rate=1.0,      # Max yaw rate (rad/s)
+                hover_thrust=0.55      # Hover thrust (tunable per drone mass)
+            )
+            custom_rl_env.drone_armed[str(i)] = False
+            custom_rl_env.drone_mode[str(i)] = 'DISARMED'
+            print(f"[INFO] Drone {i} controller initialized in DISARMED mode (motor-based control)")
+    
     # reset environment
     print("[INFO] Resetting environment and getting initial observations...")
     obs, _ = env.get_observations()
@@ -335,6 +553,69 @@ def run_sim():
         with torch.inference_mode():
             # agent stepping
             actions = policy(obs)
+            
+            # Motor-based control for drones (uses physics)
+            if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                # Access the robot articulation
+                robot = env.unwrapped.scene["robot"]
+                num_envs = env.unwrapped.num_envs
+                
+                # Build motor commands for all environments
+                all_motor_commands = []
+                
+                for env_idx in range(num_envs):
+                    controller = custom_rl_env.drone_controllers.get(str(env_idx))
+                    
+                    if controller and controller.armed:
+                        # Get current state from environment
+                        current_pos = robot.data.root_pos_w[env_idx].cpu().numpy()
+                        current_vel = robot.data.root_lin_vel_w[env_idx].cpu().numpy()
+                        current_quat = robot.data.root_quat_w[env_idx].cpu().numpy()  # [w,x,y,z]
+                        
+                        # Update controller state
+                        dt = 1.0 / 60.0
+                        controller.current_orientation = current_quat
+                        controller.current_euler = controller._quat_to_euler(current_quat)
+                        controller.update(dt, current_pos, current_vel)
+                        
+                        # Get motor commands from controller
+                        motor_cmds = controller.compute_motor_command()
+                        
+                        # For VELOCITY mode, convert velocity inputs to motor commands
+                        if controller.mode.value == 'VELOCITY':
+                            # Get velocity commands from cmd_vel/keyboard
+                            cmd = custom_rl_env.base_command.get(str(env_idx), [0, 0, 0])
+                            if env_idx == 0:
+                                altitude_cmd = getattr(custom_rl_env, 'drone_altitude', 0.0)
+                            elif env_idx == 1:
+                                altitude_cmd = getattr(custom_rl_env, 'drone_altitude_1', 0.0)
+                            else:
+                                altitude_cmd = 0.0
+                            
+                            # Convert velocities to motor commands (simplified)
+                            vx, vy, vz, yaw_rate = cmd[0], cmd[1], altitude_cmd, cmd[2]
+                            
+                            desired_pitch = -vx * 0.3
+                            desired_roll = vy * 0.3
+                            thrust = controller.hover_thrust + vz * 0.2
+                            thrust = np.clip(thrust, 0.0, 1.0)
+                            
+                            # Simple mapping
+                            motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
+                    
+                    else:
+                        # Not armed or no controller: zero motors
+                        motor_cmds = np.zeros(4)
+                    
+                    all_motor_commands.append(motor_cmds)
+                
+                # Convert to tensor for action manager
+                # Action shape: (num_envs, 4) for 4 motors
+                motor_tensor = torch.tensor(all_motor_commands, device=robot.device, dtype=torch.float32)
+                
+                # Override the policy actions with motor commands
+                actions = motor_tensor
+            
             # env stepping
             obs, _, _, _ = env.step(actions)
             if not isinstance(obs, dict):

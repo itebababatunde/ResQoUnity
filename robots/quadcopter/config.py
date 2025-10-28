@@ -7,8 +7,9 @@ from omni.isaac.orbit.assets.articulation import ArticulationCfg
 
 QUADCOPTER_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
-        # Using Isaac Sim's built-in Crazyflie quadcopter
-        usd_path=f"{sim_utils.SimulationContext.instance().get_assets_root_path()}/Isaac/Robots/Crazyflie/cf2x.usd",
+        # Using Isaac Sim's built-in Crazyflie quadcopter from Omniverse nucleus
+        usd_path="http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/2023.1.1/Isaac/Robots/Crazyflie/cf2x.usd",
+        scale=(5.0, 5.0, 5.0),  # Scale up 5x for better visibility (Crazyflie is tiny!)
         activate_contact_sensors=False,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=False,
@@ -54,7 +55,7 @@ QUADCOPTER_CFG = ArticulationCfg(
 SIMPLE_DRONE_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         # Fallback: create a simple box-shaped drone if Crazyflie not available
-        usd_path=f"{sim_utils.SimulationContext.instance().get_assets_root_path()}/Isaac/Props/Blocks/DexCube/dex_cube_instanceable.usd",
+        usd_path="http://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/2023.1.1/Isaac/Props/Blocks/DexCube/dex_cube_instanceable.usd",
         activate_contact_sensors=False,
         scale=(0.3, 0.3, 0.1),  # Make it drone-shaped
         rigid_props=sim_utils.RigidBodyPropertiesCfg(

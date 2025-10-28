@@ -57,6 +57,12 @@ from omniverse_sim import args_cli
 
 
 base_command = {}
+drone_altitude = 0.0  # For T/G altitude control
+
+# Drone controller state (for advanced flight modes)
+drone_controllers = {}  # {robot_id: DroneController}
+drone_mode = {}  # {robot_id: current_mode_string}
+drone_armed = {}  # {robot_id: bool}
 
 
 def constant_commands(env: RLTaskEnvCfg) -> torch.Tensor:
@@ -365,19 +371,22 @@ class QuadcopterEnvCfg(LocomotionVelocityRoughEnvCfg):
         
         # Scene - use quadcopter configuration
         self.scene.robot = QUADCOPTER_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        # Drone doesn't need height scanner as it flies, but keep for compatibility
-        # Point to the drone's base/body link
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base"
+        
+        # Disable sensors that don't work with drone USD structure
+        self.scene.height_scanner = None  # Drones don't need ground scanning
+        self.scene.contact_forces = None  # Contact sensors fail on drone body structure
+        
+        # Remove sensor-based observations
+        self.observations.policy.height_scan = None
         
         # Actions - adjust scale for rotor control (4 motors vs 12+ joints)
         # Smaller action scale for more stable flight control
         self.actions.joint_pos.scale = 0.1
         
         # Rewards - disable ground locomotion rewards, focus on flight stability
-        # Drones don't have feet, so disable feet_air_time
-        self.rewards.feet_air_time.weight = 0.0
-        # Disable undesired contacts (no thighs for drone)
-        self.rewards.undesired_contacts = None
+        # Drones don't have feet/legs - disable rewards that reference them
+        self.rewards.feet_air_time = None  # References ".*_foot" bodies that don't exist
+        self.rewards.undesired_contacts = None  # References ".*THIGH" bodies that don't exist
         # Increase penalties for unstable flight
         self.rewards.ang_vel_xy_l2.weight = -0.1  # Penalize tilting
         self.rewards.lin_vel_z_l2.weight = -1.0   # Penalize vertical oscillation
@@ -386,6 +395,6 @@ class QuadcopterEnvCfg(LocomotionVelocityRoughEnvCfg):
         # Keep orientation flat for stable flight
         self.rewards.flat_orientation_l2.weight = -1.0
         
-        # Terminations - drone crashes if body touches ground
-        # Use base/body contact as termination condition
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["base"]
+        # Terminations - disable base contact for drones (they fly!)
+        # Drones terminate on timeout or going out of bounds, not ground contact
+        self.terminations.base_contact = None
