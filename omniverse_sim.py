@@ -997,16 +997,56 @@ def run_sim():
                                     # Motor mixing
                                     motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
                                 
-                                # Apply motor commands using ArticulationView API (GPU-safe)
-                                # Quadcopter motors are velocity-controlled (RPM), not effort-controlled
-                                # Convert normalized motor commands [0-1] to angular velocities [rad/s]
-                                # Typical quadcopter: 0.45 throttle = ~15000 RPM = ~1570 rad/s
+                                # Apply motor commands - HYBRID APPROACH:
+                                # 1. Set rotor velocities for visual spinning
+                                # 2. Manually compute and apply thrust forces (USD has no thrust physics)
+                                
                                 max_motor_velocity = 2000.0  # rad/s (~19000 RPM)
                                 motor_velocities = motor_cmds * max_motor_velocity
                                 
-                                # set_joint_velocity_targets expects (N, num_joints) tensor
+                                # Visual: Spin the rotors
                                 velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
                                 world_drone_view.set_joint_velocity_targets(velocity_targets)
+                                
+                                # Physics: Manually compute thrust from motor commands
+                                # Thrust coefficient for Crazyflie (scaled 5x, mass scales as volume = 125x)
+                                # Real Crazyflie: ~27g needs 0.6N thrust
+                                # Scaled: ~3.4kg needs 33N thrust at hover
+                                # Conservative: Use 50N for good response
+                                thrust_coefficient = 50.0 / (4 * 0.45)  # Total 50N when all 4 motors at 0.45
+                                
+                                # Total upward thrust (sum of all 4 motors)
+                                total_thrust = sum(motor_cmds) * thrust_coefficient
+                                
+                                # Compute torques from differential thrust
+                                # Motor layout: X configuration
+                                #   m1 (FR)  m2 (BL)
+                                #       \ /
+                                #        X
+                                #       / \
+                                #   m4 (FL)  m3 (BR)
+                                # Roll:  (m4 + m3) - (m1 + m2)
+                                # Pitch: (m1 + m4) - (m2 + m3)  
+                                # Yaw:   (m1 + m3) - (m2 + m4) [CCW motors: m2,m4, CW: m1,m3]
+                                
+                                arm_length = 0.046 * 5.0  # Crazyflie arm length * scale
+                                torque_coefficient = 0.1  # Torque per motor diff
+                                
+                                roll_torque = ((motor_cmds[3] + motor_cmds[2]) - (motor_cmds[0] + motor_cmds[1])) * torque_coefficient
+                                pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
+                                yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
+                                
+                                # Apply forces and torques to drone body
+                                # Forces in body frame (z-up for drone)
+                                forces = torch.tensor([[0.0, 0.0, total_thrust]], dtype=torch.float32)
+                                torques = torch.tensor([[roll_torque, pitch_torque, yaw_torque]], dtype=torch.float32)
+                                
+                                world_drone_view.apply_forces_and_torques_at_pos(
+                                    forces=forces,
+                                    torques=torques,
+                                    indices=torch.tensor([0], dtype=torch.int32),
+                                    is_global=False  # Body frame
+                                )
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1015,22 +1055,41 @@ def run_sim():
                                     controller._debug_counter = 0
                                 
                                 if controller._debug_counter % 60 == 0:  # Every ~1 second at 60Hz
-                                    print(f"[MOTOR] Position: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
-                                          f"Velocity targets: [{motor_velocities[0]:.1f}, {motor_velocities[1]:.1f}, {motor_velocities[2]:.1f}, {motor_velocities[3]:.1f}] rad/s")
+                                    print(f"[THRUST] Pos: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
+                                          f"Thrust: {total_thrust:.2f}N, Torque: ({roll_torque:.3f}, {pitch_torque:.3f}, {yaw_torque:.3f})")
                             else:
-                                # Not armed: zero motors
+                                # Not armed: zero motors and forces
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
+                                
+                                # Zero forces
+                                zero_forces = torch.zeros((1, 3), dtype=torch.float32)
+                                zero_torques = torch.zeros((1, 3), dtype=torch.float32)
+                                world_drone_view.apply_forces_and_torques_at_pos(
+                                    forces=zero_forces,
+                                    torques=zero_torques,
+                                    indices=torch.tensor([0], dtype=torch.int32),
+                                    is_global=False
+                                )
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
                         import traceback
                         traceback.print_exc()
-                        # Emergency: zero motors to prevent unsafe behavior
+                        # Emergency: zero motors AND forces to prevent unsafe behavior
                         try:
                             if world_drone_view is not None:
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
+                                
+                                zero_forces = torch.zeros((1, 3), dtype=torch.float32)
+                                zero_torques = torch.zeros((1, 3), dtype=torch.float32)
+                                world_drone_view.apply_forces_and_torques_at_pos(
+                                    forces=zero_forces,
+                                    torques=zero_torques,
+                                    indices=torch.tensor([0], dtype=torch.int32),
+                                    is_global=False
+                                )
                         except:
                             pass  # Best effort
             
