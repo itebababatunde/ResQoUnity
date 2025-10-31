@@ -86,7 +86,6 @@ import custom_rl_env
 
 from omnigraph import create_front_cam_omnigraph
 from robots.quadcopter.config import QUADCOPTER_CFG
-from omni.isaac.orbit.assets import Articulation
 
 
 class _RslRlEnvShim:
@@ -678,32 +677,46 @@ def run_sim():
     print("[INFO] Environment reset complete, starting simulation loop...")
 
     # Spawn world-level drone (separate from env system)
+    # Use Isaac Core USD API for standalone objects (not Isaac Lab Articulation)
     world_drone = None
+    world_drone_prim = None
     enable_world_drone = False
     if args_cli.robot == "go2":  # Only spawn drone when using Go2 robots
         print("[INFO] Spawning world-level drone at /World/Drone...")
         try:
-            # Create drone configuration with proper prim path
-            drone_cfg = QUADCOPTER_CFG.replace(prim_path="/World/Drone")
+            import omni.isaac.core.utils.prims as prim_utils
+            from pxr import UsdGeom, Gf
             
-            # Spawn drone as Articulation with full physics
-            # Note: Creating Articulation automatically spawns it to the stage
-            world_drone = Articulation(cfg=drone_cfg)
+            # Get USD path from config
+            drone_usd_path = QUADCOPTER_CFG.spawn.usd_path
+            drone_prim_path = "/World/Drone"
             
-            # Reset drone to default initial state first
-            world_drone.reset()
+            # Spawn drone USD directly to stage (Isaac Core API, not Orbit)
+            prim_utils.create_prim(
+                prim_path=drone_prim_path,
+                usd_path=drone_usd_path,
+                translation=(0.0, 0.0, 2.5),  # 2.5m hover height
+                scale=(5.0, 5.0, 5.0)  # 5x scale for visibility
+            )
             
-            # Override position to spawn at 2.5m height (hovering in center)
-            # Must do this AFTER reset to ensure it takes effect
-            root_state = world_drone.data.default_root_state.clone()
-            root_state[0, :3] = torch.tensor([0.0, 0.0, 2.5], device=world_drone.device)  # Position
-            root_state[0, 3:7] = torch.tensor([1.0, 0.0, 0.0, 0.0], device=world_drone.device)  # Quaternion (identity)
-            world_drone.write_root_pose_to_sim(root_state[:, :7])
-            world_drone.write_root_velocity_to_sim(root_state[:, 7:])
+            world_drone_prim = prim_utils.get_prim_at_path(drone_prim_path)
             
-            # Write all drone state to simulation
-            world_drone.write_data_to_sim()
-            print("[INFO] Drone spawned and initialized at /World/Drone at position (0.0, 0.0, 2.5)")
+            if world_drone_prim and world_drone_prim.IsValid():
+                print(f"[INFO] Drone USD loaded at {drone_prim_path}")
+                
+                # Set physics properties via USD
+                from pxr import UsdPhysics, PhysxSchema
+                
+                # Get articulation root
+                articulation_api = UsdPhysics.ArticulationRootAPI.Apply(world_drone_prim)
+                
+                # Store prim reference (we'll access it via USD/PhysX APIs)
+                world_drone = drone_prim_path  # Store path string, not Articulation object
+                
+                print("[INFO] Drone spawned and configured at position (0.0, 0.0, 2.5)")
+            else:
+                print("[ERROR] Failed to create drone prim")
+                world_drone = None
             
             # Initialize drone controller
             from drone_controller import DroneController
@@ -729,6 +742,19 @@ def run_sim():
             )
             custom_rl_env.world_drone_controller.armed = False
             print("[INFO] Drone controller initialized in DISARMED mode")
+            
+            # Create ArticulationView for state reading and control
+            # This works with GPU physics, unlike direct Articulation manipulation
+            from omni.isaac.core.articulations import ArticulationView
+            
+            world_drone_view = ArticulationView(
+                prim_paths_expr="/World/Drone",
+                name="world_drone_view"
+            )
+            # Initialize the view (registers with physics)
+            world_drone_view.initialize()
+            
+            print(f"[INFO] Drone ArticulationView initialized with {world_drone_view.count} drones")
             
             # Add bottom-facing camera to drone
             try:
@@ -757,6 +783,9 @@ def run_sim():
                 print(f"[WARN] Failed to add drone camera: {cam_e}")
             
             enable_world_drone = True
+            
+            # Store view for control
+            world_drone = world_drone_view
         except Exception as e:
             print(f"[WARN] Failed to spawn world drone: {e}")
             import traceback
@@ -876,19 +905,21 @@ def run_sim():
             # World-level drone control (AFTER env.step to read latest physics state)
             if world_drone is not None and custom_rl_env.world_drone_controller is not None:
                 try:
-                    # Update drone physics data from latest simulation step
                     dt = env.unwrapped.step_dt if hasattr(env.unwrapped, 'step_dt') else (1.0 / 60.0)
-                    world_drone.update(dt)
                     
                     # THREAD-SAFE: Lock while reading controller state and commands
                     with custom_rl_env.world_drone_lock:
                         controller = custom_rl_env.world_drone_controller
                         
                         if controller.armed:
-                            # Get current state from world drone (freshly updated from physics)
-                            current_pos = world_drone.data.root_pos_w[0].cpu().numpy()
-                            current_vel = world_drone.data.root_lin_vel_w[0].cpu().numpy()
-                            current_quat = world_drone.data.root_quat_w[0].cpu().numpy()  # [w,x,y,z]
+                            # Get current state using ArticulationView API (GPU-safe)
+                            positions, orientations = world_drone.get_world_poses()  # Returns (N, 3), (N, 4)
+                            velocities = world_drone.get_velocities()  # Returns (N, 6) [linear, angular]
+                            
+                            # Convert to numpy (index 0 since we have 1 drone)
+                            current_pos = positions[0].cpu().numpy()  # [x, y, z]
+                            current_quat = orientations[0].cpu().numpy()  # [w, x, y, z]
+                            current_vel = velocities[0, :3].cpu().numpy()  # First 3 are linear velocity
                             
                             # Update controller state
                             controller.current_orientation = current_quat
@@ -915,25 +946,23 @@ def run_sim():
                                 # Motor mixing
                                 motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
                             
-                            # Apply motor commands to drone (will take effect in NEXT frame)
-                            motor_tensor = torch.tensor([motor_cmds], device=world_drone.device, dtype=torch.float32)
-                            world_drone.set_joint_effort_target(motor_tensor)
+                            # Apply motor commands using ArticulationView API (GPU-safe)
+                            # set_joint_efforts expects (N, num_joints) tensor
+                            motor_efforts = torch.tensor([motor_cmds], dtype=torch.float32)
+                            world_drone.set_joint_efforts(motor_efforts)
                         else:
                             # Not armed: zero motors
-                            motor_tensor = torch.zeros((1, 4), device=world_drone.device, dtype=torch.float32)
-                            world_drone.set_joint_effort_target(motor_tensor)
+                            zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
+                            world_drone.set_joint_efforts(zero_efforts)
                     
-                    # Write drone control commands to simulation (buffered for next step)
-                    world_drone.write_data_to_sim()
                 except Exception as e:
                     print(f"[ERROR] Drone control failed: {e}")
                     import traceback
                     traceback.print_exc()
                     # Emergency: zero motors to prevent unsafe behavior
                     try:
-                        motor_tensor = torch.zeros((1, 4), device=world_drone.device, dtype=torch.float32)
-                        world_drone.set_joint_effort_target(motor_tensor)
-                        world_drone.write_data_to_sim()
+                        zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
+                        world_drone.set_joint_efforts(zero_efforts)
                     except:
                         pass  # Best effort
             
@@ -944,9 +973,31 @@ def run_sim():
             
             # Publish world drone data (if enabled)
             if world_drone is not None and enable_world_drone:
-                base_node.publish_drone_odom(world_drone.data.root_state_w[0, :3], world_drone.data.root_state_w[0, 3:7])
-                base_node.publish_drone_imu(world_drone.data.root_state_w[0, 3:7], world_drone.data.root_lin_vel_b[0, :], world_drone.data.root_ang_vel_b[0, :])
-                base_node.publish_drone_joints(world_drone.data.joint_names, world_drone.data.joint_pos[0])
+                try:
+                    # Get state using ArticulationView API
+                    positions, orientations = world_drone.get_world_poses()
+                    velocities = world_drone.get_velocities()
+                    joint_positions = world_drone.get_joint_positions()
+                    
+                    # Publish odometry (position + orientation)
+                    base_node.publish_drone_odom(
+                        positions[0],  # xyz position
+                        orientations[0]  # wxyz quaternion
+                    )
+                    
+                    # Publish IMU (orientation + velocities)
+                    base_node.publish_drone_imu(
+                        orientations[0],  # wxyz quaternion
+                        velocities[0, :3],  # linear velocity
+                        velocities[0, 3:]  # angular velocity
+                    )
+                    
+                    # Publish joint states
+                    joint_names = world_drone.dof_names  # Get joint names from view
+                    base_node.publish_drone_joints(joint_names, joint_positions[0])
+                except Exception as e:
+                    # Silently skip publishing if drone state unavailable
+                    pass
     
     # Cleanup on exit
     print("[INFO] Shutting down simulation...")
