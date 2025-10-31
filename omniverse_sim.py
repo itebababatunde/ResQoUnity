@@ -680,6 +680,7 @@ def run_sim():
     # Use Isaac Core USD API for standalone objects (not Isaac Lab Articulation)
     world_drone_path = None
     world_drone_view = None
+    world_drone_root_body_path = None  # Cached path to root body for force application
     world_drone_initialized = False
     enable_world_drone = False
     
@@ -921,10 +922,26 @@ def run_sim():
                         print(f"[DEBUG] Controller initialized at position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
                         print(f"[DEBUG] Drone has {world_drone_view.num_dof} DOFs: {world_drone_view.dof_names}")
                         
-                        # Verify the prim actually exists where we think it does
+                        # Find and cache the root body prim for force application
                         import omni.isaac.core.utils.prims as prim_utils
                         drone_prim = prim_utils.get_prim_at_path(world_drone_path)
                         print(f"[DEBUG] Prim at {world_drone_path} exists: {drone_prim.IsValid()}")
+                        
+                        # Cache the root body prim path for efficient force application
+                        # Find "base" link or first rigid body
+                        stage = drone_prim.GetStage()
+                        for child in drone_prim.GetChildren():
+                            if child.GetTypeName() == "Xform" and "base" in child.GetName().lower():
+                                world_drone_root_body_path = str(child.GetPath())
+                                print(f"[DEBUG] Found root body at: {world_drone_root_body_path}")
+                                break
+                        if not world_drone_root_body_path:
+                            from pxr import UsdPhysics
+                            for child in drone_prim.GetChildren():
+                                if UsdPhysics.RigidBodyAPI(child):
+                                    world_drone_root_body_path = str(child.GetPath())
+                                    print(f"[DEBUG] Found root body (fallback) at: {world_drone_root_body_path}")
+                                    break
                         
                         # Check for articulation root and joint drive settings
                         from pxr import UsdPhysics, PhysxSchema
@@ -1036,20 +1053,22 @@ def run_sim():
                                 pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
                                 yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
                                 
-                                # Apply forces and torques to drone body using PhysX Tensor API
-                                # Forces/torques in body frame (z-up for drone)
-                                
-                                # Get the PhysX view backend for direct force application
-                                physics_view = world_drone_view._physics_view
-                                
-                                # Create force and torque tensors
-                                # Shape: (num_drones, 3) for forces and torques
-                                force_tensor = torch.tensor([[0.0, 0.0, total_thrust]], dtype=torch.float32, device=world_drone_view._device)
-                                torque_tensor = torch.tensor([[roll_torque, pitch_torque, yaw_torque]], dtype=torch.float32, device=world_drone_view._device)
-                                
-                                # Apply to root body (index 0) in body frame
-                                physics_view.set_forces(force_tensor, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
-                                physics_view.set_torques(torque_tensor, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                # Apply forces and torques using USD PhysX API directly
+                                # Use cached root body prim for efficient force application
+                                if world_drone_root_body_path:
+                                    import omni.isaac.core.utils.prims as prim_utils
+                                    from pxr import PhysxSchema, Gf
+                                    
+                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
+                                    if root_body_prim.IsValid():
+                                        # Apply force using PhysX rigid body API
+                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
+                                        if not rigid_body_api:
+                                            rigid_body_api = PhysxSchema.PhysxRigidBodyAPI.Apply(root_body_prim)
+                                        
+                                        # Set force and torque (in body frame)
+                                        rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, total_thrust))
+                                        rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(roll_torque, pitch_torque, yaw_torque))
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1065,12 +1084,16 @@ def run_sim():
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
                                 
-                                # Zero forces using PhysX view
-                                physics_view = world_drone_view._physics_view
-                                zero_forces = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
-                                zero_torques = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
-                                physics_view.set_forces(zero_forces, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
-                                physics_view.set_torques(zero_torques, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                # Zero forces using USD PhysX API
+                                if world_drone_root_body_path:
+                                    import omni.isaac.core.utils.prims as prim_utils
+                                    from pxr import PhysxSchema, Gf
+                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
+                                    if root_body_prim.IsValid():
+                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
+                                        if rigid_body_api:
+                                            rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                            rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
@@ -1082,12 +1105,16 @@ def run_sim():
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
                                 
-                                # Zero forces using PhysX view
-                                physics_view = world_drone_view._physics_view
-                                zero_forces = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
-                                zero_torques = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
-                                physics_view.set_forces(zero_forces, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
-                                physics_view.set_torques(zero_torques, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                # Zero forces using USD API
+                                if world_drone_root_body_path:
+                                    import omni.isaac.core.utils.prims as prim_utils
+                                    from pxr import PhysxSchema, Gf
+                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
+                                    if root_body_prim.IsValid():
+                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
+                                        if rigid_body_api:
+                                            rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                            rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
                         except:
                             pass  # Best effort
             
