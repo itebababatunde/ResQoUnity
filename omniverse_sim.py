@@ -896,8 +896,27 @@ def run_sim():
                             name="world_drone_view"
                         )
                         world_drone_view.initialize()
+                        
+                        # CRITICAL: Initialize controller position immediately
+                        positions, orientations = world_drone_view.get_world_poses()
+                        velocities = world_drone_view.get_velocities()
+                        
+                        initial_pos = positions[0].cpu().numpy()
+                        initial_quat = orientations[0].cpu().numpy()
+                        initial_vel = velocities[0, :3].cpu().numpy()
+                        
+                        # Update controller with actual drone position
+                        with custom_rl_env.world_drone_lock:
+                            controller = custom_rl_env.world_drone_controller
+                            controller.current_position = initial_pos
+                            controller.current_orientation = initial_quat
+                            controller.current_euler = controller._quat_to_euler(initial_quat)
+                            controller.current_velocity = initial_vel
+                        
                         world_drone_initialized = True
                         print(f"[INFO] ArticulationView ready - found {world_drone_view.count} drone(s)")
+                        print(f"[INFO] Controller initialized at position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
+                        print(f"[INFO] Drone has {world_drone_view.num_dof} DOFs: {world_drone_view.dof_names}")
                     except Exception as e:
                         print(f"[WARN] Drone view initialization failed (will retry next frame): {e}")
                         # Don't set initialized=True, will retry next frame
@@ -954,6 +973,16 @@ def run_sim():
                                 # Convert numpy array to tensor efficiently
                                 motor_efforts = torch.from_numpy(np.array([motor_cmds], dtype=np.float32))
                                 world_drone_view.set_joint_efforts(motor_efforts)
+                                
+                                # Debug: Print motor commands occasionally
+                                if hasattr(controller, '_debug_counter'):
+                                    controller._debug_counter += 1
+                                else:
+                                    controller._debug_counter = 0
+                                
+                                if controller._debug_counter % 60 == 0:  # Every ~1 second at 60Hz
+                                    print(f"[MOTOR] Position: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
+                                          f"Motors: [{motor_cmds[0]:.3f}, {motor_cmds[1]:.3f}, {motor_cmds[2]:.3f}, {motor_cmds[3]:.3f}]")
                             else:
                                 # Not armed: zero motors
                                 zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
