@@ -907,25 +907,28 @@ def run_sim():
                     try:
                         dt = env.unwrapped.step_dt if hasattr(env.unwrapped, 'step_dt') else (1.0 / 60.0)
                         
+                        # Get current state using ArticulationView API (GPU-safe)
+                        positions, orientations = world_drone_view.get_world_poses()  # Returns (N, 3), (N, 4)
+                        velocities = world_drone_view.get_velocities()  # Returns (N, 6) [linear, angular]
+                        
+                        # Convert to numpy (index 0 since we have 1 drone)
+                        current_pos = positions[0].cpu().numpy()  # [x, y, z]
+                        current_quat = orientations[0].cpu().numpy()  # [w, x, y, z]
+                        current_vel = velocities[0, :3].cpu().numpy()  # First 3 are linear velocity
+                        
                         # THREAD-SAFE: Lock while reading controller state and commands
                         with custom_rl_env.world_drone_lock:
                             controller = custom_rl_env.world_drone_controller
                             
+                            # ALWAYS update controller state (even when disarmed)
+                            # This ensures position is initialized before first takeoff
+                            controller.current_orientation = current_quat
+                            controller.current_euler = controller._quat_to_euler(current_quat)
+                            controller.current_position = current_pos
+                            controller.current_velocity = current_vel
+                            
                             if controller.armed:
-                                # Get current state using ArticulationView API (GPU-safe)
-                                positions, orientations = world_drone_view.get_world_poses()  # Returns (N, 3), (N, 4)
-                                velocities = world_drone_view.get_velocities()  # Returns (N, 6) [linear, angular]
-                                
-                                # Convert to numpy (index 0 since we have 1 drone)
-                                current_pos = positions[0].cpu().numpy()  # [x, y, z]
-                                current_quat = orientations[0].cpu().numpy()  # [w, x, y, z]
-                                current_vel = velocities[0, :3].cpu().numpy()  # First 3 are linear velocity
-                                
-                                # Update controller state
-                                controller.current_orientation = current_quat
-                                controller.current_euler = controller._quat_to_euler(current_quat)
-                                controller.current_position = current_pos
-                                controller.current_velocity = current_vel
+                                # Update controller PID loops
                                 controller.update(dt, current_pos, current_vel)
                                 
                                 # Get motor commands from controller
@@ -948,7 +951,8 @@ def run_sim():
                                 
                                 # Apply motor commands using ArticulationView API (GPU-safe)
                                 # set_joint_efforts expects (N, num_joints) tensor
-                                motor_efforts = torch.tensor([motor_cmds], dtype=torch.float32)
+                                # Convert numpy array to tensor efficiently
+                                motor_efforts = torch.from_numpy(np.array([motor_cmds], dtype=np.float32))
                                 world_drone_view.set_joint_efforts(motor_efforts)
                             else:
                                 # Not armed: zero motors
@@ -961,8 +965,8 @@ def run_sim():
                         traceback.print_exc()
                         # Emergency: zero motors to prevent unsafe behavior
                         try:
-                            zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
                             if world_drone_view is not None:
+                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_efforts(zero_efforts)
                         except:
                             pass  # Best effort
