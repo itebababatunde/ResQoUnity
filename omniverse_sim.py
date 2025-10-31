@@ -915,8 +915,27 @@ def run_sim():
                         
                         world_drone_initialized = True
                         print(f"[INFO] ArticulationView ready - found {world_drone_view.count} drone(s)")
-                        print(f"[INFO] Controller initialized at position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
-                        print(f"[INFO] Drone has {world_drone_view.num_dof} DOFs: {world_drone_view.dof_names}")
+                        
+                        # CRITICAL DEBUG: What did we actually find?
+                        print(f"[DEBUG] ArticulationView prim paths: {world_drone_view.prim_paths}")
+                        print(f"[DEBUG] Controller initialized at position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
+                        print(f"[DEBUG] Drone has {world_drone_view.num_dof} DOFs: {world_drone_view.dof_names}")
+                        
+                        # Verify the prim actually exists where we think it does
+                        import omni.isaac.core.utils.prims as prim_utils
+                        drone_prim = prim_utils.get_prim_at_path(world_drone_path)
+                        print(f"[DEBUG] Prim at {world_drone_path} exists: {drone_prim.IsValid()}")
+                        
+                        # Check for articulation root
+                        from pxr import UsdPhysics
+                        if drone_prim.IsValid():
+                            # Walk the hierarchy to find the actual articulation root
+                            stage = drone_prim.GetStage()
+                            for prim in stage.Traverse():
+                                if prim.GetPath().pathString.startswith(world_drone_path):
+                                    if UsdPhysics.ArticulationRootAPI(prim):
+                                        print(f"[DEBUG] Found articulation root at: {prim.GetPath()}")
+                                        break
                     except Exception as e:
                         print(f"[WARN] Drone view initialization failed (will retry next frame): {e}")
                         # Don't set initialized=True, will retry next frame
