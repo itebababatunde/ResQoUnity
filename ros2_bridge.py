@@ -162,7 +162,7 @@ def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, star
 
 
 class RobotBaseNode(Node):
-    def __init__(self, num_envs):
+    def __init__(self, num_envs, enable_world_drone=False):
         super().__init__('go2_driver_node')
         qos_profile = QoSProfile(depth=10)
 
@@ -179,6 +179,14 @@ class RobotBaseNode(Node):
             self.odom_pub.append(self.create_publisher(Odometry, f'robot{i}/odom', qos_profile))
             self.imu_pub.append(self.create_publisher(Imu, f'robot{i}/imu', qos_profile))
         self.broadcaster= TransformBroadcaster(self, qos=qos_profile)
+        
+        # World-level drone publishers (separate from robot{i})
+        self.enable_world_drone = enable_world_drone
+        if enable_world_drone:
+            self.drone_odom_pub = self.create_publisher(Odometry, '/drone/odom', qos_profile)
+            self.drone_imu_pub = self.create_publisher(Imu, '/drone/imu', qos_profile)
+            self.drone_joint_pub = self.create_publisher(JointState, '/drone/joint_states', qos_profile)
+            print("[INFO] Drone ROS2 publishers initialized on /drone namespace")
         
     def publish_joints(self, joint_names_lst, joint_state_lst, robot_num):
         # Create message
@@ -269,6 +277,80 @@ class RobotBaseNode(Node):
         point_cloud = point_cloud2.create_cloud(point_cloud.header, fields, points)
         self.go2_lidar_pub[robot_num].publish(point_cloud)
 
+    def publish_drone_odom(self, base_pos, base_rot):
+        """Publish odometry for world-level drone"""
+        if not self.enable_world_drone:
+            return
+            
+        odom_trans = TransformStamped()
+        odom_trans.header.stamp = self.get_clock().now().to_msg()
+        odom_trans.header.frame_id = "odom"
+        odom_trans.child_frame_id = "drone/base_link"
+        odom_trans.transform.translation.x = base_pos[0].item()
+        odom_trans.transform.translation.y = base_pos[1].item()
+        odom_trans.transform.translation.z = base_pos[2].item()
+        odom_trans.transform.rotation.x = base_rot[1].item()
+        odom_trans.transform.rotation.y = base_rot[2].item()
+        odom_trans.transform.rotation.z = base_rot[3].item()
+        odom_trans.transform.rotation.w = base_rot[0].item()
+        self.broadcaster.sendTransform(odom_trans)
+
+        odom_topic = Odometry()
+        odom_topic.header.stamp = self.get_clock().now().to_msg()
+        odom_topic.header.frame_id = "odom"
+        odom_topic.child_frame_id = "drone/base_link"
+        odom_topic.pose.pose.position.x = base_pos[0].item()
+        odom_topic.pose.pose.position.y = base_pos[1].item()
+        odom_topic.pose.pose.position.z = base_pos[2].item()
+        odom_topic.pose.pose.orientation.x = base_rot[1].item()
+        odom_topic.pose.pose.orientation.y = base_rot[2].item()
+        odom_topic.pose.pose.orientation.z = base_rot[3].item()
+        odom_topic.pose.pose.orientation.w = base_rot[0].item()
+        self.drone_odom_pub.publish(odom_topic)
+
+    def publish_drone_imu(self, base_rot, base_lin_vel, base_ang_vel):
+        """Publish IMU data for world-level drone"""
+        if not self.enable_world_drone:
+            return
+            
+        imu_trans = Imu()
+        imu_trans.header.stamp = self.get_clock().now().to_msg()
+        imu_trans.header.frame_id = "drone/base_link"
+
+        imu_trans.linear_acceleration.x = base_lin_vel[0].item()
+        imu_trans.linear_acceleration.y = base_lin_vel[1].item()
+        imu_trans.linear_acceleration.z = base_lin_vel[2].item()
+
+        imu_trans.angular_velocity.x = base_ang_vel[0].item()
+        imu_trans.angular_velocity.y = base_ang_vel[1].item()
+        imu_trans.angular_velocity.z = base_ang_vel[2].item()
+        
+        imu_trans.orientation.x = base_rot[1].item()
+        imu_trans.orientation.y = base_rot[2].item()
+        imu_trans.orientation.z = base_rot[3].item()
+        imu_trans.orientation.w = base_rot[0].item()
+        
+        self.drone_imu_pub.publish(imu_trans)
+
+    def publish_drone_joints(self, joint_names_lst, joint_state_lst):
+        """Publish joint states for world-level drone"""
+        if not self.enable_world_drone:
+            return
+            
+        joint_state = JointState()
+        joint_state.header.stamp = self.get_clock().now().to_msg()
+
+        joint_state_names_formated = []
+        for joint_name in joint_names_lst:
+            joint_state_names_formated.append(f"drone/"+joint_name)
+
+        joint_state_formated = []
+        for joint_state_val in joint_state_lst:
+            joint_state_formated.append(joint_state_val.item())
+
+        joint_state.name = joint_state_names_formated
+        joint_state.position = joint_state_formated
+        self.drone_joint_pub.publish(joint_state)
 
     async def run(self):
         while True:

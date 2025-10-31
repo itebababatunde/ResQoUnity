@@ -56,6 +56,8 @@ from robots.quadcopter.config import QUADCOPTER_CFG
 from omniverse_sim import args_cli
 
 
+import threading
+
 base_command = {}
 drone_altitude = 0.0  # For T/G altitude control
 
@@ -63,6 +65,13 @@ drone_altitude = 0.0  # For T/G altitude control
 drone_controllers = {}  # {robot_id: DroneController}
 drone_mode = {}  # {robot_id: current_mode_string}
 drone_armed = {}  # {robot_id: bool}
+
+# Separate world-level drone state (independent from robot0)
+# THREAD-SAFE: Protected by world_drone_lock for ROS2 callback access
+world_drone_lock = threading.Lock()
+world_drone_controller = None  # Single DroneController for /World/Drone
+world_drone_command = [0.0, 0.0, 0.0]  # [vx, vy, yaw_rate] for velocity mode
+world_drone_altitude = 0.0  # Altitude command for /drone
 
 
 def constant_commands(env: RLTaskEnvCfg) -> torch.Tensor:
@@ -379,9 +388,13 @@ class QuadcopterEnvCfg(LocomotionVelocityRoughEnvCfg):
         # Remove sensor-based observations
         self.observations.policy.height_scan = None
         
-        # Actions - adjust scale for rotor control (4 motors vs 12+ joints)
-        # Smaller action scale for more stable flight control
-        self.actions.joint_pos.scale = 0.1
+        # Actions - use effort control for motor thrust (not position control)
+        # Motor commands are direct thrust values (0-1), no scaling needed
+        self.actions.joint_pos = mdp.JointEffortActionCfg(
+            asset_name="robot",
+            joint_names=["m1_joint", "m2_joint", "m3_joint", "m4_joint"],
+            scale=1.0,  # Motor commands are already 0-1
+        )
         
         # Rewards - disable ground locomotion rewards, focus on flight stability
         # Drones don't have feet/legs - disable rewards that reference them

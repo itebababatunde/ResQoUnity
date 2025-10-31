@@ -387,8 +387,9 @@ class DroneController:
         
         # Convert desired velocities to attitude commands
         # For small angles: pitch ≈ -desired_vx, roll ≈ desired_vy
-        desired_pitch = -desired_vx * 0.5  # Scaling factor (tunable)
-        desired_roll = desired_vy * 0.5
+        # Reduced scaling to prevent aggressive tilting
+        desired_pitch = -desired_vx * 0.15  # Reduced from 0.5
+        desired_roll = desired_vy * 0.15    # Reduced from 0.5
         
         # Attitude control (inner loop)
         error_roll = desired_roll - self.current_euler[0]
@@ -399,14 +400,24 @@ class DroneController:
         
         # Thrust from vertical velocity
         # Hover thrust + correction from altitude error
-        thrust = self.hover_thrust + desired_vz * 0.1  # Scaling factor
+        # Increased vertical gain for better altitude response
+        thrust = self.hover_thrust + desired_vz * 0.2  # Increased from 0.1
         thrust = np.clip(thrust, 0.0, 1.0)
         
         # Yaw rate (keep zero or from external command)
         yaw_rate = desired_yaw_rate
         
+        # Scale down attitude rates for motor mixer (prevent saturation)
+        roll_rate_scaled = roll_rate * 0.05   # Scale to reasonable range
+        pitch_rate_scaled = pitch_rate * 0.05
+        yaw_rate_scaled = yaw_rate * 0.05
+        
         # Motor mixing
-        motors = self._motor_mixer(thrust, roll_rate, pitch_rate, yaw_rate)
+        motors = self._motor_mixer(thrust, roll_rate_scaled, pitch_rate_scaled, yaw_rate_scaled)
+        
+        # Debug output
+        if self.robot_id == "0":
+            print(f"[PID] vel:({desired_vx:.2f},{desired_vy:.2f},{desired_vz:.2f}) thrust:{thrust:.3f} motors:[{motors[0]:.3f},{motors[1]:.3f},{motors[2]:.3f},{motors[3]:.3f}]")
         
         return motors
 

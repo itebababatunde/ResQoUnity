@@ -85,6 +85,8 @@ import custom_rl_env as custom_env_module
 import custom_rl_env
 
 from omnigraph import create_front_cam_omnigraph
+from robots.quadcopter.config import QUADCOPTER_CFG
+from omni.isaac.orbit.assets import Articulation
 
 
 class _RslRlEnvShim:
@@ -337,7 +339,152 @@ def arm_service_cb(request, response, num_robot):
     return response
 
 
-def add_cmd_sub(num_envs):
+# ============= World-Level Drone Callbacks (for /World/Drone) =============
+
+def world_drone_cmd_vel_cb(msg):
+    """Handle velocity commands for world-level drone (/drone namespace)
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        if controller:
+            # Only accept velocity commands in appropriate modes
+            if controller.mode.value not in ['VELOCITY', 'ALTITUDE_HOLD', 'IDLE']:
+                print(f"[Drone] Ignoring cmd_vel in mode {controller.mode.value}")
+                return
+            
+            # Set mode to VELOCITY when receiving cmd_vel
+            if controller.mode.value == 'IDLE' or controller.mode.value == 'ALTITUDE_HOLD':
+                from drone_controller import DroneState
+                controller.set_mode(DroneState.VELOCITY)
+        
+        # Store velocity commands (thread-safe under lock)
+        custom_rl_env.world_drone_command = [msg.linear.x, msg.linear.y, msg.angular.z]
+        custom_rl_env.world_drone_altitude = msg.linear.z
+
+
+def world_drone_cmd_position_cb(msg):
+    """Handle position setpoint commands for world-level drone
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        if controller and controller.armed:
+            target_x = msg.pose.position.x
+            target_y = msg.pose.position.y
+            target_z = msg.pose.position.z
+            controller.set_target_position(target_x, target_y, target_z)
+            controller.set_mode(DroneState.POSITION)
+        else:
+            if not controller:
+                print(f"[Drone] No controller found for position command")
+            else:
+                print(f"[Drone] Drone not armed, ignoring position command")
+
+
+def world_drone_cmd_altitude_cb(msg):
+    """Handle altitude setpoint commands for world-level drone
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        if controller and controller.armed:
+            controller.set_target_altitude(msg.data)
+            controller.set_mode(DroneState.ALTITUDE_HOLD)
+        else:
+            if not controller:
+                print(f"[Drone] No controller found for altitude command")
+            else:
+                print(f"[Drone] Drone not armed, ignoring altitude command")
+
+
+def world_drone_takeoff_cb(request, response):
+    """Takeoff to default altitude (1.5m) for world-level drone
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        
+        if not controller:
+            response.success = False
+            response.message = "Controller not initialized for world drone"
+            return response
+        
+        if not controller.armed:
+            response.success = False
+            response.message = "Drone is not armed. Call /drone/arm service first."
+            return response
+        
+        if controller.mode != DroneState.IDLE:
+            response.success = False
+            response.message = f"Cannot takeoff from mode {controller.mode.value}"
+            return response
+        
+        # Set target altitude and switch to position mode
+        current_pos = controller.current_position
+        controller.set_target_position(current_pos[0], current_pos[1], 1.5)  # 1.5m altitude
+        controller.set_mode(DroneState.POSITION)
+        
+        response.success = True
+        response.message = "Takeoff initiated to 1.5m"
+        return response
+
+
+def world_drone_land_cb(request, response):
+    """Initiate landing sequence for world-level drone
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        
+        if not controller or not controller.armed:
+            response.success = False
+            response.message = "Drone not armed or controller missing"
+            return response
+        
+        controller.set_mode(DroneState.LANDING)
+        response.success = True
+        response.message = "Landing sequence initiated"
+        return response
+
+
+def world_drone_emergency_stop_cb(request, response):
+    """Emergency stop for world-level drone - zero all velocities immediately
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        
+        if controller:
+            controller.set_mode(DroneState.EMERGENCY)
+            custom_rl_env.world_drone_command = [0, 0, 0]
+            custom_rl_env.world_drone_altitude = 0.0
+        
+        response.success = True
+        response.message = "Emergency stop activated"
+        return response
+
+
+def world_drone_arm_cb(request, response):
+    """Arm or disarm the world-level drone
+    THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    from drone_controller import DroneState
+    with custom_rl_env.world_drone_lock:
+        controller = custom_rl_env.world_drone_controller
+        
+        if not controller:
+            response.success = False
+            response.message = "Controller not found"
+            return response
+        
+        controller.armed = request.data
+        controller.set_mode(DroneState.IDLE if request.data else DroneState.DISARMED)
+        
+        response.success = True
+        response.message = f"Drone {'armed' if request.data else 'disarmed'}"
+        return response
+
+
+def add_cmd_sub(num_envs, enable_world_drone=False):
     from geometry_msgs.msg import PoseStamped
     from std_msgs.msg import Float32
     from std_srvs.srv import Trigger, SetBool
@@ -364,9 +511,27 @@ def add_cmd_sub(num_envs):
             node_test.create_service(SetBool, f'robot{i}/arm',
                                     lambda req, res, i=i: arm_service_cb(req, res, str(i)))
     
+    # Add world-level drone control (separate from robot0...robotN)
+    if enable_world_drone:
+        print("[INFO] Adding /drone namespace ROS2 interface")
+        # Topics
+        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+        
+        # Services
+        node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
+        node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
+        node_test.create_service(Trigger, '/drone/emergency_stop', world_drone_emergency_stop_cb)
+        node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
+        print("[INFO] Drone control interface ready on /drone namespace")
+    
     # Spin in a separate thread
     thread = threading.Thread(target=rclpy.spin, args=(node_test,), daemon=True)
     thread.start()
+    
+    # Return node for cleanup
+    return node_test
 def _ensure_base_command_dict():
     """Ensure base_command is a dict keyed by string indices.
 
@@ -483,23 +648,23 @@ def run_sim():
         for i in range(env.unwrapped.num_envs):
             custom_rl_env.drone_controllers[str(i)] = DroneController(
                 robot_id=str(i),
-                kp_pos=0.8,      # Position PID gains
-                ki_pos=0.01,
-                kd_pos=0.4,
-                kp_alt=1.5,      # Altitude PID gains
-                ki_alt=0.05,
-                kd_alt=0.8,
-                kp_att=2.0,      # Attitude PID gains
+                kp_pos=0.3,      # Position PID gains - REDUCED to prevent aggressive movement
+                ki_pos=0.0,      # Disabled integral (can cause windup)
+                kd_pos=0.2,      # Damping
+                kp_alt=0.8,      # Altitude PID gains - REDUCED
+                ki_alt=0.0,      # Disabled integral
+                kd_alt=0.4,      # Damping
+                kp_att=1.0,      # Attitude PID gains - REDUCED
                 ki_att=0.0,
-                kd_att=0.5,
-                kp_yaw=1.0,      # Yaw rate PID gains
+                kd_att=0.3,
+                kp_yaw=0.5,      # Yaw rate PID gains - REDUCED
                 ki_yaw=0.0,
-                kd_yaw=0.2,
-                max_vel=2.0,
-                max_climb_rate=1.5,
-                max_angle_rate=2.0,    # Max roll/pitch rate (rad/s)
-                max_yaw_rate=1.0,      # Max yaw rate (rad/s)
-                hover_thrust=0.55      # Hover thrust (tunable per drone mass)
+                kd_yaw=0.1,
+                max_vel=1.0,     # REDUCED max velocity
+                max_climb_rate=0.8,  # REDUCED max climb rate
+                max_angle_rate=1.0,    # REDUCED max roll/pitch rate (rad/s)
+                max_yaw_rate=0.5,      # REDUCED max yaw rate (rad/s)
+                hover_thrust=0.45      # Slightly increased from 0.35
             )
             custom_rl_env.drone_armed[str(i)] = False
             custom_rl_env.drone_mode[str(i)] = 'DISARMED'
@@ -512,10 +677,95 @@ def run_sim():
         obs = {"policy": obs}
     print("[INFO] Environment reset complete, starting simulation loop...")
 
+    # Spawn world-level drone (separate from env system)
+    world_drone = None
+    enable_world_drone = False
+    if args_cli.robot == "go2":  # Only spawn drone when using Go2 robots
+        print("[INFO] Spawning world-level drone at /World/Drone...")
+        try:
+            # Create drone configuration with proper prim path
+            drone_cfg = QUADCOPTER_CFG.replace(prim_path="/World/Drone")
+            
+            # Spawn drone as Articulation with full physics
+            # Note: Creating Articulation automatically spawns it to the stage
+            world_drone = Articulation(cfg=drone_cfg)
+            
+            # Reset drone to default initial state first
+            world_drone.reset()
+            
+            # Override position to spawn at 2.5m height (hovering in center)
+            # Must do this AFTER reset to ensure it takes effect
+            root_state = world_drone.data.default_root_state.clone()
+            root_state[0, :3] = torch.tensor([0.0, 0.0, 2.5], device=world_drone.device)  # Position
+            root_state[0, 3:7] = torch.tensor([1.0, 0.0, 0.0, 0.0], device=world_drone.device)  # Quaternion (identity)
+            world_drone.write_root_pose_to_sim(root_state[:, :7])
+            world_drone.write_root_velocity_to_sim(root_state[:, 7:])
+            
+            # Write all drone state to simulation
+            world_drone.write_data_to_sim()
+            print("[INFO] Drone spawned and initialized at /World/Drone at position (0.0, 0.0, 2.5)")
+            
+            # Initialize drone controller
+            from drone_controller import DroneController
+            custom_rl_env.world_drone_controller = DroneController(
+                robot_id="drone",
+                kp_pos=0.3,
+                ki_pos=0.0,
+                kd_pos=0.2,
+                kp_alt=0.8,
+                ki_alt=0.0,
+                kd_alt=0.4,
+                kp_att=1.0,
+                ki_att=0.0,
+                kd_att=0.3,
+                kp_yaw=0.5,
+                ki_yaw=0.0,
+                kd_yaw=0.1,
+                max_vel=1.0,
+                max_climb_rate=0.8,
+                max_angle_rate=1.0,
+                max_yaw_rate=0.5,
+                hover_thrust=0.45
+            )
+            custom_rl_env.world_drone_controller.armed = False
+            print("[INFO] Drone controller initialized in DISARMED mode")
+            
+            # Add bottom-facing camera to drone
+            try:
+                from omni.isaac.orbit.sensors import CameraCfg, Camera
+                drone_cam_cfg = CameraCfg(
+                    prim_path="/World/Drone/base/bottom_cam",
+                    update_period=0.1,
+                    height=480,
+                    width=640,
+                    data_types=["rgb"],
+                    spawn=sim_utils.PinholeCameraCfg(
+                        focal_length=24.0,
+                        focus_distance=400.0,
+                        horizontal_aperture=20.955,
+                        clipping_range=(0.1, 1.0e5)
+                    ),
+                    offset=CameraCfg.OffsetCfg(
+                        pos=(0.0, 0.0, -0.1),  # Bottom mount
+                        rot=(0.0, 0.707, 0.0, 0.707),  # 90° down (pitch down)
+                        convention="ros"
+                    ),
+                )
+                Camera(drone_cam_cfg)
+                print("[INFO] Drone bottom camera initialized")
+            except Exception as cam_e:
+                print(f"[WARN] Failed to add drone camera: {cam_e}")
+            
+            enable_world_drone = True
+        except Exception as e:
+            print(f"[WARN] Failed to spawn world drone: {e}")
+            import traceback
+            traceback.print_exc()
+
     # initialize ROS2 node
     rclpy.init()
-    base_node = RobotBaseNode(env_cfg.scene.num_envs)
-    add_cmd_sub(env_cfg.scene.num_envs)
+    base_node = RobotBaseNode(env_cfg.scene.num_envs, enable_world_drone=enable_world_drone)
+    control_node = add_cmd_sub(env_cfg.scene.num_envs, enable_world_drone=enable_world_drone)
 
     annotator_lst = add_rtx_lidar(env_cfg.scene.num_envs, args_cli.robot, False)
     add_camera(env_cfg.scene.num_envs, args_cli.robot)
@@ -602,6 +852,10 @@ def run_sim():
                             
                             # Simple mapping
                             motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
+                            
+                            # Debug: print motor commands occasionally
+                            if env_idx == 0 and int(time.time() * 10) % 30 == 0:  # Every 3 seconds
+                                print(f"[DEBUG] Motors: [{motor_cmds[0]:.3f}, {motor_cmds[1]:.3f}, {motor_cmds[2]:.3f}, {motor_cmds[3]:.3f}] Thrust:{thrust:.3f}")
                     
                     else:
                         # Not armed or no controller: zero motors
@@ -616,9 +870,95 @@ def run_sim():
                 # Override the policy actions with motor commands
                 actions = motor_tensor
             
-            # env stepping
+            # env stepping (MUST happen first to step physics)
             obs, _, _, _ = env.step(actions)
+            
+            # World-level drone control (AFTER env.step to read latest physics state)
+            if world_drone is not None and custom_rl_env.world_drone_controller is not None:
+                try:
+                    # Update drone physics data from latest simulation step
+                    dt = env.unwrapped.step_dt if hasattr(env.unwrapped, 'step_dt') else (1.0 / 60.0)
+                    world_drone.update(dt)
+                    
+                    # THREAD-SAFE: Lock while reading controller state and commands
+                    with custom_rl_env.world_drone_lock:
+                        controller = custom_rl_env.world_drone_controller
+                        
+                        if controller.armed:
+                            # Get current state from world drone (freshly updated from physics)
+                            current_pos = world_drone.data.root_pos_w[0].cpu().numpy()
+                            current_vel = world_drone.data.root_lin_vel_w[0].cpu().numpy()
+                            current_quat = world_drone.data.root_quat_w[0].cpu().numpy()  # [w,x,y,z]
+                            
+                            # Update controller state
+                            controller.current_orientation = current_quat
+                            controller.current_euler = controller._quat_to_euler(current_quat)
+                            controller.current_position = current_pos
+                            controller.current_velocity = current_vel
+                            controller.update(dt, current_pos, current_vel)
+                            
+                            # Get motor commands from controller
+                            motor_cmds = controller.compute_motor_command()
+                            
+                            # For VELOCITY mode, convert velocity inputs to motor commands
+                            if controller.mode.value == 'VELOCITY':
+                                # Get velocity commands from cmd_vel/keyboard (thread-safe under lock)
+                                vx, vy, yaw_rate = custom_rl_env.world_drone_command[:]  # Copy list
+                                altitude_cmd = custom_rl_env.world_drone_altitude
+                                
+                                # Convert velocities to motor commands
+                                desired_pitch = -vx * 0.3
+                                desired_roll = vy * 0.3
+                                thrust = controller.hover_thrust + altitude_cmd * 0.2
+                                thrust = np.clip(thrust, 0.0, 1.0)
+                                
+                                # Motor mixing
+                                motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
+                            
+                            # Apply motor commands to drone (will take effect in NEXT frame)
+                            motor_tensor = torch.tensor([motor_cmds], device=world_drone.device, dtype=torch.float32)
+                            world_drone.set_joint_effort_target(motor_tensor)
+                        else:
+                            # Not armed: zero motors
+                            motor_tensor = torch.zeros((1, 4), device=world_drone.device, dtype=torch.float32)
+                            world_drone.set_joint_effort_target(motor_tensor)
+                    
+                    # Write drone control commands to simulation (buffered for next step)
+                    world_drone.write_data_to_sim()
+                except Exception as e:
+                    print(f"[ERROR] Drone control failed: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Emergency: zero motors to prevent unsafe behavior
+                    try:
+                        motor_tensor = torch.zeros((1, 4), device=world_drone.device, dtype=torch.float32)
+                        world_drone.set_joint_effort_target(motor_tensor)
+                        world_drone.write_data_to_sim()
+                    except:
+                        pass  # Best effort
+            
+            # Process observations
             if not isinstance(obs, dict):
                 obs = {"policy": obs}
             pub_robo_data_ros2(args_cli.robot, env_cfg.scene.num_envs, base_node, env, annotator_lst, start_time)
+            
+            # Publish world drone data (if enabled)
+            if world_drone is not None and enable_world_drone:
+                base_node.publish_drone_odom(world_drone.data.root_state_w[0, :3], world_drone.data.root_state_w[0, 3:7])
+                base_node.publish_drone_imu(world_drone.data.root_state_w[0, 3:7], world_drone.data.root_lin_vel_b[0, :], world_drone.data.root_ang_vel_b[0, :])
+                base_node.publish_drone_joints(world_drone.data.joint_names, world_drone.data.joint_pos[0])
+    
+    # Cleanup on exit
+    print("[INFO] Shutting down simulation...")
     env.close()
+    
+    # Clean up ROS2 resources
+    try:
+        control_node.destroy_node()
+        base_node.destroy_node()
+        rclpy.shutdown()
+        print("[INFO] ROS2 shutdown complete")
+    except Exception as e:
+        print(f"[WARN] ROS2 cleanup error: {e}")
+    
+    print("[INFO] Simulation shutdown complete")
