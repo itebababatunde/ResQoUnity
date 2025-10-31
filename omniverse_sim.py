@@ -1036,17 +1036,20 @@ def run_sim():
                                 pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
                                 yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
                                 
-                                # Apply forces and torques to drone body
-                                # Forces in body frame (z-up for drone)
-                                forces = torch.tensor([[0.0, 0.0, total_thrust]], dtype=torch.float32)
-                                torques = torch.tensor([[roll_torque, pitch_torque, yaw_torque]], dtype=torch.float32)
+                                # Apply forces and torques to drone body using PhysX Tensor API
+                                # Forces/torques in body frame (z-up for drone)
                                 
-                                world_drone_view.apply_forces_and_torques_at_pos(
-                                    forces=forces,
-                                    torques=torques,
-                                    indices=torch.tensor([0], dtype=torch.int32),
-                                    is_global=False  # Body frame
-                                )
+                                # Get the PhysX view backend for direct force application
+                                physics_view = world_drone_view._physics_view
+                                
+                                # Create force and torque tensors
+                                # Shape: (num_drones, 3) for forces and torques
+                                force_tensor = torch.tensor([[0.0, 0.0, total_thrust]], dtype=torch.float32, device=world_drone_view._device)
+                                torque_tensor = torch.tensor([[roll_torque, pitch_torque, yaw_torque]], dtype=torch.float32, device=world_drone_view._device)
+                                
+                                # Apply to root body (index 0) in body frame
+                                physics_view.set_forces(force_tensor, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                physics_view.set_torques(torque_tensor, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1062,15 +1065,12 @@ def run_sim():
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
                                 
-                                # Zero forces
-                                zero_forces = torch.zeros((1, 3), dtype=torch.float32)
-                                zero_torques = torch.zeros((1, 3), dtype=torch.float32)
-                                world_drone_view.apply_forces_and_torques_at_pos(
-                                    forces=zero_forces,
-                                    torques=zero_torques,
-                                    indices=torch.tensor([0], dtype=torch.int32),
-                                    is_global=False
-                                )
+                                # Zero forces using PhysX view
+                                physics_view = world_drone_view._physics_view
+                                zero_forces = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
+                                zero_torques = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
+                                physics_view.set_forces(zero_forces, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                physics_view.set_torques(zero_torques, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
@@ -1082,14 +1082,12 @@ def run_sim():
                                 zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_velocities)
                                 
-                                zero_forces = torch.zeros((1, 3), dtype=torch.float32)
-                                zero_torques = torch.zeros((1, 3), dtype=torch.float32)
-                                world_drone_view.apply_forces_and_torques_at_pos(
-                                    forces=zero_forces,
-                                    torques=zero_torques,
-                                    indices=torch.tensor([0], dtype=torch.int32),
-                                    is_global=False
-                                )
+                                # Zero forces using PhysX view
+                                physics_view = world_drone_view._physics_view
+                                zero_forces = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
+                                zero_torques = torch.zeros((1, 3), dtype=torch.float32, device=world_drone_view._device)
+                                physics_view.set_forces(zero_forces, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
+                                physics_view.set_torques(zero_torques, indices=torch.tensor([0], dtype=torch.int32, device=world_drone_view._device))
                         except:
                             pass  # Best effort
             
