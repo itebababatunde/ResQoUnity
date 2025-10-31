@@ -926,8 +926,8 @@ def run_sim():
                         drone_prim = prim_utils.get_prim_at_path(world_drone_path)
                         print(f"[DEBUG] Prim at {world_drone_path} exists: {drone_prim.IsValid()}")
                         
-                        # Check for articulation root
-                        from pxr import UsdPhysics
+                        # Check for articulation root and joint drive settings
+                        from pxr import UsdPhysics, PhysxSchema
                         if drone_prim.IsValid():
                             # Walk the hierarchy to find the actual articulation root
                             stage = drone_prim.GetStage()
@@ -935,7 +935,17 @@ def run_sim():
                                 if prim.GetPath().pathString.startswith(world_drone_path):
                                     if UsdPhysics.ArticulationRootAPI(prim):
                                         print(f"[DEBUG] Found articulation root at: {prim.GetPath()}")
-                                        break
+                                    
+                                    # Check joint drive configuration
+                                    joint = UsdPhysics.RevoluteJoint(prim)
+                                    if joint:
+                                        joint_name = prim.GetName()
+                                        drive_api = UsdPhysics.DriveAPI(prim, "angular")
+                                        if drive_api:
+                                            max_force = drive_api.GetMaxForceAttr().Get()
+                                            damping = drive_api.GetDampingAttr().Get()
+                                            stiffness = drive_api.GetStiffnessAttr().Get()
+                                            print(f"[DEBUG] Joint {joint_name}: maxForce={max_force}, damping={damping}, stiffness={stiffness}")
                     except Exception as e:
                         print(f"[WARN] Drone view initialization failed (will retry next frame): {e}")
                         # Don't set initialized=True, will retry next frame
@@ -988,10 +998,15 @@ def run_sim():
                                     motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
                                 
                                 # Apply motor commands using ArticulationView API (GPU-safe)
-                                # set_joint_efforts expects (N, num_joints) tensor
-                                # Convert numpy array to tensor efficiently
-                                motor_efforts = torch.from_numpy(np.array([motor_cmds], dtype=np.float32))
-                                world_drone_view.set_joint_efforts(motor_efforts)
+                                # Quadcopter motors are velocity-controlled (RPM), not effort-controlled
+                                # Convert normalized motor commands [0-1] to angular velocities [rad/s]
+                                # Typical quadcopter: 0.45 throttle = ~15000 RPM = ~1570 rad/s
+                                max_motor_velocity = 2000.0  # rad/s (~19000 RPM)
+                                motor_velocities = motor_cmds * max_motor_velocity
+                                
+                                # set_joint_velocity_targets expects (N, num_joints) tensor
+                                velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
+                                world_drone_view.set_joint_velocity_targets(velocity_targets)
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1001,11 +1016,11 @@ def run_sim():
                                 
                                 if controller._debug_counter % 60 == 0:  # Every ~1 second at 60Hz
                                     print(f"[MOTOR] Position: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
-                                          f"Motors: [{motor_cmds[0]:.3f}, {motor_cmds[1]:.3f}, {motor_cmds[2]:.3f}, {motor_cmds[3]:.3f}]")
+                                          f"Velocity targets: [{motor_velocities[0]:.1f}, {motor_velocities[1]:.1f}, {motor_velocities[2]:.1f}, {motor_velocities[3]:.1f}] rad/s")
                             else:
                                 # Not armed: zero motors
-                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_efforts(zero_efforts)
+                                zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_velocity_targets(zero_velocities)
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
@@ -1014,8 +1029,8 @@ def run_sim():
                         # Emergency: zero motors to prevent unsafe behavior
                         try:
                             if world_drone_view is not None:
-                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_efforts(zero_efforts)
+                                zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_velocity_targets(zero_velocities)
                         except:
                             pass  # Best effort
             
