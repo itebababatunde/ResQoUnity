@@ -595,6 +595,7 @@ def specify_cmd_for_robots(numv_envs):
     for i in range(numv_envs):
         custom_rl_env.base_command[str(i)] = [0, 0, 0]
 def run_sim():
+    import omni.appwindow
     
     # acquire input interface
     _input = carb.input.acquire_input_interface()
