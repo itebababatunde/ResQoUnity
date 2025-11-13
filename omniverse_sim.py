@@ -746,11 +746,16 @@ def run_sim():
                     max_yaw_rate=0.5,
                     hover_thrust=0.45
                 )
-                custom_rl_env.world_drone_controller.armed = False
+                
+                # AUTO-ARM: Start armed so drone holds altitude immediately
+                from drone_controller import DroneState
+                custom_rl_env.world_drone_controller.armed = True
+                custom_rl_env.world_drone_controller.set_mode(DroneState.LOITER)
                 
                 # Initialize debug logger
                 custom_rl_env.world_drone_logger = DroneDebugLogger("world_drone")
-                print("[INFO] Drone controller initialized in DISARMED mode")
+                print("[INFO] Drone controller initialized in ARMED mode (auto-armed)")
+                print("[INFO] Mode set to LOITER - will hold spawn position")
                 print("[INFO] Debug logger enabled - verbose output active")
                 
                 # Add bottom-facing camera to drone
@@ -927,8 +932,13 @@ def run_sim():
                             controller.current_euler = controller._quat_to_euler(initial_quat)
                             controller.current_velocity = initial_vel
                             
+                            # Set target position to spawn position (for LOITER mode)
+                            controller.target_position = initial_pos.copy()
+                            print(f"[INFO] LOITER target set to spawn position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
+                            
                             # Log initial state
                             logger.log_initialization(initial_pos, initial_vel, controller.mode.value)
+                            logger.log_arm_event(True)  # Log that we're starting armed
                         
                         world_drone_initialized = True
                         print(f"[INFO] ArticulationView ready - found {world_drone_view.count} drone(s)")
