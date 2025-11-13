@@ -88,6 +88,45 @@ from omnigraph import create_front_cam_omnigraph
 from robots.quadcopter.config import QUADCOPTER_CFG
 
 
+def calculate_drone_forces(desired_velocity, current_velocity, mass, dt=0.016, gravity=9.81):
+    """
+    Calculate forces needed to achieve desired velocity.
+    Inspired by OmniDrones' approach but adapted for direct velocity control.
+    
+    Args:
+        desired_velocity: np.array([vx, vy, vz]) - desired velocity in world frame (m/s)
+        current_velocity: np.array([vx, vy, vz]) - current velocity in world frame (m/s)
+        mass: float - drone mass in kg
+        dt: float - time step (default 60 Hz = 0.016s)
+        gravity: float - gravity constant (m/s^2)
+    
+    Returns:
+        forces: np.array([fx, fy, fz]) - forces to apply in world frame (N)
+    """
+    # Calculate required acceleration to reach desired velocity
+    # Using simple P controller: a = Kp * (v_desired - v_current)
+    velocity_error = desired_velocity - current_velocity
+    
+    # Gain for acceleration controller (how aggressively to change velocity)
+    # Higher = faster response but more oscillation
+    kp_accel = 8.0  # Tuned for responsive but stable control
+    
+    desired_accel = kp_accel * velocity_error
+    
+    # Clamp acceleration to reasonable limits (prevent extreme forces)
+    max_accel = 15.0  # m/s^2 (about 1.5g)
+    desired_accel = np.clip(desired_accel, -max_accel, max_accel)
+    
+    # Convert acceleration to force: F = ma
+    force = mass * desired_accel
+    
+    # CRITICAL: Add gravity compensation for vertical force
+    # The drone must counteract gravity to maintain altitude
+    force[2] += mass * gravity  # Add upward force to counteract gravity
+    
+    return force
+
+
 class _RslRlEnvShim:
     """Shim to adapt env.get_observations() to return only observations for older rsl_rl versions.
 
@@ -686,7 +725,7 @@ def run_sim():
     world_drone_path = None
     world_drone_view = None
     world_drone_root_body_path = None  # Cached path to root body for force application
-    world_drone_rigid_prim = None  # Cached RigidPrim for efficient force application
+    # RigidPrim removed - not compatible with GPU physics mode
     world_drone_initialized = False
     enable_world_drone = False
     
@@ -721,30 +760,31 @@ def run_sim():
                 print("[ERROR] Failed to create drone prim")
                 world_drone_path = None
             
-                # Initialize drone controller (independent of physics view)
+            # Initialize drone controller (independent of physics view)
             if world_drone_path:
                 from drone_controller import DroneController
                 from drone_debug_logger import DroneDebugLogger
                 
                 custom_rl_env.world_drone_controller = DroneController(
                     robot_id="drone",
-                    kp_pos=0.3,
-                    ki_pos=0.0,
-                    kd_pos=0.2,
-                    kp_alt=0.8,
-                    ki_alt=0.0,
-                    kd_alt=0.4,
-                    kp_att=1.0,
+                    # FORCE-BASED CONTROL: Higher gains needed since forces must accelerate mass
+                    kp_pos=1.2,      # Increased from 0.3 - position control
+                    ki_pos=0.05,     # Added integral term - eliminates steady-state error
+                    kd_pos=0.3,      # Increased damping
+                    kp_alt=2.0,      # Increased from 0.8 - altitude is critical
+                    ki_alt=0.15,     # Added integral - maintains hover
+                    kd_alt=0.6,      # Increased damping - prevents oscillation
+                    kp_att=1.0,      # Attitude gains (not used in simplified force control)
                     ki_att=0.0,
                     kd_att=0.3,
                     kp_yaw=0.5,
                     ki_yaw=0.0,
                     kd_yaw=0.1,
-                    max_vel=1.0,
-                    max_climb_rate=0.8,
+                    max_vel=2.0,     # Increased from 1.0 - forces can safely handle higher speeds
+                    max_climb_rate=1.5,  # Increased from 0.8 - better takeoff
                     max_angle_rate=1.0,
-                    max_yaw_rate=0.5,
-                    hover_thrust=0.45
+                    max_yaw_rate=0.8,    # Increased yaw rate
+                    hover_thrust=0.45    # Not used in force-based control
                 )
                 
                 # AUTO-ARM: Start armed so drone holds altitude immediately
@@ -915,6 +955,23 @@ def run_sim():
                         )
                         world_drone_view.initialize()
                         
+                        # Calculate drone mass from physics properties
+                        # ArticulationView stores link masses, we sum them for total mass
+                        try:
+                            link_masses = world_drone_view.get_masses()  # Returns (num_drones, num_links)
+                            if link_masses is not None:
+                                total_mass = float(link_masses[0].sum().cpu())
+                                custom_rl_env.world_drone_mass = total_mass
+                                print(f"[INFO] Drone total mass calculated: {total_mass:.4f} kg")
+                            else:
+                                # Fallback: Crazyflie 2.x is about 27g, scaled 5x = ~0.675kg (volume scales cubically, but physics scaled linearly)
+                                # Use a reasonable estimate: 0.5 kg for 5x scaled Crazyflie
+                                custom_rl_env.world_drone_mass = 0.5
+                                print(f"[WARN] Could not get mass from USD, using estimate: {custom_rl_env.world_drone_mass} kg")
+                        except Exception as e:
+                            print(f"[WARN] Failed to calculate mass: {e}, using fallback: 0.5 kg")
+                            custom_rl_env.world_drone_mass = 0.5
+                        
                         # CRITICAL: Initialize controller position immediately
                         positions, orientations = world_drone_view.get_world_poses()
                         velocities = world_drone_view.get_velocities()
@@ -969,18 +1026,8 @@ def run_sim():
                                     print(f"[DEBUG] Found root body (fallback) at: {world_drone_root_body_path}")
                                     break
                         
-                        # Create and cache RigidPrim for efficient force application
-                        if world_drone_root_body_path:
-                            try:
-                                from omni.isaac.core.prims import RigidPrim
-                                world_drone_rigid_prim = RigidPrim(
-                                    prim_path=world_drone_root_body_path,
-                                    name="world_drone_body"
-                                )
-                                print(f"[DEBUG] RigidPrim initialized for force application")
-                            except Exception as rigid_error:
-                                print(f"[WARN] Could not create RigidPrim: {rigid_error}")
-                                world_drone_rigid_prim = None
+                        # NOTE: RigidPrim removed - causes GPU physics errors
+                        # Force application now uses PhysxSchema.PhysxRigidBodyAPI directly
                         
                         # Check for articulation root and joint drive settings
                         from pxr import UsdPhysics, PhysxSchema
@@ -1135,8 +1182,10 @@ def run_sim():
                                         desired_yaw_rate = cmd_vel[2]
                                         desired_vz = custom_rl_env.world_drone_altitude
                                 
-                                # Apply velocities directly (GPU-safe)
-                                # This is the ONLY reliable way to control the drone
+                                # FORCE-BASED CONTROL (OmniDrones-inspired)
+                                # Calculate forces needed to achieve desired velocities
+                                # This works WITH the physics engine instead of bypassing it
+                                
                                 # Get device from existing tensor (positions is already on GPU)
                                 device = positions.device if hasattr(positions, 'device') else 'cuda:0'
                                 
@@ -1146,29 +1195,92 @@ def run_sim():
                                 desired_vz = np.clip(desired_vz, -controller.max_climb_rate, controller.max_climb_rate)
                                 desired_yaw_rate = np.clip(desired_yaw_rate, -controller.max_yaw_rate, controller.max_yaw_rate)
                                 
-                                desired_vel = torch.tensor([
-                                    [desired_vx, desired_vy, desired_vz,  # Linear velocity
-                                     0.0, 0.0, desired_yaw_rate]  # Angular velocity (roll/pitch = 0, yaw from command)
-                                ], dtype=torch.float32, device=device)
+                                # Get drone mass from cached value
+                                drone_mass = custom_rl_env.world_drone_mass
+                                if drone_mass is None:
+                                    print("[ERROR] Drone mass not calculated! Using fallback.")
+                                    drone_mass = 0.5
                                 
-                                # DIRECT VELOCITY CONTROL - bypasses physics
-                                # This is necessary because force application doesn't work on articulations
-                                # IMPORTANT: Only set ROOT velocities, not joint velocities (prevents breaking apart)
-                                # ArticulationView.set_velocities() expects (N, 6+num_joints) but we only want root
-                                # So we need to preserve current joint velocities
-                                current_vels_before = world_drone_view.get_velocities().clone()
-                                current_vels = world_drone_view.get_velocities()
-                                # Overwrite only root velocities (first 6 elements), keep joint velocities
-                                current_vels[0, :3] = desired_vel[0, :3]  # Linear velocity
-                                current_vels[0, 3:6] = desired_vel[0, 3:6]  # Angular velocity
-                                # Joint velocities (6 onward) remain unchanged
-                                world_drone_view.set_velocities(current_vels)
+                                # Calculate forces needed (with gravity compensation)
+                                desired_velocity_vec = np.array([desired_vx, desired_vy, desired_vz])
+                                forces = calculate_drone_forces(
+                                    desired_velocity=desired_velocity_vec,
+                                    current_velocity=current_vel,
+                                    mass=drone_mass,
+                                    dt=1.0/60.0,
+                                    gravity=9.81
+                                )
                                 
-                                # LOG: Verify velocity was applied
+                                # Convert to torch tensor for ArticulationView
+                                # Forces are in world frame, shape: (num_drones, 3)
+                                force_tensor = torch.tensor(
+                                    [[forces[0], forces[1], forces[2]]],
+                                    dtype=torch.float32,
+                                    device=device
+                                )
+                                
+                                # Torque for yaw control (simplified, just yaw axis)
+                                # Calculate torque needed for yaw rate: τ = I * α
+                                # Moment of inertia (rough estimate for scaled Crazyflie)
+                                yaw_inertia = 0.01  # kg*m^2 (tunable)
+                                yaw_error = desired_yaw_rate - 0.0  # Assume current yaw rate is ~0 for simplicity
+                                yaw_torque = yaw_inertia * yaw_error * 10.0  # Gain = 10
+                                
+                                torque_tensor = torch.tensor(
+                                    [[0.0, 0.0, yaw_torque]],  # Only yaw torque
+                                    dtype=torch.float32,
+                                    device=device
+                                )
+                                
+                                # Apply forces and torques using PhysX
+                                # We need to apply external forces to the root body
+                                # ArticulationView doesn't have direct apply_forces, so we use set_applied_forces
+                                try:
+                                    # Get physics handle to apply external forces
+                                    from omni.isaac.core.utils.prims import get_prim_at_path
+                                    from pxr import PhysxSchema
+                                    import omni.physx
+                                    
+                                    # Get the root prim (base_link)
+                                    root_prim_path = world_drone_path + "/base_link"
+                                    root_prim = get_prim_at_path(root_prim_path)
+                                    
+                                    if root_prim and root_prim.IsValid():
+                                        # Apply force using PhysX API (world frame)
+                                        # Convert torch tensor to list for API
+                                        force_list = forces.tolist()
+                                        torque_list = [0.0, 0.0, yaw_torque]
+                                        
+                                        # Use PhysX apply_force utility (works in GPU mode for reading, but we apply per-frame)
+                                        # We'll apply it as a continuous force by setting it every frame
+                                        physx_rb_api = PhysxSchema.PhysxRigidBodyAPI(root_prim)
+                                        if physx_rb_api:
+                                            # Set force and torque attributes (will be applied by PhysX)
+                                            from pxr import Gf
+                                            physx_rb_api.GetForceAttr().Set(Gf.Vec3f(force_list[0], force_list[1], force_list[2]))
+                                            physx_rb_api.GetTorqueAttr().Set(Gf.Vec3f(torque_list[0], torque_list[1], torque_list[2]))
+                                    
+                                    applied_force = forces  # For logging
+                                    
+                                except Exception as force_error:
+                                    print(f"[WARN] Force application failed: {force_error}")
+                                    print("[WARN] Falling back to velocity control")
+                                    # Fallback: use velocity control
+                                    desired_vel = torch.tensor([
+                                        [desired_vx, desired_vy, desired_vz,
+                                         0.0, 0.0, desired_yaw_rate]
+                                    ], dtype=torch.float32, device=device)
+                                    current_vels = world_drone_view.get_velocities()
+                                    current_vels[0, :3] = desired_vel[0, :3]
+                                    current_vels[0, 3:6] = desired_vel[0, 3:6]
+                                    world_drone_view.set_velocities(current_vels)
+                                    applied_force = np.zeros(3)  # No force applied
+                                
+                                # For logging - get what actually happened
                                 vels_after = world_drone_view.get_velocities()
                                 applied_vel = vels_after[0, :3].cpu().numpy()
                                 
-                                # Detailed frame logging
+                                # Detailed frame logging with forces
                                 logger.log_frame(
                                     current_pos=current_pos,
                                     current_vel=current_vel,
@@ -1177,7 +1289,8 @@ def run_sim():
                                     desired_vel=np.array([desired_vx, desired_vy, desired_vz]),
                                     error=pos_error,
                                     armed=controller.armed,
-                                    actual_vel_applied=applied_vel
+                                    actual_vel_applied=applied_vel,
+                                    applied_force=applied_force
                                 )
                                 
                                 # ALSO spin the rotors for visual effect
@@ -1188,15 +1301,29 @@ def run_sim():
                                 
                                 # Old debug output replaced by comprehensive logger
                             else:
-                                # Not armed: simulate gentle descent (gravity substitute since we bypass physics)
-                                current_vels = world_drone_view.get_velocities()
-                                current_vels[0, :2] = 0.0  # Zero XY velocity
-                                current_vels[0, 2] = -0.3  # Slow descent (simulate gravity)
-                                current_vels[0, 3:6] = 0.0  # Zero angular velocity
-                                world_drone_view.set_velocities(current_vels)
+                                # Not armed: apply ZERO forces (let gravity naturally pull drone down)
+                                try:
+                                    from omni.isaac.core.utils.prims import get_prim_at_path
+                                    from pxr import PhysxSchema, Gf
+                                    
+                                    root_prim_path = world_drone_path + "/base_link"
+                                    root_prim = get_prim_at_path(root_prim_path)
+                                    
+                                    if root_prim and root_prim.IsValid():
+                                        physx_rb_api = PhysxSchema.PhysxRigidBodyAPI(root_prim)
+                                        if physx_rb_api:
+                                            # Zero all external forces and torques
+                                            physx_rb_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                            physx_rb_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                except Exception:
+                                    pass  # Best effort
                                 
+                                # Also zero motor velocities
                                 zero_motor = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_motor)
+                                
+                                applied_force = np.zeros(3)
+                                applied_vel = np.zeros(3)
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")

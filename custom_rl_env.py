@@ -72,6 +72,8 @@ world_drone_lock = threading.Lock()
 world_drone_controller = None  # Single DroneController for /World/Drone
 world_drone_command = [0.0, 0.0, 0.0]  # [vx, vy, yaw_rate] for velocity mode
 world_drone_altitude = 0.0  # Altitude command for /drone
+world_drone_mass = None  # Drone mass in kg (calculated from USD)
+world_drone_logger = None  # DroneDebugLogger instance
 
 
 def constant_commands(env: RLTaskEnvCfg) -> torch.Tensor:

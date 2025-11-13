@@ -48,7 +48,7 @@ class DroneDebugLogger:
         print()
     
     def log_frame(self, current_pos, current_vel, target_pos, mode, 
-                  desired_vel, error, armed, actual_vel_applied=None):
+                  desired_vel, error, armed, actual_vel_applied=None, applied_force=None):
         """Log frame-by-frame state"""
         self.frame_count += 1
         current_time = time.time()
@@ -67,13 +67,25 @@ class DroneDebugLogger:
             print(f"  Error      : ({error[0]:7.3f}, {error[1]:7.3f}, {error[2]:7.3f}) = {np.linalg.norm(error):.3f}m")
             print(f"  PID Output : ({desired_vel[0]:7.3f}, {desired_vel[1]:7.3f}, {desired_vel[2]:7.3f}) m/s")
             
+            if applied_force is not None:
+                force_mag = np.linalg.norm(applied_force)
+                print(f"  Applied Force: ({applied_force[0]:7.2f}, {applied_force[1]:7.2f}, {applied_force[2]:7.2f}) N (|F|={force_mag:.2f}N)")
+                # Check if gravity is properly compensated (for LOITER mode)
+                if armed and mode in ['LOITER', 'POSITION']:
+                    # At hover, vertical force should be ~mass*g
+                    # We don't have mass here, but can check if z-force is positive and reasonable
+                    if applied_force[2] > 0:
+                        print(f"  ✅ Gravity compensation active (Fz > 0)")
+                    else:
+                        print(f"  ⚠️  WARNING: No upward force (drone will fall!)")
+            
             if actual_vel_applied is not None:
-                print(f"  Applied Vel: ({actual_vel_applied[0]:7.3f}, {actual_vel_applied[1]:7.3f}, {actual_vel_applied[2]:7.3f}) m/s")
+                print(f"  Actual Vel: ({actual_vel_applied[0]:7.3f}, {actual_vel_applied[1]:7.3f}, {actual_vel_applied[2]:7.3f}) m/s")
                 vel_match = np.allclose(desired_vel, actual_vel_applied[:3], atol=0.01)
                 if vel_match:
-                    print(f"  ✅ Velocity command APPLIED correctly")
+                    print(f"  ✅ Velocity matches PID output")
                 else:
-                    print(f"  ⚠️  Velocity mismatch! Command not applied properly")
+                    print(f"  ℹ️  Velocity differs from PID (physics is active)")
             
             # Check if drone is moving
             speed = np.linalg.norm(current_vel)
