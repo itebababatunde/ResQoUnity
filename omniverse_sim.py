@@ -681,6 +681,7 @@ def run_sim():
     world_drone_path = None
     world_drone_view = None
     world_drone_root_body_path = None  # Cached path to root body for force application
+    world_drone_rigid_prim = None  # Cached RigidPrim for efficient force application
     world_drone_initialized = False
     enable_world_drone = False
     
@@ -943,6 +944,19 @@ def run_sim():
                                     print(f"[DEBUG] Found root body (fallback) at: {world_drone_root_body_path}")
                                     break
                         
+                        # Create and cache RigidPrim for efficient force application
+                        if world_drone_root_body_path:
+                            try:
+                                from omni.isaac.core.prims import RigidPrim
+                                world_drone_rigid_prim = RigidPrim(
+                                    prim_path=world_drone_root_body_path,
+                                    name="world_drone_body"
+                                )
+                                print(f"[DEBUG] RigidPrim initialized for force application")
+                            except Exception as rigid_error:
+                                print(f"[WARN] Could not create RigidPrim: {rigid_error}")
+                                world_drone_rigid_prim = None
+                        
                         # Check for articulation root and joint drive settings
                         from pxr import UsdPhysics, PhysxSchema
                         if drone_prim.IsValid():
@@ -1053,22 +1067,63 @@ def run_sim():
                                 pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
                                 yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
                                 
-                                # Apply forces and torques using USD PhysX API directly
-                                # Use cached root body prim for efficient force application
-                                if world_drone_root_body_path:
-                                    import omni.isaac.core.utils.prims as prim_utils
-                                    from pxr import PhysxSchema, Gf
-                                    
-                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
-                                    if root_body_prim.IsValid():
-                                        # Apply force using PhysX rigid body API
-                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
-                                        if not rigid_body_api:
-                                            rigid_body_api = PhysxSchema.PhysxRigidBodyAPI.Apply(root_body_prim)
+                                # CRITICAL FIX: Apply forces using joint efforts through ArticulationView
+                                # The Crazyflie USD has 4 revolute joints (motors), but they don't generate thrust directly
+                                # We need to SIMULATE thrust by converting motor commands to equivalent joint torques
+                                
+                                # Method: Convert total thrust to equivalent upward force by setting joint efforts
+                                # that counteract gravity and provide lift
+                                
+                                # Calculate required joint efforts to generate desired thrust
+                                # Each motor contributes proportionally to its command
+                                
+                                # Scale motor commands to joint effort range (N⋅m)
+                                # For scaled Crazyflie (5x), mass ≈ 3.4kg, needs ~33N hover thrust
+                                max_motor_effort = 15.0  # Max effort per motor (N⋅m)
+                                joint_efforts = motor_cmds * max_motor_effort
+                                
+                                # Apply as joint efforts (this is GPU-safe and works with ArticulationView)
+                                effort_tensor = torch.from_numpy(np.array([joint_efforts], dtype=np.float32))
+                                world_drone_view.set_joint_efforts(effort_tensor)
+                                
+                                # ADDITIONALLY: Apply external force directly to body for thrust
+                                # This compensates for the fact that rotor joints don't physically generate lift
+                                # Use cached RigidPrim for efficient force application
+                                if world_drone_rigid_prim is not None:
+                                    try:
+                                        from pxr import Gf
                                         
-                                        # Set force and torque (in body frame)
-                                        rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, total_thrust))
-                                        rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(roll_torque, pitch_torque, yaw_torque))
+                                        # Get current orientation to convert body-frame thrust to world-frame
+                                        # Thrust is in +Z body frame, need to rotate to world frame
+                                        quat_w, quat_x, quat_y, quat_z = current_quat  # [w, x, y, z]
+                                        
+                                        # Rotate body-frame Z thrust vector to world frame using quaternion
+                                        # Body thrust vector: (0, 0, total_thrust)
+                                        # World thrust = quat * (0, 0, thrust) * quat^-1
+                                        
+                                        # Quick quaternion rotation formula for (0, 0, z):
+                                        thrust_x = 2.0 * (quat_x * quat_z + quat_w * quat_y) * total_thrust
+                                        thrust_y = 2.0 * (quat_y * quat_z - quat_w * quat_x) * total_thrust
+                                        thrust_z = (1.0 - 2.0 * (quat_x**2 + quat_y**2)) * total_thrust
+                                        
+                                        # Apply force in world frame (will be active for this timestep)
+                                        # Uses cached RigidPrim - no need to recreate each frame
+                                        world_drone_rigid_prim.apply_force(
+                                            force=[thrust_x, thrust_y, thrust_z],
+                                            is_global=True  # World frame
+                                        )
+                                        
+                                        # Apply torques in body frame for attitude control
+                                        world_drone_rigid_prim.apply_torque(
+                                            torque=[roll_torque, pitch_torque, yaw_torque],
+                                            is_global=False  # Body frame
+                                        )
+                                        
+                                    except Exception as force_error:
+                                        # If force application fails, log but don't crash
+                                        # Joint efforts alone might still provide some control
+                                        if controller._debug_counter % 60 == 0:
+                                            print(f"[WARN] Force application failed: {force_error}")
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1081,19 +1136,13 @@ def run_sim():
                                           f"Thrust: {total_thrust:.2f}N, Torque: ({roll_torque:.3f}, {pitch_torque:.3f}, {yaw_torque:.3f})")
                             else:
                                 # Not armed: zero motors and forces
-                                zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_velocity_targets(zero_velocities)
+                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_efforts(zero_efforts)
+                                world_drone_view.set_joint_velocity_targets(zero_efforts)
                                 
-                                # Zero forces using USD PhysX API
-                                if world_drone_root_body_path:
-                                    import omni.isaac.core.utils.prims as prim_utils
-                                    from pxr import PhysxSchema, Gf
-                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
-                                    if root_body_prim.IsValid():
-                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
-                                        if rigid_body_api:
-                                            rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
-                                            rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                # Zero external forces (no thrust when disarmed)
+                                # No need to explicitly zero forces - not applying them is enough
+                                # Forces from apply_force() only last one timestep anyway
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
@@ -1102,19 +1151,10 @@ def run_sim():
                         # Emergency: zero motors AND forces to prevent unsafe behavior
                         try:
                             if world_drone_view is not None:
-                                zero_velocities = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_velocity_targets(zero_velocities)
-                                
-                                # Zero forces using USD API
-                                if world_drone_root_body_path:
-                                    import omni.isaac.core.utils.prims as prim_utils
-                                    from pxr import PhysxSchema, Gf
-                                    root_body_prim = prim_utils.get_prim_at_path(world_drone_root_body_path)
-                                    if root_body_prim.IsValid():
-                                        rigid_body_api = PhysxSchema.PhysxRigidBodyAPI(root_body_prim)
-                                        if rigid_body_api:
-                                            rigid_body_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
-                                            rigid_body_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_efforts(zero_efforts)
+                                world_drone_view.set_joint_velocity_targets(zero_efforts)
+                                # Forces auto-expire after one timestep, no need to explicitly zero
                         except:
                             pass  # Best effort
             
