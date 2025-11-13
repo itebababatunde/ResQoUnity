@@ -1067,63 +1067,53 @@ def run_sim():
                                 pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
                                 yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
                                 
-                                # CRITICAL FIX: Apply forces using joint efforts through ArticulationView
-                                # The Crazyflie USD has 4 revolute joints (motors), but they don't generate thrust directly
-                                # We need to SIMULATE thrust by converting motor commands to equivalent joint torques
+                                # CRITICAL FIX: Use velocity-based control as fallback
+                                # ArticulatedView doesn't support external forces well
+                                # Instead, directly set velocities to achieve desired motion
                                 
-                                # Method: Convert total thrust to equivalent upward force by setting joint efforts
-                                # that counteract gravity and provide lift
+                                # Calculate desired velocities from position error (PID already computed)
+                                # This bypasses the broken force application
                                 
-                                # Calculate required joint efforts to generate desired thrust
-                                # Each motor contributes proportionally to its command
+                                # Get position error
+                                pos_error = controller.target_position - current_pos
                                 
-                                # Scale motor commands to joint effort range (N⋅m)
-                                # For scaled Crazyflie (5x), mass ≈ 3.4kg, needs ~33N hover thrust
-                                max_motor_effort = 15.0  # Max effort per motor (N⋅m)
-                                joint_efforts = motor_cmds * max_motor_effort
+                                # Use PID-computed velocities (already calculated in compute_motor_command)
+                                # Scale motor thrust to equivalent velocity change
+                                velocity_scale = 0.5  # m/s per motor command unit
                                 
-                                # Apply as joint efforts (this is GPU-safe and works with ArticulationView)
-                                effort_tensor = torch.from_numpy(np.array([joint_efforts], dtype=np.float32))
-                                world_drone_view.set_joint_efforts(effort_tensor)
+                                # Convert thrust to upward velocity
+                                # Hover thrust (0.45) should give 0 velocity
+                                # Higher thrust should give upward velocity
+                                thrust_deviation = (total_thrust / 50.0) - 0.45  # Normalize by max thrust
+                                desired_vz = thrust_deviation * 10.0  # Scale to velocity
                                 
-                                # ADDITIONALLY: Apply external force directly to body for thrust
-                                # This compensates for the fact that rotor joints don't physically generate lift
-                                # Use cached RigidPrim for efficient force application
-                                if world_drone_rigid_prim is not None:
-                                    try:
-                                        from pxr import Gf
-                                        
-                                        # Get current orientation to convert body-frame thrust to world-frame
-                                        # Thrust is in +Z body frame, need to rotate to world frame
-                                        quat_w, quat_x, quat_y, quat_z = current_quat  # [w, x, y, z]
-                                        
-                                        # Rotate body-frame Z thrust vector to world frame using quaternion
-                                        # Body thrust vector: (0, 0, total_thrust)
-                                        # World thrust = quat * (0, 0, thrust) * quat^-1
-                                        
-                                        # Quick quaternion rotation formula for (0, 0, z):
-                                        thrust_x = 2.0 * (quat_x * quat_z + quat_w * quat_y) * total_thrust
-                                        thrust_y = 2.0 * (quat_y * quat_z - quat_w * quat_x) * total_thrust
-                                        thrust_z = (1.0 - 2.0 * (quat_x**2 + quat_y**2)) * total_thrust
-                                        
-                                        # Apply force in world frame (will be active for this timestep)
-                                        # Uses cached RigidPrim - no need to recreate each frame
-                                        world_drone_rigid_prim.apply_force(
-                                            force=[thrust_x, thrust_y, thrust_z],
-                                            is_global=True  # World frame
-                                        )
-                                        
-                                        # Apply torques in body frame for attitude control
-                                        world_drone_rigid_prim.apply_torque(
-                                            torque=[roll_torque, pitch_torque, yaw_torque],
-                                            is_global=False  # Body frame
-                                        )
-                                        
-                                    except Exception as force_error:
-                                        # If force application fails, log but don't crash
-                                        # Joint efforts alone might still provide some control
-                                        if controller._debug_counter % 60 == 0:
-                                            print(f"[WARN] Force application failed: {force_error}")
+                                # Convert roll/pitch torques to XY velocities
+                                # This is a simplified model: torque → tilt → velocity
+                                desired_vx = -pitch_torque * 2.0  # Pitch forward → +X velocity
+                                desired_vy = roll_torque * 2.0    # Roll right → +Y velocity
+                                
+                                # Apply velocities directly (GPU-safe)
+                                # This is the ONLY reliable way to control the drone
+                                desired_vel = torch.tensor([
+                                    [desired_vx, desired_vy, desired_vz,  # Linear velocity
+                                     roll_torque * 0.5, pitch_torque * 0.5, yaw_torque * 0.5]  # Angular velocity
+                                ], dtype=torch.float32, device=world_drone_view._backend_utils.device)
+                                
+                                # DIRECT VELOCITY CONTROL - bypasses physics
+                                # This is necessary because force application doesn't work on articulations
+                                world_drone_view.set_velocities(desired_vel)
+                                
+                                # ALSO spin the rotors for visual effect
+                                max_motor_velocity = 2000.0  # rad/s
+                                motor_velocities = motor_cmds * max_motor_velocity
+                                velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
+                                world_drone_view.set_joint_velocity_targets(velocity_targets)
+                                
+                                # Debug output
+                                if controller._debug_counter % 60 == 0:
+                                    print(f"[VELOCITY] Pos: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
+                                          f"Vel: ({desired_vx:.2f}, {desired_vy:.2f}, {desired_vz:.2f}), "
+                                          f"Mode: {controller.mode.value}")
                                 
                                 # Debug: Print motor commands occasionally
                                 if hasattr(controller, '_debug_counter'):
@@ -1131,30 +1121,26 @@ def run_sim():
                                 else:
                                     controller._debug_counter = 0
                                 
-                                if controller._debug_counter % 60 == 0:  # Every ~1 second at 60Hz
-                                    print(f"[THRUST] Pos: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
-                                          f"Thrust: {total_thrust:.2f}N, Torque: ({roll_torque:.3f}, {pitch_torque:.3f}, {yaw_torque:.3f})")
+                                # Debug already printed above in VELOCITY section
                             else:
-                                # Not armed: zero motors and forces
-                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_efforts(zero_efforts)
-                                world_drone_view.set_joint_velocity_targets(zero_efforts)
+                                # Not armed: zero all velocities and motor spin
+                                zero_vel = torch.zeros((1, 6), dtype=torch.float32, device=world_drone_view._backend_utils.device)
+                                world_drone_view.set_velocities(zero_vel)
                                 
-                                # Zero external forces (no thrust when disarmed)
-                                # No need to explicitly zero forces - not applying them is enough
-                                # Forces from apply_force() only last one timestep anyway
+                                zero_motor = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_velocity_targets(zero_motor)
                         
                     except Exception as e:
                         print(f"[ERROR] Drone control failed: {e}")
                         import traceback
                         traceback.print_exc()
-                        # Emergency: zero motors AND forces to prevent unsafe behavior
+                        # Emergency: zero all velocities to prevent unsafe behavior
                         try:
                             if world_drone_view is not None:
-                                zero_efforts = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_efforts(zero_efforts)
-                                world_drone_view.set_joint_velocity_targets(zero_efforts)
-                                # Forces auto-expire after one timestep, no need to explicitly zero
+                                zero_vel = torch.zeros((1, 6), dtype=torch.float32)
+                                world_drone_view.set_velocities(zero_vel)
+                                zero_motor = torch.zeros((1, 4), dtype=torch.float32)
+                                world_drone_view.set_joint_velocity_targets(zero_motor)
                         except:
                             pass  # Best effort
             
