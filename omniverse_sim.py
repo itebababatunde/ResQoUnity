@@ -1094,10 +1094,13 @@ def run_sim():
                                 
                                 # Apply velocities directly (GPU-safe)
                                 # This is the ONLY reliable way to control the drone
+                                # Get device from existing tensor (positions is already on GPU)
+                                device = positions.device if hasattr(positions, 'device') else 'cuda:0'
+                                
                                 desired_vel = torch.tensor([
                                     [desired_vx, desired_vy, desired_vz,  # Linear velocity
                                      roll_torque * 0.5, pitch_torque * 0.5, yaw_torque * 0.5]  # Angular velocity
-                                ], dtype=torch.float32, device=world_drone_view._backend_utils.device)
+                                ], dtype=torch.float32, device=device)
                                 
                                 # DIRECT VELOCITY CONTROL - bypasses physics
                                 # This is necessary because force application doesn't work on articulations
@@ -1124,7 +1127,8 @@ def run_sim():
                                 # Debug already printed above in VELOCITY section
                             else:
                                 # Not armed: zero all velocities and motor spin
-                                zero_vel = torch.zeros((1, 6), dtype=torch.float32, device=world_drone_view._backend_utils.device)
+                                device = positions.device if hasattr(positions, 'device') else 'cuda:0'
+                                zero_vel = torch.zeros((1, 6), dtype=torch.float32, device=device)
                                 world_drone_view.set_velocities(zero_vel)
                                 
                                 zero_motor = torch.zeros((1, 4), dtype=torch.float32)
