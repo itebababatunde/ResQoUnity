@@ -469,6 +469,7 @@ def world_drone_arm_cb(request, response):
     from drone_controller import DroneState
     with custom_rl_env.world_drone_lock:
         controller = custom_rl_env.world_drone_controller
+        logger = custom_rl_env.world_drone_logger if hasattr(custom_rl_env, 'world_drone_logger') else None
         
         if not controller:
             response.success = False
@@ -477,6 +478,10 @@ def world_drone_arm_cb(request, response):
         
         controller.armed = request.data
         controller.set_mode(DroneState.IDLE if request.data else DroneState.DISARMED)
+        
+        # Log arm/disarm event
+        if logger:
+            logger.log_arm_event(request.data)
         
         response.success = True
         response.message = f"Drone {'armed' if request.data else 'disarmed'}"
@@ -716,9 +721,11 @@ def run_sim():
                 print("[ERROR] Failed to create drone prim")
                 world_drone_path = None
             
-            # Initialize drone controller (independent of physics view)
+                # Initialize drone controller (independent of physics view)
             if world_drone_path:
                 from drone_controller import DroneController
+                from drone_debug_logger import DroneDebugLogger
+                
                 custom_rl_env.world_drone_controller = DroneController(
                     robot_id="drone",
                     kp_pos=0.3,
@@ -740,7 +747,11 @@ def run_sim():
                     hover_thrust=0.45
                 )
                 custom_rl_env.world_drone_controller.armed = False
+                
+                # Initialize debug logger
+                custom_rl_env.world_drone_logger = DroneDebugLogger("world_drone")
                 print("[INFO] Drone controller initialized in DISARMED mode")
+                print("[INFO] Debug logger enabled - verbose output active")
                 
                 # Add bottom-facing camera to drone
                 try:
@@ -910,10 +921,14 @@ def run_sim():
                         # Update controller with actual drone position
                         with custom_rl_env.world_drone_lock:
                             controller = custom_rl_env.world_drone_controller
+                            logger = custom_rl_env.world_drone_logger
                             controller.current_position = initial_pos
                             controller.current_orientation = initial_quat
                             controller.current_euler = controller._quat_to_euler(initial_quat)
                             controller.current_velocity = initial_vel
+                            
+                            # Log initial state
+                            logger.log_initialization(initial_pos, initial_vel, controller.mode.value)
                         
                         world_drone_initialized = True
                         print(f"[INFO] ArticulationView ready - found {world_drone_view.count} drone(s)")
@@ -998,6 +1013,7 @@ def run_sim():
                         # THREAD-SAFE: Lock while reading controller state and commands
                         with custom_rl_env.world_drone_lock:
                             controller = custom_rl_env.world_drone_controller
+                            logger = custom_rl_env.world_drone_logger
                             
                             # ALWAYS update controller state (even when disarmed)
                             # This ensures position is initialized before first takeoff
@@ -1007,6 +1023,8 @@ def run_sim():
                             controller.current_velocity = current_vel
                             
                             if controller.armed:
+                                # Calculate position error for logging
+                                pos_error = controller.target_position - current_pos
                                 # Update controller PID loops
                                 controller.update(dt, current_pos, current_vel)
                                 
@@ -1067,44 +1085,90 @@ def run_sim():
                                 pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
                                 yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
                                 
-                                # CRITICAL FIX: Use velocity-based control as fallback
-                                # ArticulatedView doesn't support external forces well
-                                # Instead, directly set velocities to achieve desired motion
-                                
-                                # Calculate desired velocities from position error (PID already computed)
+                                # CRITICAL FIX: Use velocity-based control
+                                # Calculate desired velocities directly from PID controllers
                                 # This bypasses the broken force application
                                 
-                                # Get position error
-                                pos_error = controller.target_position - current_pos
+                                # Compute desired velocities based on flight mode
+                                desired_vx = 0.0
+                                desired_vy = 0.0
+                                desired_vz = 0.0
+                                desired_yaw_rate = 0.0
                                 
-                                # Use PID-computed velocities (already calculated in compute_motor_command)
-                                # Scale motor thrust to equivalent velocity change
-                                velocity_scale = 0.5  # m/s per motor command unit
+                                dt = 1.0 / 60.0  # 60 Hz
                                 
-                                # Convert thrust to upward velocity
-                                # Hover thrust (0.45) should give 0 velocity
-                                # Higher thrust should give upward velocity
-                                thrust_deviation = (total_thrust / 50.0) - 0.45  # Normalize by max thrust
-                                desired_vz = thrust_deviation * 10.0  # Scale to velocity
+                                if controller.mode.value == 'POSITION' or controller.mode.value == 'LOITER':
+                                    # Position control: use PID to compute velocities from position error
+                                    error_x = controller.target_position[0] - current_pos[0]
+                                    error_y = controller.target_position[1] - current_pos[1]
+                                    error_z = controller.target_position[2] - current_pos[2]
+                                    
+                                    desired_vx = controller.pid_x.update(error_x, dt)
+                                    desired_vy = controller.pid_y.update(error_y, dt)
+                                    desired_vz = controller.pid_z.update(error_z, dt)
                                 
-                                # Convert roll/pitch torques to XY velocities
-                                # This is a simplified model: torque → tilt → velocity
-                                desired_vx = -pitch_torque * 2.0  # Pitch forward → +X velocity
-                                desired_vy = roll_torque * 2.0    # Roll right → +Y velocity
+                                elif controller.mode.value == 'ALTITUDE_HOLD':
+                                    # Altitude control only
+                                    error_z = controller.target_altitude - current_pos[2]
+                                    desired_vz = controller.pid_z.update(error_z, dt)
+                                    # XY from external commands (handled elsewhere)
+                                
+                                elif controller.mode.value == 'LANDING':
+                                    desired_vz = controller.landing_velocity
+                                
+                                elif controller.mode.value == 'VELOCITY':
+                                    # Use commanded velocities from cmd_vel
+                                    with custom_rl_env.world_drone_lock:
+                                        cmd_vel = custom_rl_env.world_drone_command
+                                        desired_vx = cmd_vel[0]
+                                        desired_vy = cmd_vel[1]
+                                        desired_yaw_rate = cmd_vel[2]
+                                        desired_vz = custom_rl_env.world_drone_altitude
                                 
                                 # Apply velocities directly (GPU-safe)
                                 # This is the ONLY reliable way to control the drone
                                 # Get device from existing tensor (positions is already on GPU)
                                 device = positions.device if hasattr(positions, 'device') else 'cuda:0'
                                 
+                                # Clamp velocities to safe limits
+                                desired_vx = np.clip(desired_vx, -controller.max_vel, controller.max_vel)
+                                desired_vy = np.clip(desired_vy, -controller.max_vel, controller.max_vel)
+                                desired_vz = np.clip(desired_vz, -controller.max_climb_rate, controller.max_climb_rate)
+                                desired_yaw_rate = np.clip(desired_yaw_rate, -controller.max_yaw_rate, controller.max_yaw_rate)
+                                
                                 desired_vel = torch.tensor([
                                     [desired_vx, desired_vy, desired_vz,  # Linear velocity
-                                     roll_torque * 0.5, pitch_torque * 0.5, yaw_torque * 0.5]  # Angular velocity
+                                     0.0, 0.0, desired_yaw_rate]  # Angular velocity (roll/pitch = 0, yaw from command)
                                 ], dtype=torch.float32, device=device)
                                 
                                 # DIRECT VELOCITY CONTROL - bypasses physics
                                 # This is necessary because force application doesn't work on articulations
-                                world_drone_view.set_velocities(desired_vel)
+                                # IMPORTANT: Only set ROOT velocities, not joint velocities (prevents breaking apart)
+                                # ArticulationView.set_velocities() expects (N, 6+num_joints) but we only want root
+                                # So we need to preserve current joint velocities
+                                current_vels_before = world_drone_view.get_velocities().clone()
+                                current_vels = world_drone_view.get_velocities()
+                                # Overwrite only root velocities (first 6 elements), keep joint velocities
+                                current_vels[0, :3] = desired_vel[0, :3]  # Linear velocity
+                                current_vels[0, 3:6] = desired_vel[0, 3:6]  # Angular velocity
+                                # Joint velocities (6 onward) remain unchanged
+                                world_drone_view.set_velocities(current_vels)
+                                
+                                # LOG: Verify velocity was applied
+                                vels_after = world_drone_view.get_velocities()
+                                applied_vel = vels_after[0, :3].cpu().numpy()
+                                
+                                # Detailed frame logging
+                                logger.log_frame(
+                                    current_pos=current_pos,
+                                    current_vel=current_vel,
+                                    target_pos=controller.target_position,
+                                    mode=controller.mode.value,
+                                    desired_vel=np.array([desired_vx, desired_vy, desired_vz]),
+                                    error=pos_error,
+                                    armed=controller.armed,
+                                    actual_vel_applied=applied_vel
+                                )
                                 
                                 # ALSO spin the rotors for visual effect
                                 max_motor_velocity = 2000.0  # rad/s
@@ -1112,24 +1176,14 @@ def run_sim():
                                 velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
                                 world_drone_view.set_joint_velocity_targets(velocity_targets)
                                 
-                                # Debug output
-                                if controller._debug_counter % 60 == 0:
-                                    print(f"[VELOCITY] Pos: ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}), "
-                                          f"Vel: ({desired_vx:.2f}, {desired_vy:.2f}, {desired_vz:.2f}), "
-                                          f"Mode: {controller.mode.value}")
-                                
-                                # Debug: Print motor commands occasionally
-                                if hasattr(controller, '_debug_counter'):
-                                    controller._debug_counter += 1
-                                else:
-                                    controller._debug_counter = 0
-                                
-                                # Debug already printed above in VELOCITY section
+                                # Old debug output replaced by comprehensive logger
                             else:
-                                # Not armed: zero all velocities and motor spin
-                                device = positions.device if hasattr(positions, 'device') else 'cuda:0'
-                                zero_vel = torch.zeros((1, 6), dtype=torch.float32, device=device)
-                                world_drone_view.set_velocities(zero_vel)
+                                # Not armed: simulate gentle descent (gravity substitute since we bypass physics)
+                                current_vels = world_drone_view.get_velocities()
+                                current_vels[0, :2] = 0.0  # Zero XY velocity
+                                current_vels[0, 2] = -0.3  # Slow descent (simulate gravity)
+                                current_vels[0, 3:6] = 0.0  # Zero angular velocity
+                                world_drone_view.set_velocities(current_vels)
                                 
                                 zero_motor = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_motor)
@@ -1141,8 +1195,9 @@ def run_sim():
                         # Emergency: zero all velocities to prevent unsafe behavior
                         try:
                             if world_drone_view is not None:
-                                zero_vel = torch.zeros((1, 6), dtype=torch.float32)
-                                world_drone_view.set_velocities(zero_vel)
+                                current_vels = world_drone_view.get_velocities()
+                                current_vels[0, :6] = 0.0  # Zero all root velocities
+                                world_drone_view.set_velocities(current_vels)
                                 zero_motor = torch.zeros((1, 4), dtype=torch.float32)
                                 world_drone_view.set_joint_velocity_targets(zero_motor)
                         except:
