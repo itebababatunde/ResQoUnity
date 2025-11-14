@@ -111,6 +111,9 @@ else
 fi
 export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
 export ISAACSIM_ASSET_ROOT="${ISAACSIM_PATH}/assets"
+export ISAAC_ASSET_ROOT_PATH="${ISAACSIM_PATH}/assets"
+# Disable Nucleus check (for offline operation)
+export OMNI_KIT_ACCEPT_EULA=YES
 echo -e "  ${GREEN}✓${NC} Isaac Sim found at: $ISAACSIM_PATH"
 echo -e "  ${GREEN}✓${NC} Assets root set to: $ISAACSIM_ASSET_ROOT"
 
