@@ -1373,8 +1373,12 @@ def run_sim():
                     joint_names = world_drone_view.dof_names  # Get joint names from view
                     base_node.publish_drone_joints(joint_names, joint_positions[0])
                 except Exception as e:
-                    # Silently skip publishing if drone state unavailable
-                    pass
+                    # Log publishing errors for debugging
+                    if not hasattr(base_node, '_publish_error_logged'):
+                        print(f"[ERROR] Failed to publish world drone data: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        base_node._publish_error_logged = True  # Only log once to avoid spam
     
     # Cleanup on exit
     print("[INFO] Shutting down simulation...")
