@@ -171,7 +171,16 @@ if ! ${ISAACSIM_PATH}/python.sh -c "import torch; torch.cuda.is_available()" 2>/
     echo -e "  ${YELLOW}⚠${NC} PyTorch may need attention, but continuing..."
 fi
 
-echo -e "${GREEN}[7/8]${NC} Configuring IsaacLab Python paths..."
+echo -e "${GREEN}[7/8]${NC} Configuring IsaacLab for offline operation..."
+# Patch IsaacLab to allow offline operation (run once)
+if ! grep -q "Patched by ResQoUnity" "${ISAACLAB_PATH}/source/extensions/omni.isaac.orbit/omni/isaac/orbit/utils/assets.py" 2>/dev/null; then
+    echo "  Patching IsaacLab for offline operation..."
+    ${ISAACSIM_PATH}/python.sh ~/ResQoUnity/fix_isaaclab_nucleus.py
+    echo -e "  ${GREEN}✓${NC} IsaacLab patched for offline operation"
+else
+    echo -e "  ${GREEN}✓${NC} IsaacLab already patched for offline operation"
+fi
+
 # Add IsaacLab extensions to PYTHONPATH (no pip install needed)
 export PYTHONPATH="${ISAACLAB_PATH}/source/extensions/omni.isaac.orbit:${PYTHONPATH}"
 export PYTHONPATH="${ISAACLAB_PATH}/source/extensions/omni.isaac.orbit_tasks:${PYTHONPATH}"
