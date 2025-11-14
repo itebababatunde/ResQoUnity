@@ -1,247 +1,115 @@
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1384] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   1.839)
-  Velocity   : ( -0.000,   0.000,  -0.075)
-  Target Pos : ( -0.000,  -0.000,   1.990)
-  Error      : ( -0.000,   0.000,   0.151) = 0.151m
-  PID Output : ( -0.000,   0.000,   0.121) m/s
-  Applied Vel: ( -0.000,   0.000,   0.121) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1402] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   1.838)
-  Velocity   : ( -0.000,   0.000,  -0.075)
-  Target Pos : ( -0.000,  -0.000,   1.990)
-  Error      : ( -0.000,   0.000,   0.152) = 0.152m
-  PID Output : ( -0.000,   0.000,   0.121) m/s
-  Applied Vel: ( -0.000,   0.000,   0.121) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-[Drone drone] Target position: (2.00, 1.00, 3.00)
-[Drone drone] Mode: LOITER → POSITION
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1420] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=POSITION
-  Position   : (  0.128,   0.064,   1.987)
-  Velocity   : (  0.565,   0.282,   0.604)
-  Target Pos : (  2.000,   1.000,   3.000)
-  Error      : (  1.872,   0.936,   1.013) = 2.325m
-  PID Output : (  0.562,   0.281,   0.800) m/s
-  Applied Vel: (  0.562,   0.281,   0.800) m/s
-  ✅ Velocity command APPLIED correctly
-  ⚠️  WARNING: Large altitude error (1.01m)
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1439] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=POSITION
-  Position   : (  0.330,   0.165,   2.214)
-  Velocity   : (  0.504,   0.252,   0.441)
-  Target Pos : (  2.000,   1.000,   3.000)
-  Error      : (  1.670,   0.835,   0.786) = 2.026m
-  PID Output : (  0.501,   0.250,   0.629) m/s
-  Applied Vel: (  0.501,   0.250,   0.629) m/s
-  ✅ Velocity command APPLIED correctly
-  ⚠️  WARNING: Large altitude error (0.79m)
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1459] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=POSITION
-  Position   : (  0.520,   0.260,   2.388)
-  Velocity   : (  0.447,   0.223,   0.299)
-  Target Pos : (  2.000,   1.000,   3.000)
-  Error      : (  1.480,   0.740,   0.612) = 1.764m
-  PID Output : (  0.444,   0.222,   0.489) m/s
-  Applied Vel: (  0.444,   0.222,   0.489) m/s
-  ✅ Velocity command APPLIED correctly
-  ⚠️  WARNING: Large altitude error (0.61m)
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1789] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.948)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   0.883) = 0.883m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1807] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.796)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.035) = 1.035m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1826] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.636)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.195) = 1.195m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1845] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.475)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.356) = 1.356m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1864] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.314)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.517) = 1.517m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1883] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   1.154)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.677) = 1.677m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1903] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.985)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   1.846) = 1.846m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1922] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.824)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   2.007) = 2.007m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1942] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.655)
-  Velocity   : (  0.000,   0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   2.176) = 2.176m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1962] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.486)
-  Velocity   : (  0.000,   0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   2.345) = 2.345m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 1982] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.317)
-  Velocity   : (  0.000,   0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   2.514) = 2.514m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 2002] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.579,   0.790,   0.148)
-  Velocity   : (  0.000,  -0.000,  -0.496)
-  Target Pos : (  1.579,   0.790,   2.831)
-  Error      : (  0.000,   0.000,   2.683) = 2.683m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Vel: (  0.000,   0.000,  -0.300) m/s
-  ✅ Velocity command APPLIED correctly
-────────────────────────────────────────────────────────────────────────────────
-
-[Drone drone] Mode: LANDING → DISARMED
-[Drone drone] Landed and disarmed
-
+2025-11-14 20:13:15 [32,003ms] [Warning] [omni.client.python] Detected a blocking function. This will cause hitches or hangs in the UI. Please switch to the async version:
+  File "/home/kishi/ResQoUnity/main.py", line 25, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/ResQoUnity/omniverse_sim.py", line 67, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit_tasks/omni/isaac/orbit_tasks/__init__.py", line 25, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit_tasks/omni/isaac/orbit_tasks/utils/__init__.py", line 9, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit_tasks/omni/isaac/orbit_tasks/utils/parse_cfg.py", line 16, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/envs/__init__.py", line 24, in <module>
+  File "<frozen importlib._bootstrap>", line 1078, in _handle_fromlist
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/envs/mdp/__init__.py", line 18, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/envs/mdp/actions/__init__.py", line 8, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/envs/mdp/actions/actions_cfg.py", line 9, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/managers/__init__.py", line 13, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/managers/action_manager.py", line 16, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/assets/__init__.py", line 41, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/assets/articulation/__init__.py", line 8, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/assets/articulation/articulation.py", line 22, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/sim/__init__.py", line 29, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/sim/converters/__init__.py", line 19, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/sim/converters/asset_converter_base.py", line 15, in <module>
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/home/kishi/IsaacLab_v0.3.1/source/extensions/omni.isaac.orbit/omni/isaac/orbit/utils/assets.py", line 27, in <module>
+  File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core/omni/isaac/core/utils/nucleus.py", line 572, in get_assets_root_path
+  File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core/omni/isaac/core/utils/nucleus.py", line 192, in check_server
+  File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/kit/extscore/omni.client/omni/client/__init__.py", line 158, in stat
