@@ -110,7 +110,9 @@ else
     fi
 fi
 export ISAACSIM_PYTHON_EXE="${ISAACSIM_PATH}/python.sh"
+export ISAACSIM_ASSET_ROOT="${ISAACSIM_PATH}/assets"
 echo -e "  ${GREEN}✓${NC} Isaac Sim found at: $ISAACSIM_PATH"
+echo -e "  ${GREEN}✓${NC} Assets root set to: $ISAACSIM_ASSET_ROOT"
 
 echo -e "${GREEN}[6/8]${NC} Setting up IsaacLab and dependencies..."
 

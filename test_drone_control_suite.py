@@ -22,15 +22,15 @@ class DroneControlTester(Node):
         super().__init__('drone_control_tester')
         
         # Publishers
-        self.cmd_vel_pub = self.create_publisher(Twist, 'robot0/cmd_vel', 10)
-        self.cmd_pos_pub = self.create_publisher(PoseStamped, 'robot0/cmd_position', 10)
-        self.cmd_alt_pub = self.create_publisher(Float32, 'robot0/cmd_altitude', 10)
+        self.cmd_vel_pub = self.create_publisher(Twist, '/drone/cmd_vel', 10)
+        self.cmd_pos_pub = self.create_publisher(PoseStamped, '/drone/cmd_position', 10)
+        self.cmd_alt_pub = self.create_publisher(Float32, '/drone/cmd_altitude', 10)
         
         # Service clients
-        self.arm_client = self.create_client(SetBool, 'robot0/arm')
-        self.takeoff_client = self.create_client(Trigger, 'robot0/takeoff')
-        self.land_client = self.create_client(Trigger, 'robot0/land')
-        self.emergency_client = self.create_client(Trigger, 'robot0/emergency_stop')
+        self.arm_client = self.create_client(SetBool, '/drone/arm')
+        self.takeoff_client = self.create_client(Trigger, '/drone/takeoff')
+        self.land_client = self.create_client(Trigger, '/drone/land')
+        self.emergency_client = self.create_client(Trigger, '/drone/emergency_stop')
         
         self.get_logger().info('Drone Control Tester initialized')
     
