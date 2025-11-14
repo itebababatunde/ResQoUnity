@@ -557,17 +557,28 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
     # Add world-level drone control (separate from robot0...robotN)
     if enable_world_drone:
         print("[INFO] Adding /drone namespace ROS2 interface")
-        # Topics
-        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
-        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
-        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
-        
-        # Services
-        node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
-        node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
-        node_test.create_service(Trigger, '/drone/emergency_stop', world_drone_emergency_stop_cb)
-        node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
-        print("[INFO] Drone control interface ready on /drone namespace")
+        try:
+            # Topics
+            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+            print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
+            
+            # Services
+            arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
+            takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
+            land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
+            estop_srv = node_test.create_service(Trigger, '/drone/emergency_stop', world_drone_emergency_stop_cb)
+            print(f"[INFO] Drone services created:")
+            print(f"  - /drone/arm: {arm_srv is not None}")
+            print(f"  - /drone/takeoff: {takeoff_srv is not None}")
+            print(f"  - /drone/land: {land_srv is not None}")
+            print(f"  - /drone/emergency_stop: {estop_srv is not None}")
+            print("[INFO] Drone control interface ready on /drone namespace")
+        except Exception as e:
+            print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
+            import traceback
+            traceback.print_exc()
     
     # Spin in a separate thread
     thread = threading.Thread(target=rclpy.spin, args=(node_test,), daemon=True)
@@ -956,25 +967,13 @@ def run_sim():
                         )
                         world_drone_view.initialize()
                         
-                        # Calculate drone mass from physics properties
-                        # ArticulationView stores link masses, we sum them for total mass
-                        try:
-                            link_masses = world_drone_view.get_masses()  # Returns (num_drones, num_links)
-                            if link_masses is not None:
-                                total_mass = float(link_masses[0].sum().cpu())
-                                custom_rl_env.world_drone_mass = total_mass
-                                print(f"[INFO] Drone total mass calculated: {total_mass:.4f} kg")
-                                print(f"[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)")
-                                print(f"[INFO] Forces → Acceleration → Velocity integration (F=ma)")
-                            else:
-                                # Fallback: Crazyflie 2.x is about 27g, scaled 5x = ~0.675kg (volume scales cubically, but physics scaled linearly)
-                                # Use a reasonable estimate: 0.5 kg for 5x scaled Crazyflie
-                                custom_rl_env.world_drone_mass = 0.5
-                                print(f"[WARN] Could not get mass from USD, using estimate: {custom_rl_env.world_drone_mass} kg")
-                                print(f"[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)")
-                        except Exception as e:
-                            print(f"[WARN] Failed to calculate mass: {e}, using fallback: 0.5 kg")
-                            custom_rl_env.world_drone_mass = 0.5
+                        # Use fixed mass estimate (get_masses() not available in all Isaac Sim versions)
+                        # Crazyflie 2.x is about 27g, scaled 5x = ~0.675kg
+                        # Use conservative estimate: 0.5 kg
+                        custom_rl_env.world_drone_mass = 0.5
+                        print(f"[INFO] Drone mass set to: {custom_rl_env.world_drone_mass} kg (Crazyflie scaled estimate)")
+                        print(f"[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)")
+                        print(f"[INFO] Forces → Acceleration → Velocity integration (F=ma)")
                         
                         # CRITICAL: Initialize controller position immediately
                         positions, orientations = world_drone_view.get_world_poses()
