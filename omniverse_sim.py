@@ -1065,11 +1065,22 @@ def run_sim():
                         # Get current state using ArticulationView API (GPU-safe)
                         positions, orientations = world_drone_view.get_world_poses()  # Returns (N, 3), (N, 4)
                         velocities = world_drone_view.get_velocities()  # Returns (N, 6) [linear, angular]
+                        joint_positions = world_drone_view.get_joint_positions()  # For publishing
                         
                         # Convert to numpy (index 0 since we have 1 drone)
                         current_pos = positions[0].cpu().numpy()  # [x, y, z]
                         current_quat = orientations[0].cpu().numpy()  # [w, x, y, z]
                         current_vel = velocities[0, :3].cpu().numpy()  # First 3 are linear velocity
+                        
+                        # Cache state for publishing (GPU PhysX allows reads here, not after step)
+                        custom_rl_env.world_drone_state_cache = {
+                            'position': positions[0],  # Keep as tensor for ROS2
+                            'orientation': orientations[0],  # Keep as tensor for ROS2
+                            'linear_velocity': velocities[0, :3],  # Linear velocity
+                            'angular_velocity': velocities[0, 3:],  # Angular velocity
+                            'joint_names': world_drone_view.dof_names,
+                            'joint_positions': joint_positions[0]
+                        }
                         
                         # THREAD-SAFE: Lock while reading controller state and commands
                         with custom_rl_env.world_drone_lock:
@@ -1349,36 +1360,37 @@ def run_sim():
             pub_robo_data_ros2(args_cli.robot, env_cfg.scene.num_envs, base_node, env, annotator_lst, start_time)
             
             # Publish world drone data (if enabled and initialized)
-            if world_drone_initialized and world_drone_view is not None and enable_world_drone:
-                try:
-                    # Get state using ArticulationView API
-                    positions, orientations = world_drone_view.get_world_poses()
-                    velocities = world_drone_view.get_velocities()
-                    joint_positions = world_drone_view.get_joint_positions()
-                    
-                    # Publish odometry (position + orientation)
-                    base_node.publish_drone_odom(
-                        positions[0],  # xyz position
-                        orientations[0]  # wxyz quaternion
-                    )
-                    
-                    # Publish IMU (orientation + velocities)
-                    base_node.publish_drone_imu(
-                        orientations[0],  # wxyz quaternion
-                        velocities[0, :3],  # linear velocity
-                        velocities[0, 3:]  # angular velocity
-                    )
-                    
-                    # Publish joint states
-                    joint_names = world_drone_view.dof_names  # Get joint names from view
-                    base_node.publish_drone_joints(joint_names, joint_positions[0])
-                except Exception as e:
-                    # Log publishing errors for debugging
-                    if not hasattr(base_node, '_publish_error_logged'):
-                        print(f"[ERROR] Failed to publish world drone data: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        base_node._publish_error_logged = True  # Only log once to avoid spam
+            # Use cached state from control loop to avoid GPU PhysX restrictions
+            if world_drone_initialized and enable_world_drone:
+                if hasattr(custom_rl_env, 'world_drone_state_cache'):
+                    try:
+                        cache = custom_rl_env.world_drone_state_cache
+                        
+                        # Publish odometry (position + orientation)
+                        base_node.publish_drone_odom(
+                            cache['position'],  # xyz position
+                            cache['orientation']  # wxyz quaternion
+                        )
+                        
+                        # Publish IMU (orientation + velocities)
+                        base_node.publish_drone_imu(
+                            cache['orientation'],  # wxyz quaternion
+                            cache['linear_velocity'],  # linear velocity
+                            cache['angular_velocity']  # angular velocity
+                        )
+                        
+                        # Publish joint states
+                        base_node.publish_drone_joints(
+                            cache['joint_names'],
+                            cache['joint_positions']
+                        )
+                    except Exception as e:
+                        # Log publishing errors for debugging
+                        if not hasattr(base_node, '_publish_error_logged'):
+                            print(f"[ERROR] Failed to publish world drone data: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            base_node._publish_error_logged = True  # Only log once to avoid spam
     
     # Cleanup on exit
     print("[INFO] Shutting down simulation...")
