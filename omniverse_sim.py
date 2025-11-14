@@ -1073,15 +1073,7 @@ def run_sim():
                         current_quat = orientations[0].cpu().numpy()  # [w, x, y, z]
                         current_vel = velocities[0, :3].cpu().numpy()  # First 3 are linear velocity
                         
-                        # Cache state for publishing (GPU PhysX allows reads here, not after step)
-                        custom_rl_env.world_drone_state_cache = {
-                            'position': positions[0],  # Keep as tensor for ROS2
-                            'orientation': orientations[0],  # Keep as tensor for ROS2
-                            'linear_velocity': velocities[0, :3],  # Linear velocity
-                            'angular_velocity': velocities[0, 3:],  # Angular velocity
-                            'joint_names': world_drone_view.dof_names,
-                            'joint_positions': joint_positions[0]
-                        }
+                        # NOTE: Cache is updated AFTER control loop (see below) so ROS2 gets current position
                         
                         # THREAD-SAFE: Lock while reading controller state and commands
                         with custom_rl_env.world_drone_lock:
@@ -1354,6 +1346,24 @@ def run_sim():
                                 world_drone_view.set_joint_velocity_targets(zero_motor)
                         except:
                             pass  # Best effort
+                
+                # Update cache AFTER control is applied (so ROS2 gets current position)
+                if world_drone_initialized and world_drone_view is not None:
+                    try:
+                        positions, orientations = world_drone_view.get_world_poses()
+                        velocities = world_drone_view.get_velocities()
+                        joint_positions = world_drone_view.get_joint_positions()
+                        
+                        custom_rl_env.world_drone_state_cache = {
+                            'position': positions[0],
+                            'orientation': orientations[0],
+                            'linear_velocity': velocities[0, :3],
+                            'angular_velocity': velocities[0, 3:],
+                            'joint_names': world_drone_view.dof_names,
+                            'joint_positions': joint_positions[0]
+                        }
+                    except:
+                        pass  # Best effort
             
             # Process observations
             if not isinstance(obs, dict):
