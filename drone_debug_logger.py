@@ -85,7 +85,7 @@ class DroneDebugLogger:
                 if vel_match:
                     print(f"  ✅ Velocity matches PID output")
                 else:
-                    print(f"  ℹ️  Velocity differs from PID (physics is active)")
+                    print(f"  ℹ️  Velocity differs from PID (hybrid physics integration active)")
             
             # Check if drone is moving
             speed = np.linalg.norm(current_vel)

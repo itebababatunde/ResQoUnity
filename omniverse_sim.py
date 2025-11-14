@@ -964,11 +964,14 @@ def run_sim():
                                 total_mass = float(link_masses[0].sum().cpu())
                                 custom_rl_env.world_drone_mass = total_mass
                                 print(f"[INFO] Drone total mass calculated: {total_mass:.4f} kg")
+                                print(f"[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)")
+                                print(f"[INFO] Forces → Acceleration → Velocity integration (F=ma)")
                             else:
                                 # Fallback: Crazyflie 2.x is about 27g, scaled 5x = ~0.675kg (volume scales cubically, but physics scaled linearly)
                                 # Use a reasonable estimate: 0.5 kg for 5x scaled Crazyflie
                                 custom_rl_env.world_drone_mass = 0.5
                                 print(f"[WARN] Could not get mass from USD, using estimate: {custom_rl_env.world_drone_mass} kg")
+                                print(f"[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)")
                         except Exception as e:
                             print(f"[WARN] Failed to calculate mass: {e}, using fallback: 0.5 kg")
                             custom_rl_env.world_drone_mass = 0.5
@@ -1233,49 +1236,55 @@ def run_sim():
                                     device=device
                                 )
                                 
-                                # Apply forces and torques using PhysX
-                                # We need to apply external forces to the root body
-                                # ArticulationView doesn't have direct apply_forces, so we use set_applied_forces
+                                # HYBRID PHYSICS-VELOCITY CONTROL
+                                # GPU PhysX doesn't allow direct force application via USD attributes
+                                # So we use physics to CALCULATE what the velocity should be, then apply it
+                                # This gives us physics-based behavior within GPU constraints
+                                
                                 try:
-                                    # Get physics handle to apply external forces
-                                    from omni.isaac.core.utils.prims import get_prim_at_path
-                                    from pxr import PhysxSchema
-                                    import omni.physx
+                                    # Convert forces to acceleration: a = F/m
+                                    acceleration = forces / drone_mass  # (3,) array in m/s²
                                     
-                                    # Get the root prim (base_link)
-                                    root_prim_path = world_drone_path + "/base_link"
-                                    root_prim = get_prim_at_path(root_prim_path)
+                                    # Get current velocity from physics engine
+                                    current_vels = world_drone_view.get_velocities()  # (1, 6) tensor [vx, vy, vz, wx, wy, wz]
+                                    current_linear_vel = current_vels[0, :3].cpu().numpy()  # (3,) array
+                                    current_angular_vel = current_vels[0, 3:6].cpu().numpy()  # (3,) array
                                     
-                                    if root_prim and root_prim.IsValid():
-                                        # Apply force using PhysX API (world frame)
-                                        # Convert torch tensor to list for API
-                                        force_list = forces.tolist()
-                                        torque_list = [0.0, 0.0, yaw_torque]
-                                        
-                                        # Use PhysX apply_force utility (works in GPU mode for reading, but we apply per-frame)
-                                        # We'll apply it as a continuous force by setting it every frame
-                                        physx_rb_api = PhysxSchema.PhysxRigidBodyAPI(root_prim)
-                                        if physx_rb_api:
-                                            # Set force and torque attributes (will be applied by PhysX)
-                                            from pxr import Gf
-                                            physx_rb_api.GetForceAttr().Set(Gf.Vec3f(force_list[0], force_list[1], force_list[2]))
-                                            physx_rb_api.GetTorqueAttr().Set(Gf.Vec3f(torque_list[0], torque_list[1], torque_list[2]))
+                                    # Integrate: v_new = v_current + a * dt
+                                    dt = 1.0 / 60.0  # 60 Hz physics
+                                    new_linear_vel = current_linear_vel + acceleration * dt
                                     
-                                    applied_force = forces  # For logging
+                                    # Apply damping to prevent oscillations (simulate air resistance)
+                                    damping = 0.95
+                                    new_linear_vel = new_linear_vel * damping
                                     
-                                except Exception as force_error:
-                                    print(f"[WARN] Force application failed: {force_error}")
-                                    print("[WARN] Falling back to velocity control")
-                                    # Fallback: use velocity control
-                                    desired_vel = torch.tensor([
-                                        [desired_vx, desired_vy, desired_vz,
-                                         0.0, 0.0, desired_yaw_rate]
+                                    # Clamp velocities for safety
+                                    max_velocity = 5.0  # m/s
+                                    new_linear_vel = np.clip(new_linear_vel, -max_velocity, max_velocity)
+                                    
+                                    # Angular velocity for yaw control
+                                    # Simple proportional control for yaw angular velocity
+                                    yaw_accel = yaw_torque / (drone_mass * 0.1)  # Assume small moment of inertia
+                                    new_angular_vel = current_angular_vel.copy()
+                                    new_angular_vel[2] = current_angular_vel[2] + yaw_accel * dt
+                                    new_angular_vel[2] = np.clip(new_angular_vel[2], -2.0, 2.0)  # Max 2 rad/s yaw rate
+                                    
+                                    # Apply the calculated velocities
+                                    new_vels = torch.tensor([
+                                        [new_linear_vel[0], new_linear_vel[1], new_linear_vel[2],
+                                         new_angular_vel[0], new_angular_vel[1], new_angular_vel[2]]
                                     ], dtype=torch.float32, device=device)
-                                    current_vels = world_drone_view.get_velocities()
-                                    current_vels[0, :3] = desired_vel[0, :3]
-                                    current_vels[0, 3:6] = desired_vel[0, 3:6]
-                                    world_drone_view.set_velocities(current_vels)
-                                    applied_force = np.zeros(3)  # No force applied
+                                    
+                                    world_drone_view.set_velocities(new_vels)
+                                    
+                                    # For logging - track the force we calculated
+                                    applied_force = forces  
+                                    
+                                except Exception as physics_error:
+                                    print(f"[ERROR] Hybrid physics-velocity control failed: {physics_error}")
+                                    import traceback
+                                    traceback.print_exc()
+                                    applied_force = np.zeros(3)
                                 
                                 # For logging - get what actually happened
                                 vels_after = world_drone_view.get_velocities()
@@ -1302,20 +1311,13 @@ def run_sim():
                                 
                                 # Old debug output replaced by comprehensive logger
                             else:
-                                # Not armed: apply ZERO forces (let gravity naturally pull drone down)
+                                # Not armed: gradually reduce velocity (simulate gravity pulling down + ground friction)
                                 try:
-                                    from omni.isaac.core.utils.prims import get_prim_at_path
-                                    from pxr import PhysxSchema, Gf
-                                    
-                                    root_prim_path = world_drone_path + "/base_link"
-                                    root_prim = get_prim_at_path(root_prim_path)
-                                    
-                                    if root_prim and root_prim.IsValid():
-                                        physx_rb_api = PhysxSchema.PhysxRigidBodyAPI(root_prim)
-                                        if physx_rb_api:
-                                            # Zero all external forces and torques
-                                            physx_rb_api.GetForceAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
-                                            physx_rb_api.GetTorqueAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+                                    current_vels = world_drone_view.get_velocities()
+                                    # Apply strong damping when disarmed (drone settles quickly)
+                                    damped_vels = current_vels.clone()
+                                    damped_vels[0, :] *= 0.8  # 80% damping per frame
+                                    world_drone_view.set_velocities(damped_vels)
                                 except Exception:
                                     pass  # Best effort
                                 
