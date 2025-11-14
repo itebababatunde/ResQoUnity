@@ -1,4 +1,6 @@
-2025-11-14 20:13:15 [32,003ms] [Warning] [omni.client.python] Detected a blocking function. This will cause hitches or hangs in the UI. Please switch to the async version:
+ load system rclpy
+[11.792s] rclpy loaded
+2025-11-14 21:27:29 [31,962ms] [Warning] [omni.client.python] Detected a blocking function. This will cause hitches or hangs in the UI. Please switch to the async version:
   File "/home/kishi/ResQoUnity/main.py", line 25, in <module>
   File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
   File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
@@ -113,3 +115,4 @@
   File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core/omni/isaac/core/utils/nucleus.py", line 572, in get_assets_root_path
   File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core/omni/isaac/core/utils/nucleus.py", line 192, in check_server
   File "/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/kit/extscore/omni.client/omni/client/__init__.py", line 158, in stat
+
