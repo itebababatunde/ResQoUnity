@@ -1,0 +1,20 @@
+================================================================================
+                    HOW TO FIX THE INDENTATION ERRORS
+================================================================================
+
+The omniverse_sim.py file has broken indentation from manual edits.
+
+QUICKEST FIX:
+============
+
+Run this command to restore from a working backup:
+
+    cd ~/ResQoUnity
+    git stash
+    git reset --hard d63daae
+    
+Then I'll re-add the diagnostics cleanly.
+
+OR: Tell me to start over with a clean file and I'll add diagnostics properly.
+
+================================================================================
