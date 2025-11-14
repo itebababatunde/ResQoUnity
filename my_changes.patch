@@ -1,0 +1,126 @@
+diff --git a/omniverse_sim.py b/omniverse_sim.py
+index 83db05e..d135c22 100644
+--- a/omniverse_sim.py
++++ b/omniverse_sim.py
+@@ -558,13 +558,13 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
+     if enable_world_drone:
+         print("[INFO] Adding /drone namespace ROS2 interface")
+         try:
+-            # Topics
+-            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+-            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+-            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
++        # Topics
++        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
++        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
++        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+             print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
+-            
+-            # Services
++        
++        # Services
+             arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
+             takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
+             land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
+@@ -574,7 +574,7 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
+             print(f"  - /drone/takeoff: {takeoff_srv is not None}")
+             print(f"  - /drone/land: {land_srv is not None}")
+             print(f"  - /drone/emergency_stop: {estop_srv is not None}")
+-            print("[INFO] Drone control interface ready on /drone namespace")
++        print("[INFO] Drone control interface ready on /drone namespace")
+         except Exception as e:
+             print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
+             import traceback
+@@ -991,7 +991,7 @@ def run_sim():
+                             controller.current_orientation = initial_quat
+                             controller.current_euler = controller._quat_to_euler(initial_quat)
+                             controller.current_velocity = initial_vel
+-                            
++                        
+                             # Set target position to spawn position (for LOITER mode)
+                             controller.target_position = initial_pos.copy()
+                             print(f"[INFO] LOITER target set to spawn position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
+@@ -1259,6 +1259,26 @@ def run_sim():
+                                 # This gives us physics-based behavior within GPU constraints
+                                 
+                                 try:
++                                    # ========== DIAGNOSTIC FRAME COUNTER ==========
++                                    if not hasattr(custom_rl_env, '_diag_frame_count'):
++                                        custom_rl_env._diag_frame_count = 0
++                                    custom_rl_env._diag_frame_count += 1
++                                    
++                                    DIAG_INTERVAL = 60  # Log every 60 frames (1 second at 60Hz)
++                                    should_log = (custom_rl_env._diag_frame_count % DIAG_INTERVAL == 0)
++                                    
++                                    if should_log:
++                                        print(f"\n{'='*80}")
++                                        print(f"[DIAG FRAME {custom_rl_env._diag_frame_count}] CONTROL LOOP RUNNING")
++                                        print(f"{'='*80}")
++                                        print(f"  Mode:         {controller.mode.value}")
++                                        print(f"  Armed:        {controller.armed}")
++                                        print(f"  Current Pos:  [{current_pos[0]:+.3f}, {current_pos[1]:+.3f}, {current_pos[2]:+.3f}]")
++                                        print(f"  Target Pos:   [{controller.target_position[0]:+.3f}, {controller.target_position[1]:+.3f}, {controller.target_position[2]:+.3f}]")
++                                        print(f"  Position Err: [{(controller.target_position[0]-current_pos[0]):+.3f}, {(controller.target_position[1]-current_pos[1]):+.3f}, {(controller.target_position[2]-current_pos[2]):+.3f}]")
++                                        print(f"  Current Vel:  [{current_vel[0]:+.3f}, {current_vel[1]:+.3f}, {current_vel[2]:+.3f}]")
++                                    # ==============================================
++                                    
+                                     # Convert forces to acceleration: a = F/m
+                                     acceleration = forces / drone_mass  # (3,) array in m/s²
+                                     
+@@ -1321,12 +1341,12 @@ def run_sim():
+                                         if pos_changed:
+                                             delta = actual_pos - current_pos
+                                             print(f"    ✅ Position CHANGED by: [{delta[0]:+.6f}, {delta[1]:+.6f}, {delta[2]:+.6f}]")
+-                                        else:
++                                else:
+                                             print(f"    ❌ Position UNCHANGED (still at same coordinates)")
+-                                        
++                                
+                                         if vel_changed:
+                                             print(f"    ✅ Velocity CHANGED")
+-                                        else:
++                            else:
+                                             print(f"    ❌ Velocity UNCHANGED")
+                                         
+                                         if not pos_changed and not vel_changed:
+@@ -1412,28 +1432,28 @@ def run_sim():
+             # Use cached state from control loop to avoid GPU PhysX restrictions
+             if world_drone_initialized and enable_world_drone:
+                 if hasattr(custom_rl_env, 'world_drone_state_cache'):
+-                    try:
++                try:
+                         cache = custom_rl_env.world_drone_state_cache
+-                        
+-                        # Publish odometry (position + orientation)
+-                        base_node.publish_drone_odom(
++                    
++                    # Publish odometry (position + orientation)
++                    base_node.publish_drone_odom(
+                             cache['position'],  # xyz position
+                             cache['orientation']  # wxyz quaternion
+-                        )
+-                        
+-                        # Publish IMU (orientation + velocities)
+-                        base_node.publish_drone_imu(
++                    )
++                    
++                    # Publish IMU (orientation + velocities)
++                    base_node.publish_drone_imu(
+                             cache['orientation'],  # wxyz quaternion
+                             cache['linear_velocity'],  # linear velocity
+                             cache['angular_velocity']  # angular velocity
+-                        )
+-                        
+-                        # Publish joint states
++                    )
++                    
++                    # Publish joint states
+                         base_node.publish_drone_joints(
+                             cache['joint_names'],
+                             cache['joint_positions']
+                         )
+-                    except Exception as e:
++                except Exception as e:
+                         # Log publishing errors for debugging
+                         if not hasattr(base_node, '_publish_error_logged'):
+                             print(f"[ERROR] Failed to publish world drone data: {e}")
