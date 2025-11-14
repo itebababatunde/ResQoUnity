@@ -310,7 +310,8 @@ def takeoff_service_cb(request, response, num_robot):
         response.message = "Drone is not armed. Call /arm service first."
         return response
     
-    if controller.mode != DroneState.IDLE:
+    # Allow takeoff from IDLE or LOITER modes
+    if controller.mode not in [DroneState.IDLE, DroneState.LOITER]:
         response.success = False
         response.message = f"Cannot takeoff from mode {controller.mode.value}"
         return response
@@ -452,7 +453,8 @@ def world_drone_takeoff_cb(request, response):
             response.message = "Drone is not armed. Call /drone/arm service first."
             return response
         
-        if controller.mode != DroneState.IDLE:
+        # Allow takeoff from IDLE or LOITER modes
+        if controller.mode not in [DroneState.IDLE, DroneState.LOITER]:
             response.success = False
             response.message = f"Cannot takeoff from mode {controller.mode.value}"
             return response
