@@ -1431,21 +1431,6 @@ def run_sim():
                 obs = {"policy": obs}
             pub_robo_data_ros2(args_cli.robot, env_cfg.scene.num_envs, base_node, env, annotator_lst, start_time)
             
-            # Update camera to follow world drone
-            if world_drone_initialized and enable_world_drone:
-                if hasattr(custom_rl_env, 'world_drone_state_cache'):
-                    try:
-                        p = custom_rl_env.world_drone_state_cache['position'].cpu().numpy()
-                        # Camera offset: 3m behind, 3m to the side, 2m up from drone
-                        from omni.isaac.core.utils.viewports import set_camera_view
-                        set_camera_view(
-                            eye=[p[0] + 3.0, p[1] + 3.0, p[2] + 2.0],  # Camera position follows drone
-                            target=[p[0], p[1], p[2]],  # Look at drone
-                            camera_prim_path="/OmniverseKit_Persp"
-                        )
-                    except:
-                        pass  # Camera update is non-critical
-            
             # Publish world drone data (if enabled and initialized)
             # Use cached state from control loop to avoid GPU PhysX restrictions
             if world_drone_initialized and enable_world_drone:
