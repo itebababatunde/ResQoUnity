@@ -1174,77 +1174,46 @@ def run_sim():
                                     motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
                                 
                                 # Apply motor commands - HYBRID APPROACH:
-                                # 1. Set rotor velocities for visual spinning
-                                # 2. Manually compute and apply thrust forces (USD has no thrust physics)
+                                # DISABLED: Joint velocity targets lock the drone in place
+                                # The force-based control below handles all movement
                                 
-                                max_motor_velocity = 2000.0  # rad/s (~19000 RPM)
-                                motor_velocities = motor_cmds * max_motor_velocity
+                                # max_motor_velocity = 2000.0  # rad/s (~19000 RPM)
+                                # motor_velocities = motor_cmds * max_motor_velocity
                                 
                                 # Visual: Spin the rotors
-                                velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
-                                world_drone_view.set_joint_velocity_targets(velocity_targets)
+                                # velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
+                                # world_drone_view.set_joint_velocity_targets(velocity_targets)
                                 
-                                # Physics: Manually compute thrust from motor commands
-                                # Thrust coefficient for Crazyflie (scaled 5x, mass scales as volume = 125x)
-                                # Real Crazyflie: ~27g needs 0.6N thrust
-                                # Scaled: ~3.4kg needs 33N thrust at hover
-                                # Conservative: Use 50N for good response
-                                thrust_coefficient = 50.0 / (4 * 0.45)  # Total 50N when all 4 motors at 0.45
+                                # FORCE-BASED CONTROL (from OmniDrones approach)
+                                # Calculate desired velocities from PID controllers based on flight mode
                                 
-                                # Total upward thrust (sum of all 4 motors)
-                                total_thrust = sum(motor_cmds) * thrust_coefficient
-                                
-                                # Compute torques from differential thrust
-                                # Motor layout: X configuration
-                                #   m1 (FR)  m2 (BL)
-                                #       \ /
-                                #        X
-                                #       / \
-                                #   m4 (FL)  m3 (BR)
-                                # Roll:  (m4 + m3) - (m1 + m2)
-                                # Pitch: (m1 + m4) - (m2 + m3)  
-                                # Yaw:   (m1 + m3) - (m2 + m4) [CCW motors: m2,m4, CW: m1,m3]
-                                
-                                arm_length = 0.046 * 5.0  # Crazyflie arm length * scale
-                                torque_coefficient = 0.1  # Torque per motor diff
-                                
-                                roll_torque = ((motor_cmds[3] + motor_cmds[2]) - (motor_cmds[0] + motor_cmds[1])) * torque_coefficient
-                                pitch_torque = ((motor_cmds[0] + motor_cmds[3]) - (motor_cmds[1] + motor_cmds[2])) * torque_coefficient
-                                yaw_torque = ((motor_cmds[0] + motor_cmds[2]) - (motor_cmds[1] + motor_cmds[3])) * torque_coefficient * 0.1
-                                
-                                # CRITICAL FIX: Use velocity-based control
-                                # Calculate desired velocities directly from PID controllers
-                                # This bypasses the broken force application
-                                
-                                # Compute desired velocities based on flight mode
                                 desired_vx = 0.0
                                 desired_vy = 0.0
                                 desired_vz = 0.0
                                 desired_yaw_rate = 0.0
                                 
-                                dt = 1.0 / 60.0  # 60 Hz
-                                
                                 if controller.mode.value == 'POSITION' or controller.mode.value == 'LOITER':
-                                    # Position control: use PID to compute velocities from position error
-                                    error_x = controller.target_position[0] - current_pos[0]
-                                    error_y = controller.target_position[1] - current_pos[1]
-                                    error_z = controller.target_position[2] - current_pos[2]
-                                    
-                                    desired_vx = controller.pid_x.update(error_x, dt)
-                                    desired_vy = controller.pid_y.update(error_y, dt)
-                                    desired_vz = controller.pid_z.update(error_z, dt)
+                                    # Position control: PID computes velocity from position error
+                                    error = controller.target_position - current_pos
+                                    desired_vx = controller.pid_x.update(error[0], dt)
+                                    desired_vy = controller.pid_y.update(error[1], dt)
+                                    desired_vz = controller.pid_z.update(error[2], dt)
                                 
                                 elif controller.mode.value == 'ALTITUDE_HOLD':
-                                    # Altitude control only
+                                    # Altitude control only, XY from cmd_vel
                                     error_z = controller.target_altitude - current_pos[2]
                                     desired_vz = controller.pid_z.update(error_z, dt)
-                                    # XY from external commands (handled elsewhere)
+                                    with custom_rl_env.world_drone_lock:
+                                        cmd_vel = custom_rl_env.world_drone_command
+                                        desired_vx = cmd_vel[0]
+                                        desired_vy = cmd_vel[1]
+                                        desired_yaw_rate = cmd_vel[2]
                                 
                                 elif controller.mode.value == 'LANDING':
-                                    desired_vz = controller.landing_velocity
+                                    desired_vz = controller.landing_velocity  # Fixed descent rate
                                 
                                 elif controller.mode.value == 'VELOCITY':
-                                    # Use commanded velocities from cmd_vel
+                                    # Direct velocity control from cmd_vel
                                     with custom_rl_env.world_drone_lock:
                                         cmd_vel = custom_rl_env.world_drone_command
                                         desired_vx = cmd_vel[0]
@@ -1252,9 +1221,7 @@ def run_sim():
                                         desired_yaw_rate = cmd_vel[2]
                                         desired_vz = custom_rl_env.world_drone_altitude
                                 
-                                # FORCE-BASED CONTROL (OmniDrones-inspired)
-                                # Calculate forces needed to achieve desired velocities
-                                # This works WITH the physics engine instead of bypassing it
+                                # Convert desired velocities to forces (F=ma approach)
                                 
                                 # Get device from existing tensor (positions is already on GPU)
                                 device = positions.device if hasattr(positions, 'device') else 'cuda:0'
