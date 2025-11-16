@@ -464,6 +464,12 @@ def world_drone_takeoff_cb(request, response):
         controller.set_target_position(current_pos[0], current_pos[1], 1.5)  # 1.5m altitude
         controller.set_mode(DroneState.POSITION)
         
+        # Safety logging: Confirm takeoff state
+        print(f"[SAFETY] Takeoff service executed:")
+        print(f"  Mode: {controller.mode.value}")
+        print(f"  Target: ({controller.target_position[0]:.3f}, {controller.target_position[1]:.3f}, {controller.target_position[2]:.3f})")
+        print(f"  Current: ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
+        
         response.success = True
         response.message = "Takeoff initiated to 1.5m"
         return response
@@ -560,13 +566,13 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
     if enable_world_drone:
         print("[INFO] Adding /drone namespace ROS2 interface")
         try:
-            # Topics
-            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
-            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
-            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+        # Topics
+        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
             print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
-            
-            # Services
+        
+        # Services
             arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
             takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
             land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
@@ -576,7 +582,7 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
             print(f"  - /drone/takeoff: {takeoff_srv is not None}")
             print(f"  - /drone/land: {land_srv is not None}")
             print(f"  - /drone/emergency_stop: {estop_srv is not None}")
-            print("[INFO] Drone control interface ready on /drone namespace")
+        print("[INFO] Drone control interface ready on /drone namespace")
         except Exception as e:
             print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
             import traceback
@@ -998,6 +1004,12 @@ def run_sim():
                             controller.target_position = initial_pos.copy()
                             print(f"[INFO] LOITER target set to spawn position: ({initial_pos[0]:.2f}, {initial_pos[1]:.2f}, {initial_pos[2]:.2f})")
                             
+                            # Safety logging: Verify initialization is correct
+                            print(f"[SAFETY] World drone initialized:")
+                            print(f"  Current pos: ({initial_pos[0]:.3f}, {initial_pos[1]:.3f}, {initial_pos[2]:.3f})")
+                            print(f"  Target pos:  ({controller.target_position[0]:.3f}, {controller.target_position[1]:.3f}, {controller.target_position[2]:.3f})")
+                            print(f"  Mode: {controller.mode.value}, Armed: {controller.armed}")
+                            
                             # Log initial state
                             logger.log_initialization(initial_pos, initial_vel, controller.mode.value)
                             logger.log_arm_event(True)  # Log that we're starting armed
@@ -1354,6 +1366,14 @@ def run_sim():
                         velocities = world_drone_view.get_velocities()
                         joint_positions = world_drone_view.get_joint_positions()
                         
+                        # DEBUG: Verify cache is being updated
+                        if not hasattr(custom_rl_env, '_dbg_ctr'):
+                            custom_rl_env._dbg_ctr = 0
+                        custom_rl_env._dbg_ctr += 1
+                        if custom_rl_env._dbg_ctr % 60 == 0:
+                            p = positions[0].cpu().numpy()
+                            print(f"[DBG CACHE] Frame {custom_rl_env._dbg_ctr}: Updating cache with pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
+                        
                         custom_rl_env.world_drone_state_cache = {
                             'position': positions[0],
                             'orientation': orientations[0],
@@ -1362,8 +1382,8 @@ def run_sim():
                             'joint_names': world_drone_view.dof_names,
                             'joint_positions': joint_positions[0]
                         }
-                    except:
-                        pass  # Best effort
+                    except Exception as e:
+                        print(f"[ERROR] Cache update exception: {e}")
             
             # Process observations
             if not isinstance(obs, dict):
@@ -1377,25 +1397,30 @@ def run_sim():
                     try:
                         cache = custom_rl_env.world_drone_state_cache
                         
-                        # Publish odometry (position + orientation)
-                        base_node.publish_drone_odom(
+                        # DEBUG: Print what we're publishing
+                        if hasattr(custom_rl_env, '_dbg_ctr') and custom_rl_env._dbg_ctr % 60 == 0:
+                            p = cache['position'].cpu().numpy()
+                            print(f"[DBG ROS2] Publishing to /drone/odom: pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
+                    
+                    # Publish odometry (position + orientation)
+                    base_node.publish_drone_odom(
                             cache['position'],  # xyz position
                             cache['orientation']  # wxyz quaternion
-                        )
-                        
-                        # Publish IMU (orientation + velocities)
-                        base_node.publish_drone_imu(
+                    )
+                    
+                    # Publish IMU (orientation + velocities)
+                    base_node.publish_drone_imu(
                             cache['orientation'],  # wxyz quaternion
                             cache['linear_velocity'],  # linear velocity
                             cache['angular_velocity']  # angular velocity
-                        )
-                        
-                        # Publish joint states
+                    )
+                    
+                    # Publish joint states
                         base_node.publish_drone_joints(
                             cache['joint_names'],
                             cache['joint_positions']
                         )
-                    except Exception as e:
+                except Exception as e:
                         # Log publishing errors for debugging
                         if not hasattr(base_node, '_publish_error_logged'):
                             print(f"[ERROR] Failed to publish world drone data: {e}")

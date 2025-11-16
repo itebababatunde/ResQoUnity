@@ -216,6 +216,15 @@ class DroneController:
         
         old_mode = self.mode
         self.mode = new_mode
+        
+        # Safety logging: Track unexpected mode changes
+        if old_mode == DroneState.POSITION and new_mode == DroneState.LOITER:
+            import traceback
+            print(f"[SAFETY] Drone {self.robot_id} switched POSITION→LOITER (should only happen via service)")
+            print(f"  Current: ({self.current_position[0]:.3f}, {self.current_position[1]:.3f}, {self.current_position[2]:.3f})")
+            print(f"  Target:  ({self.target_position[0]:.3f}, {self.target_position[1]:.3f}, {self.target_position[2]:.3f})")
+            print(f"  Call from: {traceback.format_stack()[-2].strip()}")
+        
         print(f"[Drone {self.robot_id}] Mode: {old_mode.value} → {new_mode.value}")
     
     def set_target_position(self, x, y, z):
@@ -360,11 +369,7 @@ class DroneController:
             desired_vy = self.pid_y.update(error_y, dt)
             desired_vz = self.pid_z.update(error_z, dt)
             
-            # Check arrival
-            distance = np.sqrt(error_x**2 + error_y**2 + error_z**2)
-            if distance < self.position_tolerance:
-                print(f"[Drone {self.robot_id}] Reached target position, switching to LOITER")
-                self.set_mode(DroneState.LOITER)
+            # Auto-LOITER removed - mode changes now controlled externally via services
         
         elif self.mode == DroneState.ALTITUDE_HOLD:
             # Altitude control only
