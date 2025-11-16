@@ -1320,9 +1320,10 @@ def run_sim():
                                     dt = 1.0 / 60.0  # 60 Hz physics
                                     new_linear_vel = current_linear_vel + acceleration * dt
                                     
-                                    # Apply damping to prevent oscillations (simulate air resistance)
-                                    damping = 0.95
-                                    new_linear_vel = new_linear_vel * damping
+                                    # REMOVED: Manual damping was double-damping with USD linear_damping config
+                                    # The USD already has linear_damping=0.05, so we don't need to apply it again
+                                    # damping = 0.95
+                                    # new_linear_vel = new_linear_vel * damping
                                     
                                     # Clamp velocities for safety
                                     max_velocity = 5.0  # m/s
