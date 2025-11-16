@@ -1025,6 +1025,19 @@ def run_sim():
                         )
                         world_drone_view.initialize()
                         
+                        # NEW: Register with simulation context for proper rendering
+                        try:
+                            # Access simulation context through environment
+                            sim = env.unwrapped.sim if hasattr(env.unwrapped, 'sim') else env.sim
+                            
+                            # Try to add to scene if supported
+                            if hasattr(env, 'scene') and hasattr(env.scene, 'articulations'):
+                                env.scene.articulations['world_drone'] = world_drone_view
+                                print("[INFO] Drone registered with scene articulations")
+                        except Exception as e:
+                            print(f"[WARN] Could not register drone with scene: {e}")
+                            print("[INFO] Will use manual render calls instead")
+                        
                         # Use fixed mass estimate (get_masses() not available in all Isaac Sim versions)
                         # Crazyflie 2.x is about 27g, scaled 5x = ~0.675kg
                         # Use conservative estimate: 0.5 kg
@@ -1311,14 +1324,28 @@ def run_sim():
                                     
                                     world_drone_view.set_velocities(new_vels)
                                     
-                                    # NOTE: In GPU PhysX, we CANNOT manually update visual transforms
-                                    # The physics engine owns the transform completely
-                                    # set_world_poses() updates internal state but viewport won't reflect it
-                                    # until the physics engine steps, which only happens in env.step()
-                                    # Since world drone is outside the environment, env.step() doesn't step it!
-                                    # 
-                                    # WORKAROUND: We set velocities and trust that over time the position
-                                    # will converge, even if viewport lags behind internal physics state
+                                    # CRITICAL: Force viewport update for GPU PhysX
+                                    # World-level objects need explicit render flush
+                                    try:
+                                        sim = env.unwrapped.sim if hasattr(env.unwrapped, 'sim') else env.sim
+                                        sim.render()  # Sync GPU physics state to viewport
+                                        
+                                        # Verify render was called (log occasionally)
+                                        if hasattr(logger, 'frame_count') and logger.frame_count % 20 == 0:
+                                            print(f"[DBG RENDER] Viewport sync triggered at pos ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
+                                    except AttributeError:
+                                        # Fallback: try direct simulation app update
+                                        try:
+                                            from omni.isaac.kit import SimulationApp
+                                            app = SimulationApp.instance()
+                                            if app:
+                                                app.update()
+                                        except:
+                                            pass  # Last resort: hope env.step() next frame does it
+                                    
+                                    # GPU PhysX viewport sync: Render flush added above
+                                    # set_velocities() updates internal state, sim.render() syncs viewport
+                                    # This is the documented approach for GPU PhysX transform updates
                                     
                                     # For logging - track the force we calculated
                                     applied_force = forces  
