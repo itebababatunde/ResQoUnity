@@ -1,0 +1,1282 @@
+================================================================================
+SIMULATION LOG - 2025-11-16 17:30:51
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_173051.log
+================================================================================
+
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: go2, Amount: 1, Terrain: flat
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.005
+	Environment step-size : 0.02
+	Physics GPU pipeline  : True
+	Physics GPU simulation: True
+[INFO]: Time taken for scene creation : 1.429781 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 1
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 0.992983 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 12)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          12 |
++--------+-------------+-------------+
+
+Module omni.isaac.orbit.utils.warp.kernels load on device 'cuda:0' took 1.22 ms
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (235,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |     (3,)    |
+|     1     | base_ang_vel                   |     (3,)    |
+|     2     | projected_gravity              |     (3,)    |
+|     3     | velocity_commands              |     (3,)    |
+|     4     | joint_pos                      |    (12,)    |
+|     5     | joint_vel                      |    (12,)    |
+|     6     | actions                        |    (12,)    |
+|     7     | height_scan                    |    (187,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Event Manager:  <EventManager> contains 1 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
++----------+---------------------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | base_contact |  False   |
++-------+--------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 10 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      1.5 |
+|   1   | track_ang_vel_z_exp  |     0.75 |
+|   2   | lin_vel_z_l2         |     -2.0 |
+|   3   | ang_vel_xy_l2        |    -0.05 |
+|   4   | dof_torques_l2       |  -0.0002 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | feet_air_time        |     0.01 |
+|   8   | flat_orientation_l2  |      0.0 |
+|   9   | dof_pos_limits       |      0.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+Creating window for environment.
+[INFO]: Completed setting up the environment...
+[INFO] Environment created successfully!
+[INFO] Environment wrapped for RSL-RL
+[INFO] Loading experiment from directory: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough
+[INFO]: Loading model checkpoint from: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough/2024-04-06_02-37-07/model_7850.pt
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 policy :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=12, bias=True)
+)
+Critic MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+[INFO]: Checkpoint loaded successfully
+[INFO] Resetting environment and getting initial observations...
+[INFO] Environment reset complete, starting simulation loop...
+[INFO] Spawning world-level drone at /World/Drone...
+[INFO] Drone USD loaded at /World/Drone
+[INFO] Drone spawned at position (0.0, 0.0, 2.5)
+[INFO] ArticulationView will be initialized after first physics step
+[Drone drone] Mode: DISARMED → LOITER
+
+================================================================================
+DRONE DEBUG LOGGER INITIALIZED FOR world_drone
+================================================================================
+
+[INFO] Drone controller initialized in ARMED mode (auto-armed)
+[INFO] Mode set to LOITER - will hold spawn position
+[INFO] Debug logger enabled - verbose output active
+[INFO] Drone bottom camera initialized
+[INFO] Drone ROS2 publishers initialized on /drone namespace
+[INFO] Adding /drone namespace ROS2 interface
+[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude
+[INFO] Drone services created:
+  - /drone/arm: True
+  - /drone/takeoff: True
+  - /drone/land: True
+  - /drone/emergency_stop: True
+[INFO] Drone control interface ready on /drone namespace
+Error loading custom environment. You should download custom envs folder from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing
+[INFO] Setting up viewport camera...
+[INFO] Camera positioned to view robot
+[INFO] Robot(s) should now be visible in the viewport!
+[INFO] Use these controls to navigate:
+  - Press 'F' to focus on robot
+  - Mouse wheel: Zoom in/out
+  - Middle mouse: Pan camera
+  - Alt+Left mouse: Orbit view
+  - WASD keys: Move robot (forward/back/left/right)
+  - Q/E keys: Rotate left/right
+[INFO] Initializing ArticulationView after physics step...
+[INFO] Drone mass set to: 0.5 kg (Crazyflie scaled estimate)
+[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)
+[INFO] Forces → Acceleration → Velocity integration (F=ma)
+[INFO] LOITER target set to spawn position: (-0.00, -0.00, 2.50)
+[SAFETY] World drone initialized:
+  Current pos: (-0.000, -0.000, 2.498)
+  Target pos:  (-0.000, -0.000, 2.498)
+  Mode: LOITER, Armed: True
+[INIT] Drone spawned at position: (-0.000, -0.000, 2.498)
+[INIT] Initial velocity: (0.000, 0.000, -0.196)
+[INIT] Initial mode: LOITER
+[INIT] Ready for control
+
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[INFO] ArticulationView ready - found 1 drone(s)
+[DEBUG] ArticulationView prim paths: ['/World/Drone']
+[DEBUG] Controller initialized at position: (-0.00, -0.00, 2.50)
+[DEBUG] Drone has 4 DOFs: ['m1_joint', 'm2_joint', 'm3_joint', 'm4_joint']
+[DEBUG] Prim at /World/Drone exists: True
+[DEBUG] Found root body (fallback) at: /World/Drone/body
+[DEBUG] Found articulation root at: /World/Drone
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.497)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.495)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.492)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 3] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.492)
+  Velocity   : (  0.000,  -0.000,  -0.208)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.006) = 0.006m
+  PID Output : (  0.000,   0.000,   0.011) m/s
+  Applied Force: (   0.00,    0.00,    5.78) N (|F|=5.78N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,  -0.015) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.489)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.486)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 19] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.449)
+  Velocity   : (  0.000,  -0.000,  -0.177)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.048) = 0.048m
+  PID Output : (  0.000,   0.000,   0.099) m/s
+  Applied Force: (   0.00,    0.00,    6.01) N (|F|=6.01N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.023) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 38] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.438)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.059) = 0.059m
+  PID Output : (  0.000,   0.000,   0.127) m/s
+  Applied Force: (   0.00,   -0.00,    5.92) N (|F|=5.92N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.071) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 57] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.444)
+  Velocity   : (  0.000,  -0.000,  -0.122)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.054) = 0.054m
+  PID Output : (  0.000,   0.000,   0.122) m/s
+  Applied Force: (   0.00,    0.00,    5.88) N (|F|=5.88N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.074) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG CACHE] Frame 60: Updating cache with pos=(-0.000,-0.000,2.446)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.446)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 76] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.448)
+  Velocity   : (  0.000,   0.000,  -0.125)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.050) = 0.050m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.88) N (|F|=5.88N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.071) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 94] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.450)
+  Velocity   : (  0.000,  -0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.048) = 0.048m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 112] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.452)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.045) = 0.045m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG CACHE] Frame 120: Updating cache with pos=(-0.000,-0.000,2.454)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.454)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 131] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.455)
+  Velocity   : (  0.000,  -0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.043) = 0.043m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 150] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.457)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.041) = 0.041m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 168] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.459)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.039) = 0.039m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG CACHE] Frame 180: Updating cache with pos=(-0.000,-0.000,2.461)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.461)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 186] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.461)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.037) = 0.037m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 205] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.463)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.035) = 0.035m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 224] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.464)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.033) = 0.033m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG CACHE] Frame 240: Updating cache with pos=(-0.000,-0.000,2.467)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.467)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 243] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.466)
+  Velocity   : (  0.000,   0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.031) = 0.031m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 262] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.468)
+  Velocity   : (  0.000,   0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.030) = 0.030m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[Drone drone] Target position: (-0.00, -0.00, 1.50)
+[Drone drone] Mode: LOITER → POSITION
+[SAFETY] Takeoff service executed:
+  Mode: POSITION
+  Target: (-0.000, -0.000, 1.500)
+  Current: (-0.000, -0.000, 2.468)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.437)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.414)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.387)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.355)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.319)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.280)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.239)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.195)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.149)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.103)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.055)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.008)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.962)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.916)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 281] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.935)
+  Velocity   : (  0.000,  -0.000,  -1.392)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,  -0.435) = 0.435m
+  PID Output : (  0.000,   0.000,  -0.935) m/s
+  Applied Force: (   0.00,    0.00,    6.73) N (|F|=6.73N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,  -1.168) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.871)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.828)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.786)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.747)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.709)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.673)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.640)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.608)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.579)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.552)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.527)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.505)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.484)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.465)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.449)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.409)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.399)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 300] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.402)
+  Velocity   : (  0.000,   0.000,  -0.423)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.098) = 0.098m
+  PID Output : (  0.000,   0.000,   0.122) m/s
+  Applied Force: (   0.00,   -0.00,    7.09) N (|F|=7.09N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,  -0.187) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG CACHE] Frame 300: Updating cache with pos=(-0.000,-0.000,1.399)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.399)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.390)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.383)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.377)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.371)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.367)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.364)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.362)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.361)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.360)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.360)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.360)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.361)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.362)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.363)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.365)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.367)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.369)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.371)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.374)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 319] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.371)
+  Velocity   : (  0.000,   0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.129) = 0.129m
+  PID Output : (  0.000,   0.000,   0.196) m/s
+  Applied Force: (   0.00,   -0.00,    5.95) N (|F|=5.95N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.133) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.376)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.379)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.381)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.384)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.386)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.388)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.391)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.393)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.395)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.397)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.399)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.401)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.403)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.405)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.406)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.408)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.409)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.410)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.412)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 338] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.410)
+  Velocity   : (  0.000,   0.000,  -0.096)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.090) = 0.090m
+  PID Output : (  0.000,   0.000,   0.130) m/s
+  Applied Force: (   0.00,   -0.00,    5.81) N (|F|=5.81N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.098) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.413)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.414)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.415)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.415)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.416)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.417)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.418)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.418)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.419)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.419)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 357] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.420)
+  Velocity   : (  0.000,   0.000,  -0.124)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.080) = 0.080m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,   -0.00,    5.87) N (|F|=5.87N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.072) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG CACHE] Frame 360: Updating cache with pos=(-0.000,-0.000,1.422)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.422)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[ERROR POSE] Pose update failed: 'ArticulationView' object has no attribute 'write_root_pose_to_sim'
