@@ -566,13 +566,13 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
     if enable_world_drone:
         print("[INFO] Adding /drone namespace ROS2 interface")
         try:
-        # Topics
-        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
-        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
-        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+            # Topics
+            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
             print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
-        
-        # Services
+            
+            # Services
             arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
             takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
             land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
@@ -582,7 +582,7 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
             print(f"  - /drone/takeoff: {takeoff_srv is not None}")
             print(f"  - /drone/land: {land_srv is not None}")
             print(f"  - /drone/emergency_stop: {estop_srv is not None}")
-        print("[INFO] Drone control interface ready on /drone namespace")
+            print("[INFO] Drone control interface ready on /drone namespace")
         except Exception as e:
             print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
             import traceback
@@ -1401,26 +1401,26 @@ def run_sim():
                         if hasattr(custom_rl_env, '_dbg_ctr') and custom_rl_env._dbg_ctr % 60 == 0:
                             p = cache['position'].cpu().numpy()
                             print(f"[DBG ROS2] Publishing to /drone/odom: pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
-                    
-                    # Publish odometry (position + orientation)
-                    base_node.publish_drone_odom(
+                        
+                        # Publish odometry (position + orientation)
+                        base_node.publish_drone_odom(
                             cache['position'],  # xyz position
                             cache['orientation']  # wxyz quaternion
-                    )
-                    
-                    # Publish IMU (orientation + velocities)
-                    base_node.publish_drone_imu(
+                        )
+                        
+                        # Publish IMU (orientation + velocities)
+                        base_node.publish_drone_imu(
                             cache['orientation'],  # wxyz quaternion
                             cache['linear_velocity'],  # linear velocity
                             cache['angular_velocity']  # angular velocity
-                    )
-                    
-                    # Publish joint states
+                        )
+                        
+                        # Publish joint states
                         base_node.publish_drone_joints(
                             cache['joint_names'],
                             cache['joint_positions']
                         )
-                except Exception as e:
+                    except Exception as e:
                         # Log publishing errors for debugging
                         if not hasattr(base_node, '_publish_error_logged'):
                             print(f"[ERROR] Failed to publish world drone data: {e}")
