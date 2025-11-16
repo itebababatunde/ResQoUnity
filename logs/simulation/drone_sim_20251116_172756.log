@@ -1,0 +1,3363 @@
+================================================================================
+SIMULATION LOG - 2025-11-16 17:27:56
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_172756.log
+================================================================================
+
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: go2, Amount: 1, Terrain: flat
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.005
+	Environment step-size : 0.02
+	Physics GPU pipeline  : True
+	Physics GPU simulation: True
+[INFO]: Time taken for scene creation : 0.968311 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 1
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 1.288725 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 12)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          12 |
++--------+-------------+-------------+
+
+Module omni.isaac.orbit.utils.warp.kernels load on device 'cuda:0' took 1.21 ms
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (235,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |     (3,)    |
+|     1     | base_ang_vel                   |     (3,)    |
+|     2     | projected_gravity              |     (3,)    |
+|     3     | velocity_commands              |     (3,)    |
+|     4     | joint_pos                      |    (12,)    |
+|     5     | joint_vel                      |    (12,)    |
+|     6     | actions                        |    (12,)    |
+|     7     | height_scan                    |    (187,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Event Manager:  <EventManager> contains 1 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
++----------+---------------------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | base_contact |  False   |
++-------+--------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 10 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      1.5 |
+|   1   | track_ang_vel_z_exp  |     0.75 |
+|   2   | lin_vel_z_l2         |     -2.0 |
+|   3   | ang_vel_xy_l2        |    -0.05 |
+|   4   | dof_torques_l2       |  -0.0002 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | feet_air_time        |     0.01 |
+|   8   | flat_orientation_l2  |      0.0 |
+|   9   | dof_pos_limits       |      0.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+Creating window for environment.
+[INFO]: Completed setting up the environment...
+[INFO] Environment created successfully!
+[INFO] Environment wrapped for RSL-RL
+[INFO] Loading experiment from directory: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough
+[INFO]: Loading model checkpoint from: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough/2024-04-06_02-37-07/model_7850.pt
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 policy :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=12, bias=True)
+)
+Critic MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+[INFO]: Checkpoint loaded successfully
+[INFO] Resetting environment and getting initial observations...
+[INFO] Environment reset complete, starting simulation loop...
+[INFO] Spawning world-level drone at /World/Drone...
+[INFO] Drone USD loaded at /World/Drone
+[INFO] Drone spawned at position (0.0, 0.0, 2.5)
+[INFO] ArticulationView will be initialized after first physics step
+[Drone drone] Mode: DISARMED → LOITER
+
+================================================================================
+DRONE DEBUG LOGGER INITIALIZED FOR world_drone
+================================================================================
+
+[INFO] Drone controller initialized in ARMED mode (auto-armed)
+[INFO] Mode set to LOITER - will hold spawn position
+[INFO] Debug logger enabled - verbose output active
+[INFO] Drone bottom camera initialized
+[INFO] Drone ROS2 publishers initialized on /drone namespace
+[INFO] Adding /drone namespace ROS2 interface
+[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude
+[INFO] Drone services created:
+  - /drone/arm: True
+  - /drone/takeoff: True
+  - /drone/land: True
+  - /drone/emergency_stop: True
+[INFO] Drone control interface ready on /drone namespace
+Error loading custom environment. You should download custom envs folder from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing
+[INFO] Setting up viewport camera...
+[INFO] Camera positioned to view robot
+[INFO] Robot(s) should now be visible in the viewport!
+[INFO] Use these controls to navigate:
+  - Press 'F' to focus on robot
+  - Mouse wheel: Zoom in/out
+  - Middle mouse: Pan camera
+  - Alt+Left mouse: Orbit view
+  - WASD keys: Move robot (forward/back/left/right)
+  - Q/E keys: Rotate left/right
+[INFO] Initializing ArticulationView after physics step...
+[INFO] Drone mass set to: 0.5 kg (Crazyflie scaled estimate)
+[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)
+[INFO] Forces → Acceleration → Velocity integration (F=ma)
+[INFO] LOITER target set to spawn position: (-0.00, -0.00, 2.50)
+[SAFETY] World drone initialized:
+  Current pos: (-0.000, -0.000, 2.498)
+  Target pos:  (-0.000, -0.000, 2.498)
+  Mode: LOITER, Armed: True
+[INIT] Drone spawned at position: (-0.000, -0.000, 2.498)
+[INIT] Initial velocity: (0.000, 0.000, -0.196)
+[INIT] Initial mode: LOITER
+[INIT] Ready for control
+
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[INFO] ArticulationView ready - found 1 drone(s)
+[DEBUG] ArticulationView prim paths: ['/World/Drone']
+[DEBUG] Controller initialized at position: (-0.00, -0.00, 2.50)
+[DEBUG] Drone has 4 DOFs: ['m1_joint', 'm2_joint', 'm3_joint', 'm4_joint']
+[DEBUG] Prim at /World/Drone exists: True
+[DEBUG] Found root body (fallback) at: /World/Drone/body
+[DEBUG] Found articulation root at: /World/Drone
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.497)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.495)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.492)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 3] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.492)
+  Velocity   : (  0.000,  -0.000,  -0.208)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.006) = 0.006m
+  PID Output : (  0.000,   0.000,   0.011) m/s
+  Applied Force: (   0.00,    0.00,    5.78) N (|F|=5.78N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,  -0.015) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.489)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.486)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 19] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.449)
+  Velocity   : (  0.000,  -0.000,  -0.177)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.048) = 0.048m
+  PID Output : (  0.000,   0.000,   0.099) m/s
+  Applied Force: (   0.00,    0.00,    6.01) N (|F|=6.01N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.023) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 38] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.438)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.059) = 0.059m
+  PID Output : (  0.000,   0.000,   0.127) m/s
+  Applied Force: (   0.00,   -0.00,    5.92) N (|F|=5.92N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.071) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.440)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.441)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.442)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.443)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.444)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 57] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.444)
+  Velocity   : (  0.000,  -0.000,  -0.122)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.054) = 0.054m
+  PID Output : (  0.000,   0.000,   0.122) m/s
+  Applied Force: (   0.00,    0.00,    5.88) N (|F|=5.88N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.074) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.445)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 60: Updating cache with pos=(-0.000,-0.000,2.446)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.446)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.447)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.448)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 76] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.448)
+  Velocity   : (  0.000,   0.000,  -0.125)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.050) = 0.050m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.88) N (|F|=5.88N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.071) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.449)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.450)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 95] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.450)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.047) = 0.047m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.453)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 114] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.453)
+  Velocity   : (  0.000,  -0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.045) = 0.045m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 120: Updating cache with pos=(-0.000,-0.000,2.454)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.454)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 133] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.455)
+  Velocity   : (  0.000,  -0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.043) = 0.043m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.456)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.457)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 152] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.457)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.040) = 0.040m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.458)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.459)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 171] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.459)
+  Velocity   : (  0.000,   0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.038) = 0.038m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.460)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 180: Updating cache with pos=(-0.000,-0.000,2.461)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.461)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.461)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 190] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.461)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.036) = 0.036m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.462)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.463)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 209] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.463)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.034) = 0.034m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.464)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.465)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 228] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.465)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.033) = 0.033m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.466)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 240: Updating cache with pos=(-0.000,-0.000,2.467)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.467)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.467)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 247] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.467)
+  Velocity   : (  0.000,   0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.031) = 0.031m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 266] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.468)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.029) = 0.029m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.470)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 285] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.470)
+  Velocity   : (  0.000,   0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.028) = 0.028m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.471)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 300: Updating cache with pos=(-0.000,-0.000,2.472)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.472)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 304] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.471)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.026) = 0.026m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.472)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.473)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 323] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.472)
+  Velocity   : (  0.000,   0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.025) = 0.025m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.474)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 342] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.474)
+  Velocity   : (  0.000,  -0.000,  -0.127)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.024) = 0.024m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 360: Updating cache with pos=(-0.000,-0.000,2.476)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.476)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 361] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.475)
+  Velocity   : (  0.000,   0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.023) = 0.023m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.476)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 380] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.476)
+  Velocity   : (  0.000,   0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.021) = 0.021m
+  PID Output : (  0.000,   0.000,   0.118) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.477)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 399] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.477)
+  Velocity   : (  0.000,   0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.020) = 0.020m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.478)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.479)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 418] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.478)
+  Velocity   : (  0.000,  -0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.019) = 0.019m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 420: Updating cache with pos=(-0.000,-0.000,2.480)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.480)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 437] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.479)
+  Velocity   : (  0.000,  -0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.018) = 0.018m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 456] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.480)
+  Velocity   : (  0.000,  -0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.017) = 0.017m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.481)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 475] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.481)
+  Velocity   : (  0.000,   0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.016) = 0.016m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 480: Updating cache with pos=(-0.000,-0.000,2.483)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.483)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 494] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.482)
+  Velocity   : (  0.000,   0.000,  -0.128)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.016) = 0.016m
+  PID Output : (  0.000,   0.000,   0.117) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.068) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.483)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.484)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.484)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.484)
+[DBG POSE] set_world_poses() completed without error
+[Drone drone] Target position: (-0.00, -0.00, 1.50)
+[Drone drone] Mode: LOITER → POSITION
+[SAFETY] Takeoff service executed:
+  Mode: POSITION
+  Target: (-0.000, -0.000, 1.500)
+  Current: (-0.000, -0.000, 2.482)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.480)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.452)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.401)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.369)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.333)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.294)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 513] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   2.312)
+  Velocity   : (  0.000,   0.000,  -1.151)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,  -0.812) = 0.812m
+  PID Output : (  0.000,   0.000,  -1.500) m/s
+  Applied Force: (  -0.00,   -0.00,    3.51) N (|F|=3.51N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,  -1.034) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+  ⚠️  WARNING: Large altitude error (0.81m)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.253)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.209)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.163)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.116)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.069)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 2.021)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.974)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.927)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.882)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.838)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.796)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.756)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.717)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.681)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.647)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.615)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.585)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.557)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.532)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 532] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.542)
+  Velocity   : (  0.000,   0.000,  -0.849)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,  -0.042) = 0.042m
+  PID Output : (  0.000,   0.000,  -0.162) m/s
+  Applied Force: (   0.00,   -0.00,    7.66) N (|F|=7.66N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,  -0.594) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.509)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.487)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.451)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.410)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.399)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 540: Updating cache with pos=(-0.000,-0.000,1.399)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.399)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.390)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.383)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.376)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.371)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.367)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.364)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.361)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.360)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.359)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.358)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.359)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 551] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.357)
+  Velocity   : (  0.000,   0.000,  -0.130)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.143) = 0.143m
+  PID Output : (  0.000,   0.000,   0.217) m/s
+  Applied Force: (   0.00,   -0.00,    6.29) N (|F|=6.29N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.080) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.359)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.360)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.362)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.363)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.365)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.368)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.370)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.372)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.375)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.377)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.380)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.382)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.385)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.387)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.389)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.392)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.394)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.396)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.398)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 570] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.396)
+  Velocity   : (  0.000,   0.000,  -0.073)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.104) = 0.104m
+  PID Output : (  0.000,   0.000,   0.152) m/s
+  Applied Force: (   0.00,   -0.00,    5.81) N (|F|=5.81N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.121) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.400)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.402)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.404)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.405)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.407)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.408)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.409)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.411)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.412)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.413)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.414)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.415)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.415)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.416)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.417)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.417)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.418)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.418)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.419)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 589] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.417)
+  Velocity   : (  0.000,   0.000,  -0.117)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.083) = 0.083m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (   0.00,   -0.00,    5.85) N (|F|=5.85N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.078) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.419)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.419)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.420)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.421)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 600: Updating cache with pos=(-0.000,-0.000,1.421)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.421)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 608] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.421)
+  Velocity   : (  0.000,  -0.000,  -0.126)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.079) = 0.079m
+  PID Output : (  0.000,   0.000,   0.119) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.422)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.424)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.425)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.425)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.425)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.425)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.425)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 627] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.424)
+  Velocity   : (  0.000,  -0.000,  -0.124)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.076) = 0.076m
+  PID Output : (  0.000,   0.000,   0.122) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.072) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.426)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.426)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.426)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.426)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.426)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.427)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.427)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.427)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.427)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.427)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.428)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.428)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.428)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.428)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.428)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.429)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 646] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.428)
+  Velocity   : (  0.000,  -0.000,  -0.124)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.072) = 0.072m
+  PID Output : (  0.000,   0.000,   0.121) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.073) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.430)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.430)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.430)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.430)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.430)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.431)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.431)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.431)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.431)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.431)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.432)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.432)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.432)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 660: Updating cache with pos=(-0.000,-0.000,1.432)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.432)
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.432)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.432)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.433)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.433)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 664] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.432)
+  Velocity   : (  0.000,  -0.000,  -0.124)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.068) = 0.068m
+  PID Output : (  0.000,   0.000,   0.121) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.072) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.433)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.433)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.433)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.434)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.435)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.436)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.436)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.436)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.436)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 682] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.435)
+  Velocity   : (  0.000,  -0.000,  -0.124)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.065) = 0.065m
+  PID Output : (  0.000,   0.000,   0.121) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.072) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.436)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.437)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.437)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.437)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.437)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (-0.000, -0.000, 1.437)
+[DBG POSE] set_world_poses() completed without error
+[Drone drone] Target position: (1.00, 0.50, 1.94)
+[DBG POSE] Trying to set position: (0.003, 0.001, 1.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.011, 0.005, 1.446)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.024, 0.012, 1.455)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.041, 0.020, 1.468)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.061, 0.031, 1.482)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.084, 0.042, 1.499)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.110, 0.055, 1.518)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.137, 0.069, 1.537)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.166, 0.083, 1.557)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.196, 0.098, 1.578)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.227, 0.113, 1.599)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.258, 0.129, 1.620)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 700] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  0.244,   0.122,   1.610)
+  Velocity   : (  0.850,   0.425,   0.448)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : (  0.756,   0.378,   0.327) = 0.907m
+  PID Output : (  0.927,   0.463,   0.676) m/s
+  Applied Force: (   0.31,    0.15,    5.81) N (|F|=5.82N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.860,   0.430,   0.642) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (0.290, 0.145, 1.641)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.321, 0.161, 1.662)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.353, 0.177, 1.682)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.384, 0.192, 1.702)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.415, 0.208, 1.720)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.445, 0.223, 1.738)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.475, 0.237, 1.756)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.504, 0.252, 1.772)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.532, 0.266, 1.787)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.559, 0.280, 1.801)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.585, 0.293, 1.815)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.611, 0.305, 1.827)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.635, 0.318, 1.838)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.659, 0.329, 1.849)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.681, 0.341, 1.858)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.703, 0.351, 1.867)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.723, 0.362, 1.875)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.743, 0.372, 1.882)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.762, 0.381, 1.888)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 719] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  0.754,   0.377,   1.884)
+  Velocity   : (  0.521,   0.261,   0.050)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : (  0.246,   0.123,   0.053) = 0.281m
+  PID Output : (  0.331,   0.166,   0.143) m/s
+  Applied Force: (  -0.76,   -0.38,    5.28) N (|F|=5.34N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.496,   0.248,   0.226) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (0.780, 0.390, 1.894)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 720: Updating cache with pos=(0.780,0.390,1.894)
+[DBG ROS2] Publishing to /drone/odom: pos=(0.780,0.390,1.894)
+[DBG POSE] Trying to set position: (0.796, 0.398, 1.898)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.812, 0.406, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.828, 0.414, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.842, 0.421, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.855, 0.428, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.868, 0.434, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.880, 0.440, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.891, 0.446, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.902, 0.451, 1.918)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.912, 0.456, 1.918)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.921, 0.461, 1.919)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.930, 0.465, 1.919)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.938, 0.469, 1.919)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.946, 0.473, 1.919)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.953, 0.477, 1.918)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.960, 0.480, 1.918)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.966, 0.483, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.972, 0.486, 1.916)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 738] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  0.969,   0.485,   1.916)
+  Velocity   : (  0.162,   0.081,  -0.148)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : (  0.031,   0.015,   0.022) = 0.041m
+  PID Output : (  0.076,   0.038,   0.083) m/s
+  Applied Force: (  -0.34,   -0.17,    5.83) N (|F|=5.84N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.151,   0.075,   0.047) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (0.977, 0.488, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.982, 0.491, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.987, 0.493, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.991, 0.495, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.995, 0.497, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (0.998, 0.499, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.002, 0.501, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.005, 0.502, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.008, 0.504, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.010, 0.505, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.013, 0.506, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.015, 0.507, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.017, 0.508, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.019, 0.509, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.020, 0.510, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.022, 0.511, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.023, 0.512, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.903)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 757] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.025,   0.513,   1.902)
+  Velocity   : (  0.032,   0.016,  -0.141)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.025,  -0.013,   0.035) = 0.045m
+  PID Output : (  0.009,   0.004,   0.113) m/s
+  Applied Force: (  -0.09,   -0.05,    5.92) N (|F|=5.92N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.029,   0.015,   0.057) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 776] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.034,   0.517,   1.900)
+  Velocity   : (  0.002,   0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.034,  -0.017,   0.037) = 0.053m
+  PID Output : ( -0.002,  -0.001,   0.121) m/s
+  Applied Force: (  -0.02,   -0.01,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.001,   0.001,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.901)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 780: Updating cache with pos=(1.034,0.517,1.902)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.034,0.517,1.902)
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.034, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.902)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.517, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 795] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.033,   0.516,   1.903)
+  Velocity   : ( -0.002,  -0.001,  -0.126)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.033,  -0.016,   0.035) = 0.050m
+  PID Output : ( -0.002,  -0.001,   0.119) m/s
+  Applied Force: (  -0.00,   -0.00,    5.88) N (|F|=5.88N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.002,  -0.001,   0.070) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.033, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.904)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.032, 0.516, 1.905)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 814] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.031,   0.516,   1.905)
+  Velocity   : ( -0.002,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.031,  -0.016,   0.032) = 0.048m
+  PID Output : ( -0.002,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.002,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.516, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.906)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.031, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.907)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 833] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.030,   0.515,   1.906)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.030,  -0.015,   0.031) = 0.046m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 840: Updating cache with pos=(1.030,0.515,1.908)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.030,0.515,1.908)
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.030, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.908)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 852] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.029,   0.515,   1.908)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.029,  -0.015,   0.029) = 0.044m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.029, 0.515, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.029, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.910)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 871] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.028,   0.514,   1.910)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.028,  -0.014,   0.028) = 0.042m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.911)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.028, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 889] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.027,   0.514,   1.911)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.027,  -0.014,   0.026) = 0.040m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.912)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.514, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 900: Updating cache with pos=(1.027,0.513,1.913)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.027,0.513,1.913)
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 907] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.027,   0.513,   1.912)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.027,  -0.013,   0.025) = 0.039m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.027, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.914)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 925] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.026,   0.513,   1.913)
+  Velocity   : ( -0.001,  -0.001,  -0.127)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.026,  -0.013,   0.024) = 0.038m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.026, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.915)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 943] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : (  1.025,   0.513,   1.915)
+  Velocity   : ( -0.001,  -0.001,  -0.128)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.025,  -0.013,   0.023) = 0.036m
+  PID Output : ( -0.001,  -0.001,   0.118) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: ( -0.001,  -0.001,   0.069) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.513, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.917)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 960: Updating cache with pos=(1.025,0.512,1.917)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.025,0.512,1.917)
+[Drone drone] Mode: POSITION → LANDING
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.916)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 961] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.025,   0.512,   1.916)
+  Velocity   : ( -0.001,  -0.001,  -0.128)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.025,  -0.012,   0.022) = 0.035m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    4.22) N (|F|=4.22N)
+  Actual Vel: ( -0.001,  -0.000,   0.013) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.025, 0.512, 1.913)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.909)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.903)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.896)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.887)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.878)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.868)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.858)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.846)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.835)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.822)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.810)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.797)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.783)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.770)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.756)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.742)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.728)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 979] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   1.733)
+  Velocity   : ( -0.000,  -0.000,  -0.513)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   0.204) = 0.206m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    5.76) N (|F|=5.76N)
+  Actual Vel: ( -0.000,  -0.000,  -0.322) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.713)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.699)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.685)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.670)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.655)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.640)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.626)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.611)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.596)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.581)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.566)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.551)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.536)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.520)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.505)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.490)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.475)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.460)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 997] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   1.466)
+  Velocity   : ( -0.000,  -0.000,  -0.543)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   0.472) = 0.472m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    5.88) N (|F|=5.88N)
+  Actual Vel: ( -0.000,  -0.000,  -0.347) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.445)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.429)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.414)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.399)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.384)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.369)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.353)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.338)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.323)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.308)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.293)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.277)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.262)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.247)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.232)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.216)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.201)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.186)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 1015] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   1.192)
+  Velocity   : ( -0.000,  -0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   0.746) = 0.746m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: ( -0.000,  -0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.171)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.155)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.140)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.125)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.110)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 1020: Updating cache with pos=(1.024,0.512,1.110)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.024,0.512,1.110)
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.094)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.079)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.064)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.049)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.033)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.018)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 1.003)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.988)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.972)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.957)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.942)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.927)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.911)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 1033] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   0.917)
+  Velocity   : ( -0.000,  -0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   1.020) = 1.020m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: ( -0.000,  -0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.896)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.881)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.866)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.850)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.835)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.820)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.805)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.789)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.774)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.759)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.744)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.728)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.713)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.698)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.683)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.667)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.652)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.637)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.622)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 1052] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   0.627)
+  Velocity   : ( -0.000,  -0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   1.310) = 1.310m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: ( -0.000,  -0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.606)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.591)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.576)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.561)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.545)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.530)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.515)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.500)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.484)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.469)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.454)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.439)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.423)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.408)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.393)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.378)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.362)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.347)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 1070] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   0.353)
+  Velocity   : (  0.000,  -0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   1.584) = 1.585m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: (  0.000,  -0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.332)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.317)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.301)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.286)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.271)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.256)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.240)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.225)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.210)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.195)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 1080: Updating cache with pos=(1.024,0.512,0.195)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.024,0.512,0.195)
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.179)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.164)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.149)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.134)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.118)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.103)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.088)
+[DBG POSE] set_world_poses() completed without error
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.073)
+[DBG POSE] set_world_poses() completed without error
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 1088] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.024,   0.512,   0.078)
+  Velocity   : ( -0.000,   0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.937)
+  Error      : ( -0.024,  -0.012,   1.859) = 1.859m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: ( -0.000,   0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[Drone drone] Mode: LANDING → DISARMED
+[Drone drone] Landed and disarmed
+[DBG POSE] Trying to set position: (1.024, 0.512, 0.078)
+[DBG POSE] set_world_poses() completed without error
+[DBG CACHE] Frame 1140: Updating cache with pos=(1.024,0.512,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.024,0.512,0.075)
