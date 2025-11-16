@@ -1370,10 +1370,11 @@ def run_sim():
                                 )
                                 
                                 # ALSO spin the rotors for visual effect
-                                max_motor_velocity = 2000.0  # rad/s
-                                motor_velocities = motor_cmds * max_motor_velocity
-                                velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
-                                world_drone_view.set_joint_velocity_targets(velocity_targets)
+                                # DISABLED: Joint velocity targets were locking the drone in place
+                                # max_motor_velocity = 2000.0  # rad/s
+                                # motor_velocities = motor_cmds * max_motor_velocity
+                                # velocity_targets = torch.from_numpy(np.array([motor_velocities], dtype=np.float32))
+                                # world_drone_view.set_joint_velocity_targets(velocity_targets)
                                 
                                 # Old debug output replaced by comprehensive logger
                             else:
