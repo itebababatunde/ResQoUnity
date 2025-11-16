@@ -1323,11 +1323,14 @@ def run_sim():
                                     print(f"[DBG POSE] Trying to set position: ({new_pos[0,0]:.3f}, {new_pos[0,1]:.3f}, {new_pos[0,2]:.3f})")
                                     
                                     # Update visual position in USD stage
+                                    # Try BOTH methods - set_world_poses AND write to sim
                                     try:
                                         world_drone_view.set_world_poses(new_pos, orientations)
-                                        print(f"[DBG POSE] set_world_poses() completed without error")
+                                        # CRITICAL: Force write to simulation to update USD stage
+                                        world_drone_view.write_root_pose_to_sim(new_pos, orientations)
+                                        print(f"[DBG POSE] set_world_poses() + write_root_pose_to_sim() completed")
                                     except Exception as pose_error:
-                                        print(f"[ERROR POSE] set_world_poses() failed: {pose_error}")
+                                        print(f"[ERROR POSE] Pose update failed: {pose_error}")
                                         import traceback
                                         traceback.print_exc()
                                         # If we can't set poses, GPU PhysX is blocking us!
