@@ -1319,18 +1319,17 @@ def run_sim():
                                     new_pos[0, 1] += new_linear_vel[1] * dt  # Y
                                     new_pos[0, 2] += new_linear_vel[2] * dt  # Z
                                     
-                                    # DEBUG: Log what we're trying to set
-                                    if should_log:
-                                        print(f"[DBG POSE] Trying to set position: ({new_pos[0,0]:.3f}, {new_pos[0,1]:.3f}, {new_pos[0,2]:.3f})")
+                                    # DEBUG: ALWAYS log (not gated by should_log)
+                                    print(f"[DBG POSE] Trying to set position: ({new_pos[0,0]:.3f}, {new_pos[0,1]:.3f}, {new_pos[0,2]:.3f})")
                                     
                                     # Update visual position in USD stage
                                     try:
                                         world_drone_view.set_world_poses(new_pos, orientations)
-                                        if should_log:
-                                            print(f"[DBG POSE] set_world_poses() completed without error")
+                                        print(f"[DBG POSE] set_world_poses() completed without error")
                                     except Exception as pose_error:
-                                        if should_log:
-                                            print(f"[ERROR] set_world_poses() failed: {pose_error}")
+                                        print(f"[ERROR POSE] set_world_poses() failed: {pose_error}")
+                                        import traceback
+                                        traceback.print_exc()
                                         # If we can't set poses, GPU PhysX is blocking us!
                                     
                                     # For logging - track the force we calculated
