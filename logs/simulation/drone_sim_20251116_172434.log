@@ -1,0 +1,1332 @@
+================================================================================
+SIMULATION LOG - 2025-11-16 17:24:34
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_172434.log
+================================================================================
+
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: go2, Amount: 1, Terrain: flat
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.005
+	Environment step-size : 0.02
+	Physics GPU pipeline  : True
+	Physics GPU simulation: True
+[INFO]: Time taken for scene creation : 7.167469 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 1
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 1.010150 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 12)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          12 |
++--------+-------------+-------------+
+
+Module omni.isaac.orbit.utils.warp.kernels load on device 'cuda:0' took 1.25 ms
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (235,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |     (3,)    |
+|     1     | base_ang_vel                   |     (3,)    |
+|     2     | projected_gravity              |     (3,)    |
+|     3     | velocity_commands              |     (3,)    |
+|     4     | joint_pos                      |    (12,)    |
+|     5     | joint_vel                      |    (12,)    |
+|     6     | actions                        |    (12,)    |
+|     7     | height_scan                    |    (187,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Event Manager:  <EventManager> contains 1 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
++----------+---------------------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | base_contact |  False   |
++-------+--------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 10 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      1.5 |
+|   1   | track_ang_vel_z_exp  |     0.75 |
+|   2   | lin_vel_z_l2         |     -2.0 |
+|   3   | ang_vel_xy_l2        |    -0.05 |
+|   4   | dof_torques_l2       |  -0.0002 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | feet_air_time        |     0.01 |
+|   8   | flat_orientation_l2  |      0.0 |
+|   9   | dof_pos_limits       |      0.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+Creating window for environment.
+[INFO]: Completed setting up the environment...
+[INFO] Environment created successfully!
+[INFO] Environment wrapped for RSL-RL
+[INFO] Loading experiment from directory: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough
+[INFO]: Loading model checkpoint from: /home/kishi/ResQoUnity/logs/rsl_rl/unitree_go2_rough/2024-04-06_02-37-07/model_7850.pt
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 policy :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=12, bias=True)
+)
+Critic MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+[INFO]: Checkpoint loaded successfully
+[INFO] Resetting environment and getting initial observations...
+[INFO] Environment reset complete, starting simulation loop...
+[INFO] Spawning world-level drone at /World/Drone...
+[INFO] Drone USD loaded at /World/Drone
+[INFO] Drone spawned at position (0.0, 0.0, 2.5)
+[INFO] ArticulationView will be initialized after first physics step
+[Drone drone] Mode: DISARMED → LOITER
+
+================================================================================
+DRONE DEBUG LOGGER INITIALIZED FOR world_drone
+================================================================================
+
+[INFO] Drone controller initialized in ARMED mode (auto-armed)
+[INFO] Mode set to LOITER - will hold spawn position
+[INFO] Debug logger enabled - verbose output active
+[INFO] Drone bottom camera initialized
+[INFO] Drone ROS2 publishers initialized on /drone namespace
+[INFO] Adding /drone namespace ROS2 interface
+[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude
+[INFO] Drone services created:
+  - /drone/arm: True
+  - /drone/takeoff: True
+  - /drone/land: True
+  - /drone/emergency_stop: True
+[INFO] Drone control interface ready on /drone namespace
+Error loading custom environment. You should download custom envs folder from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing
+[INFO] Setting up viewport camera...
+[INFO] Camera positioned to view robot
+[INFO] Robot(s) should now be visible in the viewport!
+[INFO] Use these controls to navigate:
+  - Press 'F' to focus on robot
+  - Mouse wheel: Zoom in/out
+  - Middle mouse: Pan camera
+  - Alt+Left mouse: Orbit view
+  - WASD keys: Move robot (forward/back/left/right)
+  - Q/E keys: Rotate left/right
+[INFO] Initializing ArticulationView after physics step...
+[INFO] Drone mass set to: 0.5 kg (Crazyflie scaled estimate)
+[INFO] Using Hybrid Physics-Velocity Control (GPU PhysX compatible)
+[INFO] Forces → Acceleration → Velocity integration (F=ma)
+[INFO] LOITER target set to spawn position: (-0.00, -0.00, 2.50)
+[SAFETY] World drone initialized:
+  Current pos: (-0.000, -0.000, 2.498)
+  Target pos:  (-0.000, -0.000, 2.498)
+  Mode: LOITER, Armed: True
+[INIT] Drone spawned at position: (-0.000, -0.000, 2.498)
+[INIT] Initial velocity: (0.000, 0.000, -0.196)
+[INIT] Initial mode: LOITER
+[INIT] Ready for control
+
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[INFO] ArticulationView ready - found 1 drone(s)
+[DEBUG] ArticulationView prim paths: ['/World/Drone']
+[DEBUG] Controller initialized at position: (-0.00, -0.00, 2.50)
+[DEBUG] Drone has 4 DOFs: ['m1_joint', 'm2_joint', 'm3_joint', 'm4_joint']
+[DEBUG] Prim at /World/Drone exists: True
+[DEBUG] Found root body (fallback) at: /World/Drone/body
+[DEBUG] Found articulation root at: /World/Drone
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 4] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.490)
+  Velocity   : (  0.000,  -0.000,  -0.211)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : ( -0.000,   0.000,   0.008) = 0.008m
+  PID Output : ( -0.000,   0.000,   0.016) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,  -0.017) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 21] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.447)
+  Velocity   : (  0.000,   0.000,  -0.172)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.051) = 0.051m
+  PID Output : (  0.000,   0.000,   0.105) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.028) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 40] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.424)
+  Velocity   : (  0.000,  -0.000,  -0.106)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : ( -0.000,   0.000,   0.074) = 0.074m
+  PID Output : ( -0.000,   0.000,   0.158) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.093) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 59] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.418)
+  Velocity   : (  0.000,   0.000,  -0.076)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.079) = 0.079m
+  PID Output : (  0.000,   0.000,   0.176) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.121) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 60: Updating cache with pos=(-0.000,-0.000,2.418)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.418)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 78] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.420)
+  Velocity   : (  0.000,  -0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.078) = 0.078m
+  PID Output : (  0.000,   0.000,   0.181) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.131) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 96] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.423)
+  Velocity   : (  0.000,   0.000,  -0.064)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.074) = 0.074m
+  PID Output : (  0.000,   0.000,   0.182) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.133) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 114] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.427)
+  Velocity   : (  0.000,   0.000,  -0.063)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.071) = 0.071m
+  PID Output : (  0.000,   0.000,   0.182) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.133) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 120: Updating cache with pos=(-0.000,-0.000,2.428)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.428)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 133] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.431)
+  Velocity   : (  0.000,   0.000,  -0.064)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.067) = 0.067m
+  PID Output : (  0.000,   0.000,   0.181) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.132) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 152] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.434)
+  Velocity   : (  0.000,   0.000,  -0.064)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.063) = 0.063m
+  PID Output : (  0.000,   0.000,   0.181) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.132) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 171] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.438)
+  Velocity   : (  0.000,   0.000,  -0.065)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.060) = 0.060m
+  PID Output : (  0.000,   0.000,   0.180) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.131) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 180: Updating cache with pos=(-0.000,-0.000,2.439)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.439)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 190] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.441)
+  Velocity   : (  0.000,   0.000,  -0.065)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.057) = 0.057m
+  PID Output : (  0.000,   0.000,   0.180) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.131) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 208] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.444)
+  Velocity   : (  0.000,  -0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.054) = 0.054m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 227] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.447)
+  Velocity   : (  0.000,  -0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.051) = 0.051m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 240: Updating cache with pos=(-0.000,-0.000,2.448)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.448)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 246] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.449)
+  Velocity   : (  0.000,   0.000,  -0.067)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.048) = 0.048m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 265] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.452)
+  Velocity   : (  0.000,   0.000,  -0.067)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.046) = 0.046m
+  PID Output : (  0.000,   0.000,   0.178) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.129) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 284] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.454)
+  Velocity   : (  0.000,   0.000,  -0.067)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.043) = 0.043m
+  PID Output : (  0.000,   0.000,   0.178) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.129) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 300: Updating cache with pos=(-0.000,-0.000,2.456)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.456)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 303] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.457)
+  Velocity   : (  0.000,  -0.000,  -0.068)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.041) = 0.041m
+  PID Output : (  0.000,   0.000,   0.177) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.129) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 321] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.459)
+  Velocity   : (  0.000,   0.000,  -0.068)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.039) = 0.039m
+  PID Output : (  0.000,   0.000,   0.177) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.128) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 339] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.461)
+  Velocity   : (  0.000,  -0.000,  -0.068)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.037) = 0.037m
+  PID Output : (  0.000,   0.000,   0.177) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.128) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 358] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.463)
+  Velocity   : (  0.000,  -0.000,  -0.068)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.035) = 0.035m
+  PID Output : (  0.000,   0.000,   0.177) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.128) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 360: Updating cache with pos=(-0.000,-0.000,2.463)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.463)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 377] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.465)
+  Velocity   : (  0.000,  -0.000,  -0.069)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.033) = 0.033m
+  PID Output : (  0.000,   0.000,   0.176) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.127) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 396] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.466)
+  Velocity   : (  0.000,   0.000,  -0.069)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.031) = 0.031m
+  PID Output : (  0.000,   0.000,   0.176) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,   0.000,   0.127) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 415] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.468)
+  Velocity   : (  0.000,  -0.000,  -0.069)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.030) = 0.030m
+  PID Output : (  0.000,   0.000,   0.176) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.127) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 420: Updating cache with pos=(-0.000,-0.000,2.468)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.468)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[Drone drone] Target position: (-0.00, -0.00, 1.50)
+[Drone drone] Mode: LOITER → POSITION
+[SAFETY] Takeoff service executed:
+  Mode: POSITION
+  Target: (-0.000, -0.000, 1.500)
+  Current: (-0.000, -0.000, 2.469)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 434] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   2.300)
+  Velocity   : (  0.000,  -0.000,  -1.345)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,  -0.800) = 0.800m
+  PID Output : (  0.000,   0.000,  -1.500) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,  -1.202) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+  ⚠️  WARNING: Large altitude error (0.80m)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 453] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.779)
+  Velocity   : (  0.000,  -0.000,  -1.220)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,  -0.279) = 0.279m
+  PID Output : (  0.000,   0.000,  -0.664) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,  -0.982) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 472] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.490)
+  Velocity   : (  0.000,  -0.000,  -0.536)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.010) = 0.010m
+  PID Output : (  0.000,   0.000,  -0.097) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,  -0.314) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 480: Updating cache with pos=(-0.000,-0.000,1.433)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.433)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 491] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.390)
+  Velocity   : (  0.000,  -0.000,  -0.207)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.110) = 0.110m
+  PID Output : (  0.000,   0.000,   0.111) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,  -0.002) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 510] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.365)
+  Velocity   : (  0.000,  -0.000,  -0.095)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.135) = 0.135m
+  PID Output : (  0.000,   0.000,   0.172) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.104) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 529] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.365)
+  Velocity   : (  0.000,  -0.000,  -0.064)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.135) = 0.135m
+  PID Output : (  0.000,   0.000,   0.187) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.133) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[DBG CACHE] Frame 540: Updating cache with pos=(-0.000,-0.000,1.368)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.368)
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 548] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.370)
+  Velocity   : (  0.000,  -0.000,  -0.057)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.130) = 0.130m
+  PID Output : (  0.000,   0.000,   0.190) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.140) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 567] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.377)
+  Velocity   : (  0.000,  -0.000,  -0.056)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.123) = 0.123m
+  PID Output : (  0.000,   0.000,   0.189) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.140) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 586] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.384)
+  Velocity   : (  0.000,  -0.000,  -0.057)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.116) = 0.116m
+  PID Output : (  0.000,   0.000,   0.188) m/s
+  Applied Force: (   0.00,    0.00,    0.00) N (|F|=0.00N)
+  ⚠️  WARNING: No upward force (drone will fall!)
+  Actual Vel: (  0.000,  -0.000,   0.139) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
+[ERROR] Hybrid physics-velocity control failed: name 'should_log' is not defined
