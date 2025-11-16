@@ -1311,6 +1311,17 @@ def run_sim():
                                     
                                     world_drone_view.set_velocities(new_vels)
                                     
+                                    # CRITICAL FIX: Manually integrate position for viewport update
+                                    # World drone is outside env, so env.step() doesn't update its visual position!
+                                    # We must manually apply: new_pos = current_pos + velocity * dt
+                                    new_pos = positions.clone()
+                                    new_pos[0, 0] += new_linear_vel[0] * dt  # X
+                                    new_pos[0, 1] += new_linear_vel[1] * dt  # Y
+                                    new_pos[0, 2] += new_linear_vel[2] * dt  # Z
+                                    
+                                    # Update visual position in USD stage
+                                    world_drone_view.set_world_poses(new_pos, orientations)
+                                    
                                     # For logging - track the force we calculated
                                     applied_force = forces  
                                     
@@ -1408,6 +1419,21 @@ def run_sim():
             if not isinstance(obs, dict):
                 obs = {"policy": obs}
             pub_robo_data_ros2(args_cli.robot, env_cfg.scene.num_envs, base_node, env, annotator_lst, start_time)
+            
+            # Update camera to follow world drone
+            if world_drone_initialized and enable_world_drone:
+                if hasattr(custom_rl_env, 'world_drone_state_cache'):
+                    try:
+                        p = custom_rl_env.world_drone_state_cache['position'].cpu().numpy()
+                        # Camera offset: 3m behind, 3m to the side, 2m up from drone
+                        from omni.isaac.core.utils.viewports import set_camera_view
+                        set_camera_view(
+                            eye=[p[0] + 3.0, p[1] + 3.0, p[2] + 2.0],  # Camera position follows drone
+                            target=[p[0], p[1], p[2]],  # Look at drone
+                            camera_prim_path="/OmniverseKit_Persp"
+                        )
+                    except:
+                        pass  # Camera update is non-critical
             
             # Publish world drone data (if enabled and initialized)
             # Use cached state from control loop to avoid GPU PhysX restrictions
