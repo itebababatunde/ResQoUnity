@@ -11,6 +11,8 @@ import cli_args
 import time
 import os
 import threading
+import sys
+from datetime import datetime
 
 
 # add argparse arguments
@@ -613,7 +615,37 @@ def specify_cmd_for_robots(numv_envs):
     _ensure_base_command_dict()
     for i in range(numv_envs):
         custom_rl_env.base_command[str(i)] = [0, 0, 0]
+
+
+class TeeLogger:
+    """Writes to both console and file"""
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, 'w', buffering=1)  # Line buffered
+        
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+
 def run_sim():
+    # Setup logging to file
+    log_dir = os.path.join(os.path.expanduser("~"), "ResQoUnity", "logs", "simulation")
+    os.makedirs(log_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = os.path.join(log_dir, f"drone_sim_{timestamp}.log")
+    
+    # Redirect stdout to both console and file
+    sys.stdout = TeeLogger(log_file)
+    print(f"{'='*80}")
+    print(f"SIMULATION LOG - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Log file: {log_file}")
+    print(f"{'='*80}\n")
+    
     import omni.appwindow
     
     # acquire input interface
