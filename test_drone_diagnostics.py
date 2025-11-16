@@ -59,9 +59,10 @@ class DroneDiagnostics(Node):
         return self.current_position is not None
     
     def get_position(self):
-        """Get current position, spinning once if needed"""
-        if self.current_position is None:
-            rclpy.spin_once(self, timeout_sec=0.5)
+        """Get current position, spinning to get fresh data"""
+        # Always spin a few times to ensure we get the latest odometry
+        for _ in range(5):
+            rclpy.spin_once(self, timeout_sec=0.05)
         return self.current_position
     
     def call_service_sync(self, client, request, timeout=5.0):

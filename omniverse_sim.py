@@ -372,8 +372,17 @@ def arm_service_cb(request, response, num_robot):
         response.message = "Controller not found"
         return response
     
+    # Only change mode if arming state actually changes
+    was_armed = controller.armed
     controller.armed = request.data
-    controller.set_mode(DroneState.IDLE if request.data else DroneState.DISARMED)
+    
+    if request.data and not was_armed:
+        # Arming from disarmed: switch to IDLE
+        controller.set_mode(DroneState.IDLE)
+    elif not request.data:
+        # Disarming: switch to DISARMED
+        controller.set_mode(DroneState.DISARMED)
+    # else: Already armed, keep current mode (LOITER/POSITION/etc)
     
     response.success = True
     response.message = f"Drone {'armed' if request.data else 'disarmed'}"
@@ -525,8 +534,17 @@ def world_drone_arm_cb(request, response):
             response.message = "Controller not found"
             return response
         
+        # Only change mode if arming state actually changes
+        was_armed = controller.armed
         controller.armed = request.data
-        controller.set_mode(DroneState.IDLE if request.data else DroneState.DISARMED)
+        
+        if request.data and not was_armed:
+            # Arming from disarmed: switch to IDLE
+            controller.set_mode(DroneState.IDLE)
+        elif not request.data:
+            # Disarming: switch to DISARMED
+            controller.set_mode(DroneState.DISARMED)
+        # else: Already armed, keep current mode (LOITER/POSITION/etc)
         
         # Log arm/disarm event
         if logger:
