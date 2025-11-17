@@ -111,7 +111,8 @@ def calculate_drone_forces(desired_velocity, current_velocity, mass, dt=0.016, g
     
     # Gain for acceleration controller (how aggressively to change velocity)
     # Higher = faster response but more oscillation
-    kp_accel = 8.0  # Tuned for responsive but stable control
+    # Increased from 8.0 to 12.0 for better altitude hold (drone was sinking)
+    kp_accel = 12.0  # Tuned for responsive control with minimal altitude loss
     
     desired_accel = kp_accel * velocity_error
     
