@@ -248,77 +248,90 @@ def run_diagnostics(tester):
     # ========================================================================
     print_test(5, "Takeoff & Position Control (Horizontal Movement)")
     
-    # First, takeoff to get back in the air
-    print_info("Sending takeoff command...")
-    request = Trigger.Request()
-    response, error = tester.call_service_sync(tester.takeoff_client, request, timeout=5.0)
+    # Re-arm the drone (landing auto-disarms)
+    print_info("Re-arming drone after landing...")
+    arm_request = SetBool.Request()
+    arm_request.data = True
+    arm_response, arm_error = tester.call_service_sync(tester.arm_client, arm_request, timeout=5.0)
     
-    if error or not response or not response.success:
-        print_fail(f"Takeoff command failed: {error if error else response.message}")
+    if arm_error or not arm_response or not arm_response.success:
+        print_fail(f"Re-arm failed: {arm_error if arm_error else arm_response.message}")
         results['tests'].append({'name': 'Takeoff & Position Control', 'status': 'FAIL'})
         results['failed'] += 1
     else:
-        print_pass("Takeoff command accepted")
-        print_info("Waiting 10 seconds for takeoff...")
-        time.sleep(10)
+        print_pass("Drone re-armed successfully")
         
-        pos_before_move = tester.get_position()
-        print_info(f"Position after takeoff: ({pos_before_move.x:.3f}, {pos_before_move.y:.3f}, {pos_before_move.z:.3f})")
+        # Now takeoff to get back in the air
+        print_info("Sending takeoff command...")
+        request = Trigger.Request()
+        response, error = tester.call_service_sync(tester.takeoff_client, request, timeout=5.0)
         
-        # Send position command
-        cmd = PoseStamped()
-        cmd.header.frame_id = 'odom'
-        cmd.header.stamp = tester.get_clock().now().to_msg()
-        target_x, target_y, target_z = 1.0, 0.5, pos_before_move.z + 0.5
-        cmd.pose.position.x = target_x
-        cmd.pose.position.y = target_y
-        cmd.pose.position.z = target_z
-    
-        print_info(f"Commanding position: ({target_x:.1f}, {target_y:.1f}, {target_z:.1f})")
-        tester.cmd_pos_pub.publish(cmd)
-        
-        print_info("Waiting 15 seconds to reach target...")
-    time.sleep(15)
-    
-    pos_after_move = tester.get_position()
-    print_info(f"Position after: ({pos_after_move.x:.3f}, {pos_after_move.y:.3f}, {pos_after_move.z:.3f})")
-    
-    error_x = abs(pos_after_move.x - target_x)
-    error_y = abs(pos_after_move.y - target_y)
-    error_z = abs(pos_after_move.z - target_z)
-    total_error = math.sqrt(error_x**2 + error_y**2 + error_z**2)
-    
-    print_info(f"Position error: ({error_x:.3f}, {error_y:.3f}, {error_z:.3f}) = {total_error:.3f}m")
-    
-    if total_error < 0.5:
-        print_pass(f"Reached target position (error: {total_error:.3f}m)")
-        results['tests'].append({'name': 'Position Control', 'status': 'PASS'})
-        results['passed'] += 1
-    else:
-        print_fail(f"Did not reach target (error: {total_error:.3f}m > 0.5m threshold)")
-        
-        # Diagnose why
-        horizontal_movement = math.sqrt((pos_after_move.x - pos_before_move.x)**2 + 
-                                       (pos_after_move.y - pos_before_move.y)**2)
-        vertical_movement = abs(pos_after_move.z - pos_before_move.z)
-        
-        if horizontal_movement < 0.1 and vertical_movement < 0.1:
-            print_info("No movement detected - drone is stuck")
-            print_info("Check: Are velocities being applied? Is physics running?")
-        elif horizontal_movement < 0.1:
-            print_info(f"No horizontal movement (only vertical: {vertical_movement:.3f}m)")
-            print_info("Check: Is XY position control working?")
+        if error or not response or not response.success:
+            print_fail(f"Takeoff command failed: {error if error else response.message}")
+            results['tests'].append({'name': 'Takeoff & Position Control', 'status': 'FAIL'})
+            results['failed'] += 1
         else:
-            print_info(f"Drone moved {horizontal_movement:.3f}m horizontally but not to target")
-            print_info("Check: PID gains, maximum velocity limits")
+            print_pass("Takeoff command accepted")
+            print_info("Waiting 10 seconds for takeoff...")
+            time.sleep(10)
+            
+            pos_before_move = tester.get_position()
+            print_info(f"Position after takeoff: ({pos_before_move.x:.3f}, {pos_before_move.y:.3f}, {pos_before_move.z:.3f})")
+            
+            # Send position command
+            cmd = PoseStamped()
+            cmd.header.frame_id = 'odom'
+            cmd.header.stamp = tester.get_clock().now().to_msg()
+            target_x, target_y, target_z = 1.0, 0.5, pos_before_move.z + 0.5
+            cmd.pose.position.x = target_x
+            cmd.pose.position.y = target_y
+            cmd.pose.position.z = target_z
         
-        results['tests'].append({'name': 'Position Control', 'status': 'FAIL'})
-        results['failed'] += 1
+            print_info(f"Commanding position: ({target_x:.1f}, {target_y:.1f}, {target_z:.1f})")
+            tester.cmd_pos_pub.publish(cmd)
+            
+            print_info("Waiting 15 seconds to reach target...")
+            time.sleep(15)
+            
+            pos_after_move = tester.get_position()
+            print_info(f"Position after: ({pos_after_move.x:.3f}, {pos_after_move.y:.3f}, {pos_after_move.z:.3f})")
+            
+            error_x = abs(pos_after_move.x - target_x)
+            error_y = abs(pos_after_move.y - target_y)
+            error_z = abs(pos_after_move.z - target_z)
+            total_error = math.sqrt(error_x**2 + error_y**2 + error_z**2)
+            
+            print_info(f"Position error: ({error_x:.3f}, {error_y:.3f}, {error_z:.3f}) = {total_error:.3f}m")
+            
+            if total_error < 0.5:
+                print_pass(f"Reached target position (error: {total_error:.3f}m)")
+                results['tests'].append({'name': 'Position Control', 'status': 'PASS'})
+                results['passed'] += 1
+            else:
+                print_fail(f"Did not reach target (error: {total_error:.3f}m > 0.5m threshold)")
+                
+                # Diagnose why
+                horizontal_movement = math.sqrt((pos_after_move.x - pos_before_move.x)**2 + 
+                                               (pos_after_move.y - pos_before_move.y)**2)
+                vertical_movement = abs(pos_after_move.z - pos_before_move.z)
+                
+                if horizontal_movement < 0.1 and vertical_movement < 0.1:
+                    print_info("No movement detected - drone is stuck")
+                    print_info("Check: Are velocities being applied? Is physics running?")
+                elif horizontal_movement < 0.1:
+                    print_info(f"No horizontal movement (only vertical: {vertical_movement:.3f}m)")
+                    print_info("Check: Is XY position control working?")
+                else:
+                    print_info(f"Drone moved {horizontal_movement:.3f}m horizontally but not to target")
+                    print_info("Check: PID gains, maximum velocity limits")
+                
+                results['tests'].append({'name': 'Position Control', 'status': 'FAIL'})
+                results['failed'] += 1
     
     # ========================================================================
-    # TEST 7: Land Service
+    # TEST 6: Land Service (Final)
     # ========================================================================
-    print_test(7, "Land Service")
+    print_test(6, "Land Service (Final)")
     
     request = Trigger.Request()
     response, error = tester.call_service_sync(tester.land_client, request, timeout=10.0)
