@@ -16,9 +16,9 @@ class SquareSurvey(Node):
     def goto(self, x, y, z):
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.pose.position.x = x
-        msg.pose.position.y = y
-        msg.pose.position.z = z
+        msg.pose.position.x = float(x)
+        msg.pose.position.y = float(y)
+        msg.pose.position.z = float(z)
         msg.pose.orientation.w = 1.0
         self.pos_pub.publish(msg)
 
