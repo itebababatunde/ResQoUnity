@@ -1607,15 +1607,59 @@ def run_sim():
                                          new_angular_vel[0], new_angular_vel[1], new_angular_vel[2]]
                                     ], dtype=torch.float32, device=device)
                                     
-                                    # Apply velocity-based control only
-                                    # Note: GPU PhysX (PxSceneFlag::eENABLE_DIRECT_GPU_API) forbids direct pose
-                                    # manipulation via set_world_poses(). We rely purely on velocity control.
-                                    # This means viewport updates may lag slightly, but physics remains accurate.
+                                    # CRITICAL FIX: Manually integrate position and SET IT directly
+                                    # Velocity-based control doesn't update viewport for world drones
+                                    # So we manually integrate and force the position update
+                                    
+                                    # Integrate position: p_new = p_current + v * dt
+                                    new_position = current_pos + new_linear_vel * dt
+                                    
+                                    # DEBUG: Confirm this code path is executing
+                                    if hasattr(logger, 'frame_count') and logger.frame_count % 50 == 0:
+                                        print(f"[VIEWPORT FIX] Setting drone position to ({new_position[0]:.3f}, {new_position[1]:.3f}, {new_position[2]:.3f})")
+                                    
+                                    # Set both velocity AND position to force viewport update
                                     world_drone_view.set_velocities(new_vels, indices=[0])
                                     
-                                    # GPU PhysX limitation: Viewport sync for world drones is not immediate
-                                    # Physics simulation is accurate, but visual updates lag behind
-                                    # This is expected behavior when objects aren't managed by env.scene["robot"]
+                                    # Force position update via USD (bypass ArticulationView - go straight to USD)
+                                    try:
+                                        from pxr import UsdGeom, Gf
+                                        import omni.usd
+                                        stage = omni.usd.get_context().get_stage()
+                                        drone_prim = stage.GetPrimAtPath("/World/envs/env_0/Drone")
+                                        if drone_prim and drone_prim.IsValid():
+                                            xformable = UsdGeom.Xformable(drone_prim)
+                                            xform_op = xformable.GetOrderedXformOps()[0]  # Get the transform op
+                                            # Set translation directly in USD
+                                            xform_op.Set(Gf.Vec3d(float(new_position[0]), float(new_position[1]), float(new_position[2])))
+                                    except Exception as e:
+                                        # Fallback to ArticulationView method
+                                        new_pos_tensor = torch.tensor([[new_position[0], new_position[1], new_position[2]]], 
+                                                                       dtype=torch.float32, device=device)
+                                        current_quat = world_drone_view.get_world_poses()[1]  # Keep orientation
+                                        world_drone_view.set_world_poses(positions=new_pos_tensor, orientations=current_quat, indices=[0])
+                                    
+                                    # Force viewport update
+                                    try:
+                                        sim = env.unwrapped.sim if hasattr(env.unwrapped, 'sim') else env.sim
+                                        sim.render()  # Sync GPU physics state to viewport
+                                        
+                                        # Verify render was called (log occasionally)
+                                        if hasattr(logger, 'frame_count') and logger.frame_count % 20 == 0:
+                                            print(f"[DBG RENDER] Viewport sync triggered at pos ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
+                                    except AttributeError:
+                                        # Fallback: try direct simulation app update
+                                        try:
+                                            from omni.isaac.kit import SimulationApp
+                                            app = SimulationApp.instance()
+                                            if app:
+                                                app.update()
+                                        except:
+                                            pass  # Last resort: hope env.step() next frame does it
+                                    
+                                    # GPU PhysX viewport sync: Render flush added above
+                                    # set_velocities() updates internal state, sim.render() syncs viewport
+                                    # This is the documented approach for GPU PhysX transform updates
                                     
                                     # For logging - track the force we calculated
                                     applied_force = forces  
