@@ -42,10 +42,10 @@ QUADCOPTER_CFG = ArticulationCfg(
     actuators={
         "rotors": ImplicitActuatorCfg(
             joint_names_expr=["m1_joint", "m2_joint", "m3_joint", "m4_joint"],
-            effort_limit=1.0,
-            velocity_limit=100.0,
-            stiffness=0.0,
-            damping=0.01,
+            effort_limit=100.0,  # Increased - rotors need high torque
+            velocity_limit=2000.0,  # rad/s (~19000 RPM max)
+            stiffness=0.0,  # No position stiffness
+            damping=0.0,  # No damping - let motors spin freely
         ),
     },
 )
