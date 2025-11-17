@@ -27,7 +27,7 @@ QUADCOPTER_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 1.0),  # Start at 1m height
+        pos=(0.0, 0.0, 2.5),  # Start at 2.5m height - high enough to avoid ground contact
         rot=(1.0, 0.0, 0.0, 0.0),  # Identity quaternion
         joint_pos={
             # Quadcopter typically has 4 rotor joints
