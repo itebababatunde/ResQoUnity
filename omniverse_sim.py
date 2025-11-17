@@ -963,7 +963,10 @@ def run_sim():
                 
                 # Calculate drone mass once  
                 if not hasattr(custom_rl_env, 'env_drone_mass'):
-                    custom_rl_env.env_drone_mass = 0.5  # kg (Crazyflie 5x scaled estimate)
+                    # Crazyflie real: 27g. Scaled 5x: volume scales as 5³=125x
+                    # Mass scales as volume (assuming same density): 27g × 125 = 3.375kg
+                    # But effective mass might be lower due to thrust scaling
+                    custom_rl_env.env_drone_mass = 1.5  # kg (increased from 0.5 for better altitude hold)
                     print(f"[INFO] Environment drone mass: {custom_rl_env.env_drone_mass}kg")
                 
                 # Build velocity commands for all environments
