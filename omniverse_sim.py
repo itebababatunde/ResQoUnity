@@ -1614,6 +1614,10 @@ def run_sim():
                                     # Integrate position: p_new = p_current + v * dt
                                     new_position = current_pos + new_linear_vel * dt
                                     
+                                    # DEBUG: Confirm this code path is executing
+                                    if hasattr(logger, 'frame_count') and logger.frame_count % 50 == 0:
+                                        print(f"[VIEWPORT FIX] Setting drone position to ({new_position[0]:.3f}, {new_position[1]:.3f}, {new_position[2]:.3f})")
+                                    
                                     # Set both velocity AND position to force viewport update
                                     world_drone_view.set_velocities(new_vels, indices=[0])
                                     
