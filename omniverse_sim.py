@@ -1675,8 +1675,9 @@ def run_sim():
                                     pass  # Best effort
                                 
                                 # Also zero motor velocities
-                                zero_motor = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_velocity_targets(zero_motor)
+                                # NOTE: DON'T set joint velocity targets - they override root body movement!
+                                # zero_motor = torch.zeros((1, 4), dtype=torch.float32)
+                                # world_drone_view.set_joint_velocity_targets(zero_motor)
                                 
                                 applied_force = np.zeros(3)
                                 applied_vel = np.zeros(3)
@@ -1691,8 +1692,9 @@ def run_sim():
                                 current_vels = world_drone_view.get_velocities()
                                 current_vels[0, :6] = 0.0  # Zero all root velocities
                                 world_drone_view.set_velocities(current_vels)
-                                zero_motor = torch.zeros((1, 4), dtype=torch.float32)
-                                world_drone_view.set_joint_velocity_targets(zero_motor)
+                                # NOTE: DON'T set joint velocity targets - they override root body movement!
+                                # zero_motor = torch.zeros((1, 4), dtype=torch.float32)
+                                # world_drone_view.set_joint_velocity_targets(zero_motor)
                         except:
                             pass  # Best effort
                 
