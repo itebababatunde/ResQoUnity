@@ -586,13 +586,13 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
     if enable_world_drone:
         print("[INFO] Adding /drone namespace ROS2 interface")
         try:
-        # Topics
-        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
-        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
-        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+            # Topics
+            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
             print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
         
-        # Services
+            # Services
             arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
             takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
             land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
@@ -602,7 +602,7 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
             print(f"  - /drone/takeoff: {takeoff_srv is not None}")
             print(f"  - /drone/land: {land_srv is not None}")
             print(f"  - /drone/emergency_stop: {estop_srv is not None}")
-        print("[INFO] Drone control interface ready on /drone namespace")
+            print("[INFO] Drone control interface ready on /drone namespace")
         except Exception as e:
             print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
             import traceback
