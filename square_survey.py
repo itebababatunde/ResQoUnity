@@ -26,11 +26,18 @@ def main():
     rclpy.init()
     drone = SquareSurvey()
     
+    # Wait for services to be available
+    print("Waiting for drone services...")
+    drone.arm_client.wait_for_service(timeout_sec=10.0)
+    drone.takeoff_client.wait_for_service(timeout_sec=10.0)
+    drone.land_client.wait_for_service(timeout_sec=10.0)
+    
     # Arm (drone already hovering at 2.5m, skip takeoff)
     print("Arming drone...")
     req = SetBool.Request()
     req.data = True
-    drone.arm_client.call(req)
+    future = drone.arm_client.call_async(req)
+    rclpy.spin_until_future_complete(drone, future, timeout_sec=5.0)
     time.sleep(2)
     
     # Survey 5x5 meter square (drone already at ~2.5m)
@@ -44,7 +51,8 @@ def main():
     
     # Land
     print("Landing...")
-    drone.land_client.call(Trigger.Request())
+    future = drone.land_client.call_async(Trigger.Request())
+    rclpy.spin_until_future_complete(drone, future, timeout_sec=5.0)
     time.sleep(5)
     
     print("Mission complete!")
