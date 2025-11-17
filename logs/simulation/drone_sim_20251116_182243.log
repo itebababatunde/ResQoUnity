@@ -1,0 +1,14 @@
+================================================================================
+SIMULATION LOG - 2025-11-16 18:22:43
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_182243.log
+================================================================================
+
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: drone, Amount: 1, Terrain: flat
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.005
+	Environment step-size : 0.02
+	Physics GPU pipeline  : True
+	Physics GPU simulation: True
