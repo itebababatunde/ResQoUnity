@@ -1,0 +1,44 @@
+{
+  "test_1_freefall": {
+    "description": "Measure mass from free fall",
+    "duration": 3.0,
+    "initial_height": 5.0,
+    "control_enabled": false,
+    "record": [
+      "position",
+      "velocity",
+      "time"
+    ]
+  },
+  "test_2_hover_sweep": {
+    "description": "Find minimum hover force",
+    "duration": 5.0,
+    "force_range": [
+      10.0,
+      20.0
+    ],
+    "force_steps": 10,
+    "record": [
+      "position",
+      "velocity",
+      "force",
+      "time"
+    ]
+  },
+  "test_3_pid_tuning": {
+    "description": "Auto-tune PID with Ziegler-Nichols",
+    "duration": 10.0,
+    "kp_range": [
+      5.0,
+      30.0
+    ],
+    "kp_steps": 6,
+    "target_altitude": 2.0,
+    "record": [
+      "position",
+      "velocity",
+      "command",
+      "time"
+    ]
+  }
+}

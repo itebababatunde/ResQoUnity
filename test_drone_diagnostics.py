@@ -204,80 +204,80 @@ def run_diagnostics(tester):
         results['failed'] += 1
     
     # ========================================================================
-    # TEST 4: Takeoff Service
+    # TEST 4: Landing Test #1
     # ========================================================================
-    print_test(4, "Takeoff Service")
+    print_test(4, "Landing from Hover (Test #1)")
+    print_info("Testing landing capability before moving drone")
+    
+    pos_before_land = tester.get_position()
+    print_info(f"Altitude before landing: {pos_before_land.z:.3f}m")
     
     request = Trigger.Request()
-    response, error = tester.call_service_sync(tester.takeoff_client, request)
+    response, error = tester.call_service_sync(tester.land_client, timeout=10.0)
     
-    if error or not response:
-        print_fail(f"Takeoff service failed: {error}")
-        print_info("Check: Is /drone/takeoff service available?")
-        results['tests'].append({'name': 'Takeoff Service', 'status': 'FAIL'})
+    if error:
+        print_fail(f"Land service failed: {error}")
+        print_info("Common causes: Service timeout, callback exception, ROS2 node not spinning")
+        results['tests'].append({'name': 'Landing Test #1', 'status': 'FAIL'})
         results['failed'] += 1
-    elif response.success:
-        print_pass("Takeoff command accepted", response.message)
-        results['tests'].append({'name': 'Takeoff Service', 'status': 'PASS'})
-        results['passed'] += 1
+    elif response and response.success:
+        print_pass("Land command accepted", response.message)
+        print_info("Waiting 15 seconds for landing...")
+        time.sleep(15)
+        
+        pos_after_land = tester.get_position()
+        altitude_final = pos_after_land.z
+        print_info(f"Final altitude: {altitude_final:.3f}m")
+        
+        if altitude_final < 0.2:
+            print_pass(f"Drone landed successfully (Z={altitude_final:.3f}m)")
+            results['tests'].append({'name': 'Landing Test #1', 'status': 'PASS'})
+            results['passed'] += 1
+        else:
+            print_fail(f"Drone did not reach ground (Z={altitude_final:.3f}m)")
+            print_info("Check: Is landing descent rate correct? Is drone stuck?")
+            results['tests'].append({'name': 'Landing Test #1', 'status': 'FAIL'})
+            results['failed'] += 1
     else:
-        print_fail("Takeoff service returned failure", response.message)
-        results['tests'].append({'name': 'Takeoff Service', 'status': 'FAIL'})
+        print_fail("Land service returned failure", response.message if response else "No response")
+        results['tests'].append({'name': 'Landing Test #1', 'status': 'FAIL'})
         results['failed'] += 1
     
     # ========================================================================
-    # TEST 5: Altitude Change After Takeoff
+    # TEST 5: Takeoff and Position Command
     # ========================================================================
-    print_test(5, "Altitude Change After Takeoff")
+    print_test(5, "Takeoff & Position Control (Horizontal Movement)")
     
-    pos_before_takeoff = tester.get_position()
-    print_info(f"Altitude before takeoff: {pos_before_takeoff.z:.3f}m")
-    print_info("Waiting 10 seconds for takeoff...")
+    # First, takeoff to get back in the air
+    print_info("Sending takeoff command...")
+    request = Trigger.Request()
+    response, error = tester.call_service_sync(tester.takeoff_client, timeout=5.0)
     
-    time.sleep(10)
-    
-    pos_after_takeoff = tester.get_position()
-    altitude_gain = pos_after_takeoff.z - pos_before_takeoff.z
-    print_info(f"Altitude after takeoff: {pos_after_takeoff.z:.3f}m")
-    print_info(f"Altitude gain: {altitude_gain:+.3f}m")
-    
-    if altitude_gain > 0.2:
-        print_pass(f"Drone climbed {altitude_gain:.3f}m")
-        results['tests'].append({'name': 'Takeoff Altitude Gain', 'status': 'PASS'})
-        results['passed'] += 1
-    elif abs(altitude_gain) < 0.05:
-        print_fail(f"No altitude change detected ({altitude_gain:.3f}m)")
-        print_info("Physics reports position change but actual position unchanged")
-        print_info("Possible: Velocities not being applied to physics state")
-        results['tests'].append({'name': 'Takeoff Altitude Gain', 'status': 'FAIL'})
+    if error or not response or not response.success:
+        print_fail(f"Takeoff command failed: {error if error else response.message}")
+        results['tests'].append({'name': 'Takeoff & Position Control', 'status': 'FAIL'})
         results['failed'] += 1
     else:
-        print_fail(f"Drone descended {altitude_gain:.3f}m (should climb)")
-        print_info("Check: Is vertical control inverted? Are forces being applied?")
-        results['tests'].append({'name': 'Takeoff Altitude Gain', 'status': 'FAIL'})
-        results['failed'] += 1
+        print_pass("Takeoff command accepted")
+        print_info("Waiting 10 seconds for takeoff...")
+        time.sleep(10)
+        
+        pos_before_move = tester.get_position()
+        print_info(f"Position after takeoff: ({pos_before_move.x:.3f}, {pos_before_move.y:.3f}, {pos_before_move.z:.3f})")
+        
+        # Send position command
+        cmd = PoseStamped()
+        cmd.header.frame_id = 'odom'
+        cmd.header.stamp = tester.get_clock().now().to_msg()
+        target_x, target_y, target_z = 1.0, 0.5, pos_before_move.z + 0.5
+        cmd.pose.position.x = target_x
+        cmd.pose.position.y = target_y
+        cmd.pose.position.z = target_z
     
-    # ========================================================================
-    # TEST 6: Position Command
-    # ========================================================================
-    print_test(6, "Position Control (Horizontal Movement)")
-    
-    pos_before_move = tester.get_position()
-    print_info(f"Position before: ({pos_before_move.x:.3f}, {pos_before_move.y:.3f}, {pos_before_move.z:.3f})")
-    
-    # Send position command
-    cmd = PoseStamped()
-    cmd.header.frame_id = 'odom'
-    cmd.header.stamp = tester.get_clock().now().to_msg()
-    target_x, target_y, target_z = 1.0, 0.5, pos_before_move.z + 0.5
-    cmd.pose.position.x = target_x
-    cmd.pose.position.y = target_y
-    cmd.pose.position.z = target_z
-    
-    print_info(f"Commanding position: ({target_x:.1f}, {target_y:.1f}, {target_z:.1f})")
-    tester.cmd_pos_pub.publish(cmd)
-    
-    print_info("Waiting 15 seconds to reach target...")
+        print_info(f"Commanding position: ({target_x:.1f}, {target_y:.1f}, {target_z:.1f})")
+        tester.cmd_pos_pub.publish(cmd)
+        
+        print_info("Waiting 15 seconds to reach target...")
     time.sleep(15)
     
     pos_after_move = tester.get_position()

@@ -28,6 +28,7 @@ parser.add_argument("--custom_env", type=str, default="office", help="Setup the 
 parser.add_argument("--robot", type=str, default="go2", help="Setup the robot")
 parser.add_argument("--terrain", type=str, default="rough", help="Setup the robot")
 parser.add_argument("--robot_amount", type=int, default=2, help="Setup the robot amount")
+parser.add_argument("--calibrate", action="store_true", default=False, help="Run physics calibration tests")
 
 
 # append RSL-RL cli arguments
@@ -111,8 +112,9 @@ def calculate_drone_forces(desired_velocity, current_velocity, mass, dt=0.016, g
     
     # Gain for acceleration controller (how aggressively to change velocity)
     # Higher = faster response but more oscillation
-    # Increased from 8.0 to 12.0 for better altitude hold (drone was sinking)
-    kp_accel = 12.0  # Tuned for responsive control with minimal altitude loss
+    # Increased from 8.0 → 12.0 → 15.0 for better altitude hold
+    # Drone was still sinking 15cm over 10 sec, needs stronger forces
+    kp_accel = 15.0  # Aggressive gains for stable hovering despite damping
     
     desired_accel = kp_accel * velocity_error
     
@@ -964,17 +966,164 @@ def run_sim():
                 
                 # Calculate drone mass once  
                 if not hasattr(custom_rl_env, 'env_drone_mass'):
-                    # Crazyflie real: 27g. Scaled 5x: volume scales as 5³=125x
-                    # Mass scales as volume (assuming same density): 27g × 125 = 3.375kg
-                    # But effective mass might be lower due to thrust scaling
-                    custom_rl_env.env_drone_mass = 1.5  # kg (increased from 0.5 for better altitude hold)
+                    # CALIBRATION MODE: Measure actual mass from USD
+                    if args_cli.calibrate:
+                        # Get mass from physics properties
+                        try:
+                            link_masses = robot.get_masses()  # Returns (num_envs, num_links)
+                            measured_mass = float(link_masses[0].sum().cpu())
+                            custom_rl_env.env_drone_mass = measured_mass
+                            print(f"[CALIBRATION] Measured mass from USD: {measured_mass:.6f} kg")
+                            print(f"[CALIBRATION] Real Crazyflie: 0.027 kg, Scaled 5x (vol×125): 3.375 kg")
+                            print(f"[CALIBRATION] USD mass is {measured_mass/0.027:.1f}x real mass")
+                        except Exception as e:
+                            print(f"[WARNING] Could not measure mass from USD: {e}")
+                            custom_rl_env.env_drone_mass = 1.5  # Fallback
+                    else:
+                        # Normal mode: Use hardcoded value (will be updated after calibration)
+                        # Crazyflie real: 27g. Scaled 5x: volume scales as 5³=125x
+                        # Mass scales as volume (assuming same density): 27g × 125 = 3.375kg
+                        # But effective mass might be lower due to thrust scaling
+                        custom_rl_env.env_drone_mass = 1.5  # kg (increased from 0.5 for better altitude hold)
+                    
                     print(f"[INFO] Environment drone mass: {custom_rl_env.env_drone_mass}kg")
+                    
+                    # CALIBRATION MODE: Initialize data collection
+                    if args_cli.calibrate:
+                        custom_rl_env.calibration_data = {
+                            'mass': custom_rl_env.env_drone_mass,
+                            'test_1_freefall': [],
+                            'test_2_hover_sweep': [],
+                            'test_3_pid_tuning': [],
+                            'timestamp': time.time()
+                        }
+                        custom_rl_env.calibration_phase = 'test_1_freefall'
+                        custom_rl_env.calibration_start_time = time.time()
+                        print("[CALIBRATION] Data collection initialized")
+                        print("[CALIBRATION] Phase 1: Free-fall test (3 seconds)")
                 
                 # Build velocity commands for all environments
                 new_velocities_list = []
                 
                 for env_idx in range(num_envs):
                     controller = custom_rl_env.drone_controllers.get(str(env_idx))
+                    
+                    # CALIBRATION MODE: Override normal control with test sequences
+                    if args_cli.calibrate and hasattr(custom_rl_env, 'calibration_phase'):
+                        current_pos = robot.data.root_pos_w[env_idx].cpu().numpy()
+                        current_vel = robot.data.root_lin_vel_w[env_idx].cpu().numpy()
+                        elapsed = time.time() - custom_rl_env.calibration_start_time
+                        
+                        # Test 1: Free-fall (3 seconds, control disabled)
+                        if custom_rl_env.calibration_phase == 'test_1_freefall':
+                            if elapsed < 3.0:
+                                # Record position and velocity during free fall
+                                custom_rl_env.calibration_data['test_1_freefall'].append({
+                                    'time': elapsed,
+                                    'position': current_pos.tolist(),
+                                    'velocity': current_vel.tolist()
+                                })
+                                # Apply no control (free fall with damping)
+                                new_velocities_list.append(current_vel * 0.95)  # Just damping
+                                continue
+                            else:
+                                # Move to Test 2
+                                print(f"[CALIBRATION] Test 1 complete. Collected {len(custom_rl_env.calibration_data['test_1_freefall'])} samples")
+                                custom_rl_env.calibration_phase = 'test_2_hover_sweep'
+                                custom_rl_env.calibration_start_time = time.time()
+                                custom_rl_env.hover_test_force_idx = 0
+                                print("[CALIBRATION] Phase 2: Hover force sweep (50 seconds)")
+                        
+                        # Test 2: Hover force sweep (10 forces × 5 seconds each)
+                        elif custom_rl_env.calibration_phase == 'test_2_hover_sweep':
+                            force_range = np.linspace(10.0, 20.0, 10)  # Test 10-20N
+                            test_duration = 5.0  # 5 seconds per force level
+                            
+                            if not hasattr(custom_rl_env, 'hover_test_force_idx'):
+                                custom_rl_env.hover_test_force_idx = 0
+                            
+                            force_idx = int(elapsed // test_duration)
+                            if force_idx < len(force_range):
+                                test_force = force_range[force_idx]
+                                
+                                # Apply constant upward force
+                                dt = 1.0 / 60.0
+                                force_vec = np.array([0.0, 0.0, test_force])
+                                accel = force_vec / custom_rl_env.env_drone_mass
+                                new_vel = current_vel + accel * dt
+                                new_vel *= 0.95  # Damping
+                                
+                                # Record data
+                                custom_rl_env.calibration_data['test_2_hover_sweep'].append({
+                                    'time': elapsed,
+                                    'force': test_force,
+                                    'position': current_pos.tolist(),
+                                    'velocity': current_vel.tolist()
+                                })
+                                
+                                new_velocities_list.append(new_vel)
+                                
+                                if elapsed % 1.0 < dt:  # Log every second
+                                    print(f"[CALIBRATION] Force={test_force:.1f}N, Alt={current_pos[2]:.3f}m, Vz={current_vel[2]:.3f}m/s")
+                                continue
+                            else:
+                                # Move to Test 3
+                                print(f"[CALIBRATION] Test 2 complete. Tested {len(force_range)} force levels")
+                                custom_rl_env.calibration_phase = 'test_3_pid_tuning'
+                                custom_rl_env.calibration_start_time = time.time()
+                                print("[CALIBRATION] Phase 3: PID tuning (60 seconds)")
+                        
+                        # Test 3: PID auto-tuning (6 gains × 10 seconds each)
+                        elif custom_rl_env.calibration_phase == 'test_3_pid_tuning':
+                            kp_range = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0]
+                            test_duration = 10.0
+                            target_altitude = 2.0
+                            
+                            kp_idx = int(elapsed // test_duration)
+                            if kp_idx < len(kp_range):
+                                test_kp = kp_range[kp_idx]
+                                
+                                # Simple P control for altitude
+                                error_z = target_altitude - current_pos[2]
+                                desired_vz = test_kp * error_z
+                                desired_vz = np.clip(desired_vz, -2.0, 2.0)
+                                
+                                # Calculate force for desired velocity
+                                vel_error = desired_vz - current_vel[2]
+                                force_z = custom_rl_env.env_drone_mass * (15.0 * vel_error + 9.81)
+                                
+                                dt = 1.0 / 60.0
+                                accel = force_z / custom_rl_env.env_drone_mass
+                                new_vel = np.array([0.0, 0.0, current_vel[2] + accel * dt])
+                                new_vel *= 0.95
+                                
+                                # Record data
+                                if kp_idx >= len(custom_rl_env.calibration_data['test_3_pid_tuning']):
+                                    custom_rl_env.calibration_data['test_3_pid_tuning'].append({
+                                        'kp': test_kp,
+                                        'data': []
+                                    })
+                                custom_rl_env.calibration_data['test_3_pid_tuning'][kp_idx]['data'].append({
+                                    'time': elapsed,
+                                    'position': current_pos.tolist(),
+                                    'velocity': current_vel.tolist(),
+                                    'command': desired_vz
+                                })
+                                
+                                new_velocities_list.append(new_vel)
+                                
+                                if elapsed % 1.0 < dt:
+                                    print(f"[CALIBRATION] Kp={test_kp:.1f}, Alt={current_pos[2]:.3f}m (target={target_altitude}m)")
+                                continue
+                            else:
+                                # Calibration complete! Save results
+                                print("[CALIBRATION] All tests complete!")
+                                import json
+                                with open('calibration_data.json', 'w') as f:
+                                    json.dump(custom_rl_env.calibration_data, f, indent=2)
+                                print("[CALIBRATION] Results saved to calibration_data.json")
+                                print("[CALIBRATION] Run: python calibrate_drone_physics.py --analyze calibration_data.json")
+                                custom_rl_env.calibration_phase = 'complete'
                     
                     if controller and controller.armed:
                         # Get current state from environment

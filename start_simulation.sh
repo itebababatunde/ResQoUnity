@@ -25,12 +25,17 @@ ROBOT_TYPE="${1:-go2}"        # Default: go2 (also accepts: drone, quadcopter, g
 ROBOT_AMOUNT="${2:-1}"        # Default: 1 robot
 TERRAIN="${3:-flat}"          # Default: flat (also accepts: rough)
 CUSTOM_ENV="${4:-office}"     # Default: office (also accepts: warehouse)
+shift 4 2>/dev/null || true  # Remove parsed args, keep any extras
+EXTRA_ARGS="$@"               # Capture remaining args (e.g., --calibrate)
 
 echo -e "${YELLOW}Configuration:${NC}"
 echo -e "  Robot Type:    ${GREEN}$ROBOT_TYPE${NC}"
 echo -e "  Robot Amount:  ${GREEN}$ROBOT_AMOUNT${NC}"
 echo -e "  Terrain:       ${GREEN}$TERRAIN${NC}"
 echo -e "  Environment:   ${GREEN}$CUSTOM_ENV${NC}"
+if [ -n "$EXTRA_ARGS" ]; then
+    echo -e "  Extra Args:    ${GREEN}$EXTRA_ARGS${NC}"
+fi
 echo ""
 
 # Show controls based on robot type
@@ -209,7 +214,8 @@ ${ISAACSIM_PYTHON_EXE} main.py \
     --robot $ROBOT_TYPE \
     --robot_amount $ROBOT_AMOUNT \
     --terrain $TERRAIN \
-    --custom_env $CUSTOM_ENV
+    --custom_env $CUSTOM_ENV \
+    $EXTRA_ARGS
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
