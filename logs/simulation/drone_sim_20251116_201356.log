@@ -1,0 +1,656 @@
+================================================================================
+SIMULATION LOG - 2025-11-16 20:13:56
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_201356.log
+================================================================================
+
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: drone, Amount: 1, Terrain: flat
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.005
+	Environment step-size : 0.02
+	Physics GPU pipeline  : True
+	Physics GPU simulation: True
+[INFO]: Time taken for scene creation : 1.197077 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 1
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 0.935641 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++----------------------------------+
+|  Active Action Terms (shape: 4)  |
++--------+------------+------------+
+| Index  | Name       |  Dimension |
++--------+------------+------------+
+|   0    | joint_pos  |          4 |
++--------+------------+------------+
+
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++---------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (24,)) |
++-----------+---------------------------------+-----------+
+|   Index   | Name                            |   Shape   |
++-----------+---------------------------------+-----------+
+|     0     | base_lin_vel                    |    (3,)   |
+|     1     | base_ang_vel                    |    (3,)   |
+|     2     | projected_gravity               |    (3,)   |
+|     3     | velocity_commands               |    (3,)   |
+|     4     | joint_pos                       |    (4,)   |
+|     5     | joint_vel                       |    (4,)   |
+|     6     | actions                         |    (4,)   |
++-----------+---------------------------------+-----------+
+
+[INFO] Event Manager:  <EventManager> contains 1 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
++----------+---------------------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 1 active terms.
++-----------------------------+
+|   Active Termination Terms  |
++-------+----------+----------+
+| Index | Name     | Time Out |
++-------+----------+----------+
+|   0   | time_out |   True   |
++-------+----------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 9 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      1.0 |
+|   1   | track_ang_vel_z_exp  |      0.5 |
+|   2   | lin_vel_z_l2         |     -1.0 |
+|   3   | ang_vel_xy_l2        |     -0.1 |
+|   4   | dof_torques_l2       |   -1e-06 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | flat_orientation_l2  |     -1.0 |
+|   8   | dof_pos_limits       |      0.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
++----------------------+
+| Active Curriculum Terms |
++-----------+----------+
+|   Index   | Name     |
++-----------+----------+
++-----------+----------+
+
+Creating window for environment.
+[INFO]: Completed setting up the environment...
+[INFO] Environment created successfully!
+[INFO] Environment wrapped for RSL-RL
+[INFO] Loading experiment from directory: /home/kishi/ResQoUnity/logs/rsl_rl/quadcopter_rough
+[WARN] No checkpoint found at /home/kishi/ResQoUnity/logs/rsl_rl/quadcopter_rough
+[INFO] Running in MANUAL CONTROL mode (keyboard only, no RL policy)
+[INFO] Initializing drone controllers...
+[Drone 0] Mode: DISARMED → IDLE
+[INFO] Drone 0 controller initialized and ARMED in IDLE (will switch to LOITER after spawn)
+[INFO] Resetting environment and getting initial observations...
+[INFO] Environment reset complete, starting simulation loop...
+Error loading custom environment. You should download custom envs folder from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing
+[INFO] Setting up viewport camera...
+[INFO] Camera positioned to view robot
+[INFO] Robot(s) should now be visible in the viewport!
+[INFO] Use these controls to navigate:
+  - Press 'F' to focus on robot
+  - Mouse wheel: Zoom in/out
+  - Middle mouse: Pan camera
+  - Alt+Left mouse: Orbit view
+  - WASD keys: Move robot (forward/back/left/right)
+  - Q/E keys: Rotate left/right
+  - T/G keys: Altitude up/down (for drone)
+[WARNING] Could not measure mass from USD: 'Articulation' object has no attribute 'get_masses'
+[INFO] Environment drone mass: 1.5kg
+[CALIBRATION] Data collection initialized
+[CALIBRATION] Phase 1: Free-fall test (3 seconds)
+[INFO] Starting odometry publishing for 1 environment drone(s)
+[DBG ODOM] Published /robot0/odom: pos=(0.003, 0.009, 0.075)
+[CALIBRATION] Test 1 complete. Collected 62 samples
+[CALIBRATION] Phase 2: Hover force sweep (50 seconds)
+[DBG] Frame 1 - Mode: IDLE, Pos: (0.003, 0.009, 0.075)
+[FORCE] env0 pos:(0.00,0.01,0.07) des_vel:(0.00,0.00,-0.01) new_vel:(-0.00,-0.00,0.16)
+[DBG ODOM] Published /robot0/odom: pos=(0.002, 0.011, 0.075)
+[CALIBRATION] Force=10.0N, Alt=0.075m, Vz=0.004m/s
+[CALIBRATION] Force=10.0N, Alt=0.075m, Vz=0.001m/s
+[CALIBRATION] Force=10.0N, Alt=0.075m, Vz=-0.002m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.002, 0.013, 0.075)
+[CALIBRATION] Force=11.1N, Alt=0.075m, Vz=0.005m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.004, 0.014, 0.075)
+[CALIBRATION] Force=11.1N, Alt=0.075m, Vz=0.006m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.005, 0.017, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.006, 0.016, 0.075)
+[CALIBRATION] Force=12.2N, Alt=0.075m, Vz=0.004m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.008, 0.010, 0.075)
+[CALIBRATION] Force=12.2N, Alt=0.075m, Vz=-0.062m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.010, 0.002, 0.075)
+[CALIBRATION] Force=13.3N, Alt=0.075m, Vz=-0.062m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.009, 0.004, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.008, 0.006, 0.075)
+[CALIBRATION] Force=14.4N, Alt=0.075m, Vz=-0.018m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.007, 0.008, 0.076)
+[CALIBRATION] Force=14.4N, Alt=0.075m, Vz=-0.082m/s
+[CALIBRATION] Force=14.4N, Alt=0.075m, Vz=-0.084m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.006, 0.007, 0.076)
+[DBG ODOM] Published /robot0/odom: pos=(0.004, 0.010, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.005, 0.002, 0.075)
+[CALIBRATION] Force=15.6N, Alt=0.075m, Vz=-0.009m/s
+[CALIBRATION] Force=15.6N, Alt=0.075m, Vz=-0.017m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.004, 0.005, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.004, 0.009, 0.076)
+[CALIBRATION] Force=16.7N, Alt=0.077m, Vz=-0.085m/s
+[CALIBRATION] Force=16.7N, Alt=0.075m, Vz=0.008m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.010, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.007, 0.077)
+[CALIBRATION] Force=17.8N, Alt=0.081m, Vz=-0.087m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.000, 0.011, 0.082)
+[DBG ODOM] Published /robot0/odom: pos=(0.000, 0.015, 0.076)
+[CALIBRATION] Force=18.9N, Alt=0.118m, Vz=0.033m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.020, 0.181)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.342)
+[CALIBRATION] Force=20.0N, Alt=0.429m, Vz=0.063m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.569)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.994)
+[CALIBRATION] Force=20.0N, Alt=1.001m, Vz=0.294m/s
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.437)
+[CALIBRATION] Test 2 complete. Tested 10 force levels
+[CALIBRATION] Phase 3: PID tuning (60 seconds)
+[DBG] Frame 2 - Mode: IDLE, Pos: (0.001, 0.021, 1.437)
+[Drone 0] Mode: IDLE → LOITER
+[INFO] Drone 0 switched to LOITER at position (0.00, 0.02, 1.44)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.983)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.983)
+[CALIBRATION] Kp=5.0, Alt=1.983m (target=2.0m)
+[CALIBRATION] Kp=5.0, Alt=1.983m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.983)
+[CALIBRATION] Kp=5.0, Alt=1.983m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.983)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.987)
+[CALIBRATION] Kp=10.0, Alt=1.992m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.992)
+[CALIBRATION] Kp=10.0, Alt=1.992m (target=2.0m)
+[CALIBRATION] Kp=10.0, Alt=1.992m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.992)
+[CALIBRATION] Kp=10.0, Alt=1.992m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.992)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.992)
+[CALIBRATION] Kp=10.0, Alt=1.992m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.995)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.994)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.994)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.994)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[CALIBRATION] Kp=15.0, Alt=1.994m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.994)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.996)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.996)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.996)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.996)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.996)
+[CALIBRATION] Kp=20.0, Alt=1.996m (target=2.0m)
+[CALIBRATION] Kp=25.0, Alt=1.996m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=25.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=25.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=25.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=25.0, Alt=1.997m (target=2.0m)
+[CALIBRATION] Kp=25.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=30.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=30.0, Alt=1.997m (target=2.0m)
+[CALIBRATION] Kp=30.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] Kp=30.0, Alt=1.997m (target=2.0m)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.997)
+[CALIBRATION] All tests complete!
+[CALIBRATION] Results saved to calibration_data.json
+[CALIBRATION] Run: python calibrate_drone_physics.py --analyze calibration_data.json
+[DBG] Frame 3 - Mode: LOITER, Pos: (0.001, 0.021, 1.997)
+[DBG] Frame 4 - Mode: LOITER, Pos: (0.001, 0.021, 1.993)
+[DBG] Frame 5 - Mode: LOITER, Pos: (0.001, 0.021, 1.988)
+[FORCE] env0 pos:(0.00,0.02,1.95) des_vel:(-0.00,0.00,-0.27) new_vel:(-0.00,-0.00,-0.17)
+[FORCE] env0 pos:(0.00,0.02,1.90) des_vel:(0.00,0.00,-0.24) new_vel:(-0.00,0.00,-0.15)
+[FORCE] env0 pos:(0.00,0.02,1.84) des_vel:(0.00,0.00,-0.21) new_vel:(0.00,-0.00,-0.12)
+[FORCE] env0 pos:(0.00,0.02,1.80) des_vel:(0.00,0.00,-0.18) new_vel:(0.00,-0.00,-0.10)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.776)
+[FORCE] env0 pos:(0.00,0.02,1.75) des_vel:(-0.00,0.00,-0.16) new_vel:(0.00,-0.00,-0.08)
+[FORCE] env0 pos:(0.00,0.02,1.72) des_vel:(0.00,0.00,-0.13) new_vel:(-0.00,0.00,-0.06)
+[FORCE] env0 pos:(0.00,0.02,1.68) des_vel:(0.00,0.00,-0.11) new_vel:(0.00,-0.00,-0.04)
+[FORCE] env0 pos:(0.00,0.02,1.65) des_vel:(-0.00,0.00,-0.10) new_vel:(-0.00,-0.00,-0.03)
+[FORCE] env0 pos:(0.00,0.02,1.62) des_vel:(-0.00,0.00,-0.08) new_vel:(-0.00,0.00,-0.01)
+[FORCE] env0 pos:(0.00,0.02,1.59) des_vel:(-0.00,0.00,-0.06) new_vel:(-0.00,0.00,-0.00)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.581)
+[FORCE] env0 pos:(0.00,0.02,1.57) des_vel:(0.00,-0.00,-0.05) new_vel:(0.00,-0.00,0.01)
+[FORCE] env0 pos:(0.00,0.02,1.55) des_vel:(-0.00,0.00,-0.04) new_vel:(-0.00,-0.00,0.02)
+[FORCE] env0 pos:(0.00,0.02,1.53) des_vel:(-0.00,0.00,-0.03) new_vel:(-0.00,-0.00,0.03)
+[FORCE] env0 pos:(0.00,0.02,1.51) des_vel:(0.00,0.00,-0.02) new_vel:(0.00,-0.00,0.04)
+[FORCE] env0 pos:(0.00,0.02,1.49) des_vel:(-0.00,0.00,-0.01) new_vel:(-0.00,0.00,0.05)
+[FORCE] env0 pos:(0.00,0.02,1.48) des_vel:(0.00,0.00,0.00) new_vel:(-0.00,0.00,0.05)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.472)
+[FORCE] env0 pos:(0.00,0.02,1.47) des_vel:(-0.00,0.00,0.01) new_vel:(0.00,0.00,0.06)
+[FORCE] env0 pos:(0.00,0.02,1.45) des_vel:(0.00,0.00,0.01) new_vel:(-0.00,0.00,0.06)
+[FORCE] env0 pos:(0.00,0.02,1.44) des_vel:(0.00,-0.00,0.02) new_vel:(-0.00,-0.00,0.07)
+[FORCE] env0 pos:(0.00,0.02,1.43) des_vel:(0.00,0.00,0.03) new_vel:(0.00,0.00,0.08)
+[FORCE] env0 pos:(0.00,0.02,1.42) des_vel:(-0.00,0.00,0.03) new_vel:(-0.00,-0.00,0.08)
+[FORCE] env0 pos:(0.00,0.02,1.42) des_vel:(0.00,-0.00,0.04) new_vel:(0.00,-0.00,0.08)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.411)
+[FORCE] env0 pos:(0.00,0.02,1.41) des_vel:(0.00,0.00,0.04) new_vel:(-0.00,-0.00,0.09)
+[FORCE] env0 pos:(0.00,0.02,1.40) des_vel:(-0.00,0.00,0.04) new_vel:(-0.00,0.00,0.09)
+[FORCE] env0 pos:(0.00,0.02,1.39) des_vel:(-0.00,0.00,0.05) new_vel:(-0.00,-0.00,0.09)
+[FORCE] env0 pos:(0.00,0.02,1.39) des_vel:(-0.00,0.00,0.05) new_vel:(-0.00,-0.00,0.10)
+[FORCE] env0 pos:(0.00,0.02,1.38) des_vel:(0.00,-0.00,0.05) new_vel:(0.00,-0.00,0.10)
+[FORCE] env0 pos:(0.00,0.02,1.38) des_vel:(0.00,0.00,0.06) new_vel:(-0.00,-0.00,0.10)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.377)
+[FORCE] env0 pos:(0.00,0.02,1.38) des_vel:(-0.00,0.00,0.06) new_vel:(-0.00,0.00,0.10)
+[FORCE] env0 pos:(0.00,0.02,1.37) des_vel:(-0.00,0.00,0.06) new_vel:(-0.00,0.00,0.10)
+[FORCE] env0 pos:(0.00,0.02,1.37) des_vel:(0.00,0.00,0.06) new_vel:(0.00,-0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.36) des_vel:(0.00,0.00,0.07) new_vel:(0.00,0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.36) des_vel:(-0.00,0.00,0.07) new_vel:(-0.00,0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.36) des_vel:(0.00,0.00,0.07) new_vel:(0.00,-0.00,0.11)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.358)
+[FORCE] env0 pos:(0.00,0.02,1.36) des_vel:(0.00,0.00,0.07) new_vel:(0.00,0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(-0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(-0.00,-0.00,0.07) new_vel:(-0.00,-0.00,0.11)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(0.00,0.00,0.07) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(-0.00,0.00,0.07) new_vel:(-0.00,0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.347)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(-0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.35) des_vel:(0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,-0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.341)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.338)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.336)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.34) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,-0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.335)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(-0.00,0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,-0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.334)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(0.00,0.00,0.08) new_vel:(0.00,0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.334)
+[FORCE] env0 pos:(0.00,0.02,1.33) des_vel:(-0.00,0.00,0.08) new_vel:(-0.00,0.00,0.12)
+[Drone 0] Mode: LOITER → LANDING
+[FORCE] env0 pos:(0.00,0.02,1.31) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,-0.00,-0.16)
+[FORCE] env0 pos:(0.00,0.02,1.25) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,1.19) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,1.12) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,1.06) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.027)
+[FORCE] env0 pos:(0.00,0.02,1.00) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.93) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.87) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.81) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.74) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.68) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.647)
+[FORCE] env0 pos:(0.00,0.02,0.62) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.55) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.49) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.43) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.36) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.30) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.268)
+[FORCE] env0 pos:(0.00,0.02,0.24) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.17) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,-0.00,-0.19)
+[FORCE] env0 pos:(0.00,0.02,0.11) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,-0.00,-0.19)
+[Drone 0] Mode: LANDING → DISARMED
+[Drone 0] Landed and disarmed
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.075)
+[Drone 0] Mode: DISARMED → IDLE
+[Drone 0] Target position: (0.00, 0.02, 1.50)
+[Drone 0] Mode: IDLE → POSITION
+[FORCE] env0 pos:(0.00,0.02,0.09) des_vel:(0.00,0.00,0.80) new_vel:(-0.00,-0.00,0.58)
+[FORCE] env0 pos:(0.00,0.02,0.20) des_vel:(0.00,-0.00,0.76) new_vel:(0.00,-0.00,0.69)
+[FORCE] env0 pos:(0.00,0.02,0.31) des_vel:(0.00,-0.00,0.70) new_vel:(0.00,-0.00,0.64)
+[FORCE] env0 pos:(0.00,0.02,0.41) des_vel:(0.00,-0.00,0.64) new_vel:(0.00,-0.00,0.59)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.459)
+[FORCE] env0 pos:(0.00,0.02,0.50) des_vel:(0.00,-0.00,0.59) new_vel:(0.00,-0.00,0.55)
+[FORCE] env0 pos:(0.00,0.02,0.59) des_vel:(0.00,-0.00,0.54) new_vel:(0.00,-0.00,0.51)
+[FORCE] env0 pos:(0.00,0.02,0.66) des_vel:(0.00,-0.00,0.50) new_vel:(0.00,-0.00,0.48)
+[FORCE] env0 pos:(0.00,0.02,0.73) des_vel:(0.00,-0.00,0.46) new_vel:(0.00,-0.00,0.44)
+[FORCE] env0 pos:(0.00,0.02,0.79) des_vel:(0.00,-0.00,0.43) new_vel:(0.00,-0.00,0.41)
+[FORCE] env0 pos:(0.00,0.02,0.84) des_vel:(0.00,-0.00,0.40) new_vel:(0.00,-0.00,0.39)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 0.871)
+[FORCE] env0 pos:(0.00,0.02,0.90) des_vel:(0.00,-0.00,0.37) new_vel:(0.00,-0.00,0.36)
+[FORCE] env0 pos:(0.00,0.02,0.94) des_vel:(0.00,-0.00,0.34) new_vel:(0.00,-0.00,0.34)
+[FORCE] env0 pos:(0.00,0.02,0.98) des_vel:(0.00,-0.00,0.32) new_vel:(0.00,-0.00,0.32)
+[FORCE] env0 pos:(0.00,0.02,1.02) des_vel:(0.00,-0.00,0.30) new_vel:(0.00,-0.00,0.30)
+[FORCE] env0 pos:(0.00,0.02,1.06) des_vel:(0.00,-0.00,0.28) new_vel:(0.00,-0.00,0.29)
+[FORCE] env0 pos:(0.00,0.02,1.09) des_vel:(0.00,-0.00,0.26) new_vel:(0.00,-0.00,0.27)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.102)
+[FORCE] env0 pos:(0.00,0.02,1.12) des_vel:(0.00,-0.00,0.24) new_vel:(0.00,-0.00,0.26)
+[FORCE] env0 pos:(0.00,0.02,1.14) des_vel:(0.00,-0.00,0.23) new_vel:(0.00,-0.00,0.24)
+[FORCE] env0 pos:(0.00,0.02,1.16) des_vel:(0.00,-0.00,0.21) new_vel:(0.00,-0.00,0.23)
+[FORCE] env0 pos:(0.00,0.02,1.19) des_vel:(0.00,-0.00,0.20) new_vel:(0.00,-0.00,0.22)
+[FORCE] env0 pos:(0.00,0.02,1.21) des_vel:(0.00,-0.00,0.19) new_vel:(0.00,-0.00,0.21)
+[FORCE] env0 pos:(0.00,0.02,1.22) des_vel:(0.00,-0.00,0.18) new_vel:(0.00,-0.00,0.21)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.231)
+[FORCE] env0 pos:(0.00,0.02,1.24) des_vel:(0.00,-0.00,0.17) new_vel:(0.00,-0.00,0.20)
+[FORCE] env0 pos:(0.00,0.02,1.25) des_vel:(0.00,-0.00,0.16) new_vel:(0.00,-0.00,0.19)
+[FORCE] env0 pos:(0.00,0.02,1.27) des_vel:(0.00,-0.00,0.16) new_vel:(0.00,-0.00,0.18)
+[FORCE] env0 pos:(0.00,0.02,1.28) des_vel:(0.00,-0.00,0.15) new_vel:(0.00,-0.00,0.18)
+[FORCE] env0 pos:(0.00,0.02,1.29) des_vel:(0.00,-0.00,0.14) new_vel:(0.00,-0.00,0.17)
+[FORCE] env0 pos:(0.00,0.02,1.30) des_vel:(0.00,-0.00,0.14) new_vel:(0.00,-0.00,0.17)
+[DBG ODOM] Published /robot0/odom: pos=(0.001, 0.021, 1.304)
+[FORCE] env0 pos:(0.00,0.02,1.31) des_vel:(0.00,-0.00,0.13) new_vel:(0.00,-0.00,0.16)
+[Drone 0] Target position: (1.00, 0.50, 1.81)
+[FORCE] env0 pos:(0.02,0.04,1.33) des_vel:(0.24,0.11,0.30) new_vel:(0.21,0.12,0.31)
+[FORCE] env0 pos:(0.06,0.06,1.36) des_vel:(0.23,0.11,0.28) new_vel:(0.20,0.09,0.29)
+[FORCE] env0 pos:(0.10,0.07,1.39) des_vel:(0.23,0.11,0.26) new_vel:(0.19,0.09,0.27)
+[FORCE] env0 pos:(0.13,0.09,1.42) des_vel:(0.22,0.10,0.24) new_vel:(0.18,0.09,0.26)
+[FORCE] env0 pos:(0.17,0.11,1.45) des_vel:(0.21,0.10,0.23) new_vel:(0.17,0.08,0.25)
+[DBG ODOM] Published /robot0/odom: pos=(0.187, 0.116, 1.461)
+[FORCE] env0 pos:(0.20,0.12,1.47) des_vel:(0.20,0.09,0.22) new_vel:(0.17,0.08,0.23)
+[FORCE] env0 pos:(0.24,0.14,1.49) des_vel:(0.19,0.09,0.20) new_vel:(0.16,0.08,0.22)
+[FORCE] env0 pos:(0.27,0.15,1.51) des_vel:(0.18,0.09,0.19) new_vel:(0.15,0.07,0.21)
+[FORCE] env0 pos:(0.30,0.17,1.53) des_vel:(0.18,0.08,0.18) new_vel:(0.15,0.07,0.21)
+[FORCE] env0 pos:(0.33,0.18,1.55) des_vel:(0.17,0.08,0.17) new_vel:(0.14,0.07,0.20)
+[FORCE] env0 pos:(0.35,0.19,1.56) des_vel:(0.16,0.08,0.16) new_vel:(0.13,0.06,0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.367, 0.201, 1.569)
+[FORCE] env0 pos:(0.38,0.21,1.58) des_vel:(0.15,0.07,0.16) new_vel:(0.13,0.06,0.19)
+[FORCE] env0 pos:(0.41,0.22,1.59) des_vel:(0.15,0.07,0.15) new_vel:(0.12,0.06,0.18)
+[FORCE] env0 pos:(0.43,0.23,1.60) des_vel:(0.14,0.07,0.14) new_vel:(0.12,0.06,0.17)
+[FORCE] env0 pos:(0.45,0.24,1.61) des_vel:(0.14,0.06,0.14) new_vel:(0.11,0.05,0.17)
+[FORCE] env0 pos:(0.48,0.25,1.62) des_vel:(0.13,0.06,0.13) new_vel:(0.11,0.05,0.17)
+[FORCE] env0 pos:(0.50,0.26,1.63) des_vel:(0.13,0.06,0.13) new_vel:(0.10,0.05,0.16)
+[DBG ODOM] Published /robot0/odom: pos=(0.508, 0.267, 1.629)
+[FORCE] env0 pos:(0.52,0.27,1.63) des_vel:(0.12,0.06,0.12) new_vel:(0.10,0.05,0.16)
+[FORCE] env0 pos:(0.54,0.28,1.64) des_vel:(0.12,0.05,0.12) new_vel:(0.10,0.05,0.15)
+[FORCE] env0 pos:(0.56,0.29,1.65) des_vel:(0.11,0.05,0.12) new_vel:(0.09,0.04,0.15)
+[FORCE] env0 pos:(0.57,0.30,1.65) des_vel:(0.11,0.05,0.11) new_vel:(0.09,0.04,0.15)
+[FORCE] env0 pos:(0.59,0.31,1.66) des_vel:(0.10,0.05,0.11) new_vel:(0.09,0.04,0.15)
+[FORCE] env0 pos:(0.61,0.32,1.66) des_vel:(0.10,0.05,0.11) new_vel:(0.08,0.04,0.14)
+[DBG ODOM] Published /robot0/odom: pos=(0.617, 0.319, 1.663)
+[FORCE] env0 pos:(0.62,0.32,1.66) des_vel:(0.09,0.04,0.11) new_vel:(0.08,0.04,0.14)
+[FORCE] env0 pos:(0.64,0.33,1.67) des_vel:(0.09,0.04,0.10) new_vel:(0.08,0.04,0.14)
+[FORCE] env0 pos:(0.65,0.34,1.67) des_vel:(0.09,0.04,0.10) new_vel:(0.07,0.03,0.14)
+[FORCE] env0 pos:(0.67,0.34,1.68) des_vel:(0.08,0.04,0.10) new_vel:(0.07,0.03,0.14)
+[FORCE] env0 pos:(0.68,0.35,1.68) des_vel:(0.08,0.04,0.10) new_vel:(0.07,0.03,0.14)
+[FORCE] env0 pos:(0.70,0.36,1.68) des_vel:(0.08,0.04,0.10) new_vel:(0.06,0.03,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.702, 0.359, 1.682)
+[FORCE] env0 pos:(0.71,0.36,1.68) des_vel:(0.07,0.03,0.10) new_vel:(0.06,0.03,0.13)
+[FORCE] env0 pos:(0.72,0.37,1.68) des_vel:(0.07,0.03,0.09) new_vel:(0.06,0.03,0.13)
+[FORCE] env0 pos:(0.73,0.37,1.69) des_vel:(0.07,0.03,0.09) new_vel:(0.06,0.03,0.13)
+[FORCE] env0 pos:(0.74,0.38,1.69) des_vel:(0.06,0.03,0.09) new_vel:(0.05,0.03,0.13)
+[FORCE] env0 pos:(0.75,0.38,1.69) des_vel:(0.06,0.03,0.09) new_vel:(0.05,0.02,0.13)
+[FORCE] env0 pos:(0.76,0.39,1.69) des_vel:(0.06,0.03,0.09) new_vel:(0.05,0.02,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.768, 0.390, 1.692)
+[FORCE] env0 pos:(0.77,0.39,1.69) des_vel:(0.06,0.03,0.09) new_vel:(0.05,0.02,0.13)
+[FORCE] env0 pos:(0.78,0.40,1.69) des_vel:(0.05,0.03,0.09) new_vel:(0.05,0.02,0.13)
+[FORCE] env0 pos:(0.79,0.40,1.70) des_vel:(0.05,0.02,0.09) new_vel:(0.04,0.02,0.13)
+[FORCE] env0 pos:(0.80,0.41,1.70) des_vel:(0.05,0.02,0.09) new_vel:(0.04,0.02,0.13)
+[FORCE] env0 pos:(0.81,0.41,1.70) des_vel:(0.05,0.02,0.09) new_vel:(0.04,0.02,0.13)
+[FORCE] env0 pos:(0.82,0.41,1.70) des_vel:(0.05,0.02,0.09) new_vel:(0.04,0.02,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.819, 0.415, 1.698)
+[FORCE] env0 pos:(0.82,0.42,1.70) des_vel:(0.04,0.02,0.09) new_vel:(0.04,0.02,0.13)
+[Drone 0] Mode: POSITION → LANDING
+[FORCE] env0 pos:(0.83,0.42,1.67) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.16)
+[FORCE] env0 pos:(0.83,0.42,1.61) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.55) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.49) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.42) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 1.392)
+[FORCE] env0 pos:(0.83,0.42,1.36) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.30) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.23) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.17) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.11) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,1.04) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 1.013)
+[FORCE] env0 pos:(0.83,0.42,0.98) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.92) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.85) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.79) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.73) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.66) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 0.633)
+[FORCE] env0 pos:(0.83,0.42,0.60) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.54) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.48) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.41) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.35) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.29) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 0.254)
+[FORCE] env0 pos:(0.83,0.42,0.22) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.16) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.83,0.42,0.10) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[Drone 0] Mode: LANDING → DISARMED
+[Drone 0] Landed and disarmed
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.419, 0.075)
+[Drone 0] Mode: DISARMED → IDLE
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.08) new_vel:(-0.00,-0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.828, 0.418, 0.075)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.06) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.06) new_vel:(-0.00,-0.00,0.13)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[DBG ODOM] Published /robot0/odom: pos=(0.827, 0.416, 0.075)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.06) new_vel:(-0.00,-0.00,0.13)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.42,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.41,0.08) des_vel:(0.00,0.00,0.05) new_vel:(-0.00,-0.00,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.827, 0.415, 0.075)
+[FORCE] env0 pos:(0.83,0.41,0.08) des_vel:(0.00,0.00,0.07) new_vel:(0.00,-0.00,0.12)
+[FORCE] env0 pos:(0.83,0.41,0.08) des_vel:(0.00,0.00,0.07) new_vel:(-0.00,-0.00,0.12)
+[Drone 0] Mode: IDLE → LANDING
+[Drone 0] Mode: LANDING → DISARMED
+[Drone 0] Landed and disarmed
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.075)
+[Drone 0] Mode: DISARMED → IDLE
+[Drone 0] Target position: (0.83, 0.41, 1.50)
+[Drone 0] Mode: IDLE → POSITION
+[FORCE] env0 pos:(0.83,0.41,0.10) des_vel:(0.00,0.00,0.80) new_vel:(-0.00,-0.00,0.62)
+[FORCE] env0 pos:(0.83,0.41,0.21) des_vel:(0.00,0.00,0.75) new_vel:(0.00,0.00,0.69)
+[FORCE] env0 pos:(0.83,0.41,0.32) des_vel:(0.00,0.00,0.69) new_vel:(0.00,0.00,0.64)
+[FORCE] env0 pos:(0.83,0.41,0.42) des_vel:(0.00,0.00,0.64) new_vel:(0.00,0.00,0.59)
+[FORCE] env0 pos:(0.83,0.41,0.51) des_vel:(0.00,0.00,0.58) new_vel:(0.00,0.00,0.55)
+[FORCE] env0 pos:(0.83,0.41,0.59) des_vel:(0.00,0.00,0.54) new_vel:(0.00,0.00,0.51)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.616)
+[FORCE] env0 pos:(0.83,0.41,0.67) des_vel:(0.00,0.00,0.50) new_vel:(0.00,0.00,0.47)
+[FORCE] env0 pos:(0.83,0.41,0.73) des_vel:(0.00,0.00,0.46) new_vel:(0.00,0.00,0.44)
+[FORCE] env0 pos:(0.83,0.41,0.79) des_vel:(0.00,0.00,0.42) new_vel:(0.00,0.00,0.41)
+[FORCE] env0 pos:(0.83,0.41,0.85) des_vel:(0.00,0.00,0.39) new_vel:(0.00,0.00,0.38)
+[FORCE] env0 pos:(0.83,0.41,0.90) des_vel:(0.00,0.00,0.36) new_vel:(0.00,0.00,0.36)
+[FORCE] env0 pos:(0.83,0.41,0.95) des_vel:(0.00,0.00,0.34) new_vel:(0.00,0.00,0.34)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 0.959)
+[FORCE] env0 pos:(0.83,0.41,0.99) des_vel:(0.00,0.00,0.32) new_vel:(0.00,0.00,0.32)
+[FORCE] env0 pos:(0.83,0.41,1.02) des_vel:(0.00,0.00,0.29) new_vel:(0.00,0.00,0.30)
+[FORCE] env0 pos:(0.83,0.41,1.06) des_vel:(0.00,0.00,0.27) new_vel:(0.00,0.00,0.28)
+[FORCE] env0 pos:(0.83,0.41,1.09) des_vel:(0.00,0.00,0.26) new_vel:(0.00,0.00,0.27)
+[FORCE] env0 pos:(0.83,0.41,1.12) des_vel:(0.00,0.00,0.24) new_vel:(0.00,0.00,0.26)
+[FORCE] env0 pos:(0.83,0.41,1.14) des_vel:(0.00,0.00,0.23) new_vel:(0.00,0.00,0.24)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 1.151)
+[FORCE] env0 pos:(0.83,0.41,1.17) des_vel:(0.00,0.00,0.21) new_vel:(0.00,0.00,0.23)
+[FORCE] env0 pos:(0.83,0.41,1.19) des_vel:(0.00,0.00,0.20) new_vel:(0.00,0.00,0.22)
+[FORCE] env0 pos:(0.83,0.41,1.21) des_vel:(0.00,0.00,0.19) new_vel:(0.00,0.00,0.21)
+[FORCE] env0 pos:(0.83,0.41,1.22) des_vel:(0.00,0.00,0.18) new_vel:(0.00,0.00,0.21)
+[FORCE] env0 pos:(0.83,0.41,1.24) des_vel:(0.00,0.00,0.17) new_vel:(0.00,0.00,0.20)
+[FORCE] env0 pos:(0.83,0.41,1.25) des_vel:(0.00,0.00,0.16) new_vel:(0.00,0.00,0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.826, 0.415, 1.259)
+[FORCE] env0 pos:(0.83,0.41,1.27) des_vel:(0.00,0.00,0.16) new_vel:(0.00,0.00,0.18)
+[FORCE] env0 pos:(0.83,0.41,1.28) des_vel:(0.00,0.00,0.15) new_vel:(0.00,0.00,0.18)
+[FORCE] env0 pos:(0.83,0.41,1.29) des_vel:(0.00,0.00,0.14) new_vel:(0.00,0.00,0.17)
+[Drone 0] Target position: (1.00, 0.50, 1.79)
+[FORCE] env0 pos:(0.84,0.43,1.31) des_vel:(0.03,0.00,0.30) new_vel:(0.07,0.06,0.31)
+[FORCE] env0 pos:(0.85,0.43,1.35) des_vel:(0.04,0.02,0.28) new_vel:(0.03,0.01,0.29)
+[FORCE] env0 pos:(0.85,0.43,1.38) des_vel:(0.04,0.02,0.26) new_vel:(0.03,0.01,0.27)
+[DBG ODOM] Published /robot0/odom: pos=(0.856, 0.435, 1.387)
+[FORCE] env0 pos:(0.86,0.44,1.41) des_vel:(0.04,0.02,0.24) new_vel:(0.03,0.01,0.26)
+[FORCE] env0 pos:(0.87,0.44,1.43) des_vel:(0.03,0.02,0.23) new_vel:(0.03,0.01,0.25)
+[FORCE] env0 pos:(0.87,0.44,1.46) des_vel:(0.03,0.01,0.21) new_vel:(0.03,0.01,0.23)
+[FORCE] env0 pos:(0.88,0.44,1.48) des_vel:(0.03,0.01,0.20) new_vel:(0.03,0.01,0.22)
+[FORCE] env0 pos:(0.88,0.45,1.50) des_vel:(0.03,0.01,0.19) new_vel:(0.02,0.01,0.21)
+[FORCE] env0 pos:(0.89,0.45,1.51) des_vel:(0.03,0.01,0.18) new_vel:(0.02,0.01,0.21)
+[DBG ODOM] Published /robot0/odom: pos=(0.888, 0.450, 1.519)
+[FORCE] env0 pos:(0.89,0.45,1.53) des_vel:(0.03,0.01,0.17) new_vel:(0.02,0.01,0.20)
+[FORCE] env0 pos:(0.90,0.45,1.54) des_vel:(0.03,0.01,0.16) new_vel:(0.02,0.01,0.19)
+[FORCE] env0 pos:(0.90,0.46,1.56) des_vel:(0.03,0.01,0.16) new_vel:(0.02,0.01,0.19)
+[FORCE] env0 pos:(0.90,0.46,1.57) des_vel:(0.02,0.01,0.15) new_vel:(0.02,0.01,0.18)
+[FORCE] env0 pos:(0.91,0.46,1.58) des_vel:(0.02,0.01,0.14) new_vel:(0.02,0.01,0.17)
+[FORCE] env0 pos:(0.91,0.46,1.59) des_vel:(0.02,0.01,0.14) new_vel:(0.02,0.01,0.17)
+[DBG ODOM] Published /robot0/odom: pos=(0.913, 0.461, 1.594)
+[FORCE] env0 pos:(0.92,0.46,1.60) des_vel:(0.02,0.01,0.13) new_vel:(0.02,0.01,0.17)
+[FORCE] env0 pos:(0.92,0.46,1.61) des_vel:(0.02,0.01,0.13) new_vel:(0.02,0.01,0.16)
+[FORCE] env0 pos:(0.92,0.47,1.62) des_vel:(0.02,0.01,0.12) new_vel:(0.02,0.01,0.16)
+[FORCE] env0 pos:(0.93,0.47,1.62) des_vel:(0.02,0.01,0.12) new_vel:(0.02,0.01,0.15)
+[FORCE] env0 pos:(0.93,0.47,1.63) des_vel:(0.02,0.01,0.12) new_vel:(0.01,0.01,0.15)
+[FORCE] env0 pos:(0.93,0.47,1.63) des_vel:(0.02,0.01,0.11) new_vel:(0.01,0.01,0.15)
+[DBG ODOM] Published /robot0/odom: pos=(0.932, 0.470, 1.635)
+[FORCE] env0 pos:(0.93,0.47,1.64) des_vel:(0.02,0.01,0.11) new_vel:(0.01,0.01,0.15)
+[FORCE] env0 pos:(0.94,0.47,1.64) des_vel:(0.02,0.01,0.11) new_vel:(0.01,0.01,0.14)
+[FORCE] env0 pos:(0.94,0.47,1.65) des_vel:(0.02,0.01,0.11) new_vel:(0.01,0.01,0.14)
+[FORCE] env0 pos:(0.94,0.47,1.65) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.01,0.14)
+[FORCE] env0 pos:(0.94,0.47,1.65) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.01,0.14)
+[FORCE] env0 pos:(0.95,0.48,1.66) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.01,0.14)
+[DBG ODOM] Published /robot0/odom: pos=(0.947, 0.476, 1.659)
+[FORCE] env0 pos:(0.95,0.48,1.66) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.00,0.14)
+[FORCE] env0 pos:(0.95,0.48,1.66) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.95,0.48,1.67) des_vel:(0.01,0.01,0.10) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.95,0.48,1.67) des_vel:(0.01,0.01,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.96,0.48,1.67) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.96,0.48,1.67) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.959, 0.482, 1.672)
+[FORCE] env0 pos:(0.96,0.48,1.67) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.96,0.48,1.67) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.96,0.48,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.96,0.48,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.97,0.48,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.97,0.49,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[DBG ODOM] Published /robot0/odom: pos=(0.968, 0.486, 1.679)
+[FORCE] env0 pos:(0.97,0.49,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[FORCE] env0 pos:(0.97,0.49,1.68) des_vel:(0.01,0.00,0.09) new_vel:(0.01,0.00,0.13)
+[Drone 0] Mode: POSITION → LANDING
+[FORCE] env0 pos:(0.97,0.49,1.66) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.16)
+[FORCE] env0 pos:(0.97,0.49,1.60) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.53) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.47) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 1.450)
+[FORCE] env0 pos:(0.97,0.49,1.41) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.34) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.28) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.22) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.15) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,1.09) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 1.070)
+[FORCE] env0 pos:(0.97,0.49,1.03) des_vel:(0.00,0.00,-0.30) new_vel:(-0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.96) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.90) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.84) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.77) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.71) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.691)
+[FORCE] env0 pos:(0.97,0.49,0.65) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.58) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.52) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.46) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.39) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.33) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.312)
+[FORCE] env0 pos:(0.97,0.49,0.27) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.20) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.14) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[FORCE] env0 pos:(0.97,0.49,0.08) des_vel:(0.00,0.00,-0.30) new_vel:(0.00,0.00,-0.19)
+[Drone 0] Mode: LANDING → DISARMED
+[Drone 0] Landed and disarmed
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
+[DBG ODOM] Published /robot0/odom: pos=(0.971, 0.487, 0.075)
