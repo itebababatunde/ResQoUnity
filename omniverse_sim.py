@@ -807,7 +807,12 @@ def run_sim():
             
             # Get USD path from config
             drone_usd_path = QUADCOPTER_CFG.spawn.usd_path
-            world_drone_path = "/World/Drone"
+            
+            # CRITICAL FIX: Spawn inside environment scene so env.step() updates it
+            # Changed from /World/Drone to /World/envs/env_0/Drone
+            world_drone_path = "/World/envs/env_0/Drone"
+            
+            print(f"[INFO] Spawning drone at {world_drone_path} (inside env for physics stepping)")
             
             # Spawn drone USD directly to stage (Isaac Core API, not Orbit)
             prim_utils.create_prim(
