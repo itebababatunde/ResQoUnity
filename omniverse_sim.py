@@ -1621,11 +1621,23 @@ def run_sim():
                                     # Set both velocity AND position to force viewport update
                                     world_drone_view.set_velocities(new_vels, indices=[0])
                                     
-                                    # Force position update via USD (this WILL update viewport)
-                                    new_pos_tensor = torch.tensor([[new_position[0], new_position[1], new_position[2]]], 
-                                                                   dtype=torch.float32, device=device)
-                                    current_quat = world_drone_view.get_world_poses()[1]  # Keep orientation
-                                    world_drone_view.set_world_poses(positions=new_pos_tensor, orientations=current_quat, indices=[0])
+                                    # Force position update via USD (bypass ArticulationView - go straight to USD)
+                                    try:
+                                        from pxr import UsdGeom, Gf
+                                        import omni.usd
+                                        stage = omni.usd.get_context().get_stage()
+                                        drone_prim = stage.GetPrimAtPath("/World/envs/env_0/Drone")
+                                        if drone_prim and drone_prim.IsValid():
+                                            xformable = UsdGeom.Xformable(drone_prim)
+                                            xform_op = xformable.GetOrderedXformOps()[0]  # Get the transform op
+                                            # Set translation directly in USD
+                                            xform_op.Set(Gf.Vec3d(float(new_position[0]), float(new_position[1]), float(new_position[2])))
+                                    except Exception as e:
+                                        # Fallback to ArticulationView method
+                                        new_pos_tensor = torch.tensor([[new_position[0], new_position[1], new_position[2]]], 
+                                                                       dtype=torch.float32, device=device)
+                                        current_quat = world_drone_view.get_world_poses()[1]  # Keep orientation
+                                        world_drone_view.set_world_poses(positions=new_pos_tensor, orientations=current_quat, indices=[0])
                                     
                                     # Force viewport update
                                     try:
