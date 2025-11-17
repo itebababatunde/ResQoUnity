@@ -781,11 +781,10 @@ def run_sim():
             )
             # Auto-arm environment drones for immediate flight
             custom_rl_env.drone_controllers[str(i)].armed = True
-            from drone_controller import DroneState
-            custom_rl_env.drone_controllers[str(i)].set_mode(DroneState.LOITER)
             custom_rl_env.drone_armed[str(i)] = True
-            custom_rl_env.drone_mode[str(i)] = 'LOITER'
-            print(f"[INFO] Drone {i} controller initialized and ARMED (auto-hover at spawn height)")
+            # NOTE: Set mode to LOITER *after* first update() so it captures real spawn position
+            custom_rl_env.drone_mode[str(i)] = 'IDLE'  # Start in IDLE, will switch to LOITER after first update
+            print(f"[INFO] Drone {i} controller initialized and ARMED in IDLE (will switch to LOITER after spawn)")
     
     # reset environment
     print("[INFO] Resetting environment and getting initial observations...")
@@ -866,15 +865,15 @@ def run_sim():
                     hover_thrust=0.45    # Not used in force-based control
                 )
                 
-                # AUTO-ARM: Start armed so drone holds altitude immediately
+                # AUTO-ARM: Start armed in IDLE, will switch to LOITER after first update
                 from drone_controller import DroneState
                 custom_rl_env.world_drone_controller.armed = True
-                custom_rl_env.world_drone_controller.set_mode(DroneState.LOITER)
+                custom_rl_env.world_drone_controller.set_mode(DroneState.IDLE)
                 
                 # Initialize debug logger
                 custom_rl_env.world_drone_logger = DroneDebugLogger("world_drone")
                 print("[INFO] Drone controller initialized in ARMED mode (auto-armed)")
-                print("[INFO] Mode set to LOITER - will hold spawn position")
+                print("[INFO] Mode set to IDLE - will switch to LOITER after spawn")
                 print("[INFO] Debug logger enabled - verbose output active")
                 
                 # Add bottom-facing camera to drone
@@ -975,6 +974,13 @@ def run_sim():
                         controller.current_orientation = current_quat
                         controller.current_euler = controller._quat_to_euler(current_quat)
                         controller.update(dt, current_pos, current_vel)
+                        
+                        # CRITICAL: Switch to LOITER after first update (now has real position)
+                        if controller.mode.value == 'IDLE' and custom_rl_env.drone_mode[str(env_idx)] == 'IDLE':
+                            from drone_controller import DroneState
+                            controller.set_mode(DroneState.LOITER)
+                            custom_rl_env.drone_mode[str(env_idx)] = 'LOITER'
+                            print(f"[INFO] Drone {env_idx} switched to LOITER at position ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f})")
                         
                         # Get motor commands from controller
                         motor_cmds = controller.compute_motor_command()
@@ -1172,6 +1178,12 @@ def run_sim():
                             controller.current_velocity = current_vel
                             
                             if controller.armed:
+                                # CRITICAL: Switch to LOITER after first update (now has real position)
+                                if controller.mode.value == 'IDLE':
+                                    from drone_controller import DroneState
+                                    controller.set_mode(DroneState.LOITER)
+                                    print(f"[INFO] World drone switched to LOITER at position ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f})")
+                                
                                 # Calculate position error for logging
                                 pos_error = controller.target_position - current_pos
                                 # Update controller PID loops
