@@ -782,8 +782,10 @@ def run_sim():
             # Auto-arm environment drones for immediate flight
             custom_rl_env.drone_controllers[str(i)].armed = True
             custom_rl_env.drone_armed[str(i)] = True
-            # NOTE: Set mode to LOITER *after* first update() so it captures real spawn position
-            custom_rl_env.drone_mode[str(i)] = 'IDLE'  # Start in IDLE, will switch to LOITER after first update
+            # NOTE: Set mode to IDLE first, will switch to LOITER after first update() captures real position
+            from drone_controller import DroneState
+            custom_rl_env.drone_controllers[str(i)].set_mode(DroneState.IDLE)
+            custom_rl_env.drone_mode[str(i)] = 'IDLE'  # Track mode in custom_rl_env
             print(f"[INFO] Drone {i} controller initialized and ARMED in IDLE (will switch to LOITER after spawn)")
     
     # reset environment
@@ -976,6 +978,11 @@ def run_sim():
                         controller.update(dt, current_pos, current_vel)
                         
                         # CRITICAL: Switch to LOITER after first update (now has real position)
+                        # DEBUG: Log the check
+                        if not hasattr(custom_rl_env, '_loiter_switch_checked'):
+                            print(f"[DBG] First frame check - Mode: {controller.mode.value}, drone_mode: {custom_rl_env.drone_mode.get(str(env_idx), 'UNKNOWN')}")
+                            custom_rl_env._loiter_switch_checked = True
+                        
                         if controller.mode.value == 'IDLE' and custom_rl_env.drone_mode[str(env_idx)] == 'IDLE':
                             from drone_controller import DroneState
                             controller.set_mode(DroneState.LOITER)

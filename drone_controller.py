@@ -344,7 +344,9 @@ class DroneController:
             return np.zeros(4)
         
         if self.mode == DroneState.IDLE:
-            return np.zeros(4)
+            # IDLE: motors at hover thrust to prevent falling
+            # This allows the drone to hover while waiting for commands
+            return self._motor_mixer(self.hover_thrust, 0.0, 0.0, 0.0)
         
         # Common: compute desired velocities first
         desired_vx = 0.0
