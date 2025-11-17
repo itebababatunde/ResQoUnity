@@ -1038,7 +1038,22 @@ def run_sim():
                     current_quat = robot.data.root_quat_w[env_idx]  # tensor [w, x, y, z]
                     
                     # Publish odometry
-                    base_node.publish_odom(current_pos, current_quat, env_idx)
+                    try:
+                        base_node.publish_odom(current_pos, current_quat, env_idx)
+                        
+                        # Debug: Log occasionally (every 60 frames = 1 second at 60 FPS)
+                        if not hasattr(custom_rl_env, '_odom_dbg_ctr'):
+                            custom_rl_env._odom_dbg_ctr = 0
+                            print(f"[INFO] Starting odometry publishing for {num_envs} environment drone(s)")
+                        
+                        custom_rl_env._odom_dbg_ctr += 1
+                        if custom_rl_env._odom_dbg_ctr % 60 == 0:
+                            pos = current_pos.cpu().numpy()
+                            print(f"[DBG ODOM] Published /robot{env_idx}/odom: pos=({pos[0]:.3f}, {pos[1]:.3f}, {pos[2]:.3f})")
+                    except Exception as e:
+                        print(f"[ERROR] Failed to publish odometry for robot{env_idx}: {e}")
+                        import traceback
+                        traceback.print_exc()
             
             # World-level drone control (AFTER env.step to read latest physics state)
             if world_drone_path is not None and custom_rl_env.world_drone_controller is not None:
