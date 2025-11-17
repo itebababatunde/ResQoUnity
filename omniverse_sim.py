@@ -807,8 +807,10 @@ def run_sim():
     world_drone_initialized = False
     enable_world_drone = False
     
-    if args_cli.robot == "go2":  # Only spawn drone when using Go2 robots
-        print("[INFO] Spawning world-level drone at /World/Drone...")
+    # Spawn world-level drone when NOT in pure drone mode (to avoid duplicates)
+    # In drone mode, drones are spawned by the environment system
+    if args_cli.robot != "drone" and args_cli.robot != "quadcopter":
+        print("[INFO] Spawning world-level drone alongside environment robots...")
         try:
             import omni.isaac.core.utils.prims as prim_utils
             from pxr import UsdGeom, Gf, UsdPhysics
