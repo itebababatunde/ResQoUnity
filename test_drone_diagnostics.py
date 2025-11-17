@@ -213,7 +213,7 @@ def run_diagnostics(tester):
     print_info(f"Altitude before landing: {pos_before_land.z:.3f}m")
     
     request = Trigger.Request()
-    response, error = tester.call_service_sync(tester.land_client, timeout=10.0)
+    response, error = tester.call_service_sync(tester.land_client, request, timeout=10.0)
     
     if error:
         print_fail(f"Land service failed: {error}")
@@ -251,7 +251,7 @@ def run_diagnostics(tester):
     # First, takeoff to get back in the air
     print_info("Sending takeoff command...")
     request = Trigger.Request()
-    response, error = tester.call_service_sync(tester.takeoff_client, timeout=5.0)
+    response, error = tester.call_service_sync(tester.takeoff_client, request, timeout=5.0)
     
     if error or not response or not response.success:
         print_fail(f"Takeoff command failed: {error if error else response.message}")

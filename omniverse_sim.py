@@ -1197,10 +1197,11 @@ def run_sim():
                             desired_vz = controller.landing_velocity
                         
                         elif controller.mode.value == 'IDLE':
-                            # IDLE: hover in place (zero velocity change)
+                            # IDLE: hover in place (zero velocity to maintain current altitude)
+                            # Gravity compensation is handled in calculate_drone_forces()
                             desired_vx = 0.0
                             desired_vy = 0.0
-                            desired_vz = 0.0
+                            desired_vz = -current_vel[2]  # Cancel out any vertical velocity to hover
                         
                         # Clamp desired velocities
                         desired_vx = np.clip(desired_vx, -controller.max_vel, controller.max_vel)
