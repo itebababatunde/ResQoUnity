@@ -1,6 +1,6 @@
 ================================================================================
-SIMULATION LOG - 2025-11-16 17:58:14
-Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_175814.log
+SIMULATION LOG - 2025-11-16 18:02:01
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_180201.log
 ================================================================================
 
 [INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
@@ -12,7 +12,7 @@ Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_175814.log
 	Environment step-size : 0.02
 	Physics GPU pipeline  : True
 	Physics GPU simulation: True
-[INFO]: Time taken for scene creation : 1.962756 seconds
+[INFO]: Time taken for scene creation : 0.977085 seconds
 [INFO]: Scene manager:  <class InteractiveScene>
 	Number of environments: 1
 	Environment spacing   : 2.5
@@ -20,7 +20,7 @@ Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_175814.log
 	Global prim paths     : ['/World/ground']
 	Replicate physics     : True
 [INFO]: Starting the simulation. This may take a few seconds. Please wait...
-[INFO]: Time taken for simulation start : 1.941901 seconds
+[INFO]: Time taken for simulation start : 0.968691 seconds
 [INFO] Command Manager:  <CommandManager> contains 1 active terms.
 +------------------------------------------------+
 |              Active Command Terms              |
@@ -39,7 +39,7 @@ Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20251116_175814.log
 |   0    | joint_pos   |          12 |
 +--------+-------------+-------------+
 
-Module omni.isaac.orbit.utils.warp.kernels load on device 'cuda:0' took 1.30 ms
+Module omni.isaac.orbit.utils.warp.kernels load on device 'cuda:0' took 1.24 ms
 [INFO] Observation Manager: <ObservationManager> contains 1 groups.
 +----------------------------------------------------------+
 | Active Observation Terms in Group: 'policy' (shape: (235,)) |
@@ -134,7 +134,8 @@ Critic MLP: MLP(
 [INFO] Resetting environment and getting initial observations...
 [INFO] Environment reset complete, starting simulation loop...
 [INFO] Spawning world-level drone at /World/Drone...
-[INFO] Drone USD loaded at /World/Drone
+[INFO] Spawning drone at /World/envs/env_0/Drone (inside env for physics stepping)
+[INFO] Drone USD loaded at /World/envs/env_0/Drone
 [INFO] Drone spawned at position (0.0, 0.0, 2.5)
 [INFO] ArticulationView will be initialized after first physics step
 [Drone drone] Mode: DISARMED → LOITER
@@ -187,92 +188,92 @@ Error loading custom environment. You should download custom envs folder from: h
 ********************************************************************************
 
 [INFO] ArticulationView ready - found 1 drone(s)
-[DEBUG] ArticulationView prim paths: ['/World/Drone']
+[DEBUG] ArticulationView prim paths: ['/World/envs/env_0/Drone']
 [DEBUG] Controller initialized at position: (-0.00, -0.00, 2.50)
 [DEBUG] Drone has 4 DOFs: ['m1_joint', 'm2_joint', 'm3_joint', 'm4_joint']
-[DEBUG] Prim at /World/Drone exists: True
-[DEBUG] Found root body (fallback) at: /World/Drone/body
-[DEBUG] Found articulation root at: /World/Drone
+[DEBUG] Prim at /World/envs/env_0/Drone exists: True
+[DEBUG] Found root body (fallback) at: /World/envs/env_0/Drone/body
+[DEBUG] Found articulation root at: /World/envs/env_0/Drone
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.498)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 1] Δt = 1.00s
+[FRAME 2] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.498)
-  Velocity   : (  0.000,   0.000,  -0.196)
+  Position   : ( -0.000,  -0.000,   2.495)
+  Velocity   : (  0.000,  -0.000,  -0.203)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.000) = 0.000m
-  PID Output : (  0.000,   0.000,   0.000) m/s
-  Applied Force: (  -0.00,    0.00,    5.69) N (|F|=5.69N)
+  Error      : ( -0.000,   0.000,   0.003) = 0.003m
+  PID Output : ( -0.000,   0.000,   0.005) m/s
+  Applied Force: (  -0.00,    0.00,    5.74) N (|F|=5.74N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,  -0.007) m/s
-  ✅ Velocity matches PID output
+  Actual Vel: (  0.000,  -0.000,  -0.012) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 11] Δt = 1.00s
+[FRAME 14] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.470)
-  Velocity   : (  0.000,  -0.000,  -0.210)
+  Position   : ( -0.000,  -0.000,   2.462)
+  Velocity   : ( -0.000,   0.000,  -0.200)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.028) = 0.028m
-  PID Output : (  0.000,   0.000,   0.056) m/s
-  Applied Force: (  -0.00,    0.00,    5.97) N (|F|=5.97N)
+  Error      : (  0.000,   0.000,   0.035) = 0.035m
+  PID Output : (  0.000,   0.000,   0.072) m/s
+  Applied Force: (   0.00,   -0.00,    6.00) N (|F|=6.00N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,  -0.011) m/s
+  Actual Vel: ( -0.000,   0.000,  -0.001) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.447)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 24] Δt = 1.00s
+[FRAME 27] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.441)
-  Velocity   : ( -0.000,   0.000,  -0.159)
+  Position   : (  0.000,  -0.000,   2.437)
+  Velocity   : ( -0.000,   0.000,  -0.147)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.056) = 0.056m
-  PID Output : (  0.000,   0.000,   0.117) m/s
-  Applied Force: (   0.00,   -0.00,    6.01) N (|F|=6.01N)
+  Error      : ( -0.000,   0.000,   0.061) = 0.061m
+  PID Output : ( -0.000,   0.000,   0.127) m/s
+  Applied Force: (  -0.00,   -0.00,    6.00) N (|F|=6.00N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: ( -0.000,   0.000,   0.041) m/s
+  Actual Vel: ( -0.000,   0.000,   0.053) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 37] Δt = 1.00s
+[FRAME 40] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.426)
-  Velocity   : ( -0.000,  -0.000,  -0.114)
+  Position   : ( -0.000,  -0.000,   2.424)
+  Velocity   : (  0.000,  -0.000,  -0.106)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : ( -0.000,   0.000,   0.072) = 0.072m
-  PID Output : ( -0.000,   0.000,   0.152) m/s
-  Applied Force: (   0.00,    0.00,    5.97) N (|F|=5.97N)
+  Error      : ( -0.000,   0.000,   0.074) = 0.074m
+  PID Output : ( -0.000,   0.000,   0.158) m/s
+  Applied Force: (  -0.00,    0.00,    5.96) N (|F|=5.96N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: ( -0.000,  -0.000,   0.085) m/s
+  Actual Vel: (  0.000,  -0.000,   0.093) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.423)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 50] Δt = 1.00s
+[FRAME 54] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
   Position   : ( -0.000,  -0.000,   2.419)
-  Velocity   : ( -0.000,   0.000,  -0.086)
+  Velocity   : (  0.000,   0.000,  -0.081)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : ( -0.000,   0.000,   0.078) = 0.078m
-  PID Output : ( -0.000,   0.000,   0.170) m/s
-  Applied Force: (   0.00,   -0.00,    5.93) N (|F|=5.93N)
+  Error      : ( -0.000,   0.000,   0.079) = 0.079m
+  PID Output : ( -0.000,   0.000,   0.173) m/s
+  Applied Force: (  -0.00,   -0.00,    5.92) N (|F|=5.92N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: ( -0.000,   0.000,   0.112) m/s
+  Actual Vel: (  0.000,   0.000,   0.117) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -281,88 +282,83 @@ Error loading custom environment. You should download custom envs folder from: h
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.418)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 64] Δt = 1.00s
+[FRAME 67] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.418)
-  Velocity   : (  0.000,   0.000,  -0.072)
+  Position   : ( -0.000,  -0.000,   2.419)
+  Velocity   : (  0.000,  -0.000,  -0.070)
   Target Pos : ( -0.000,  -0.000,   2.498)
   Error      : (  0.000,   0.000,   0.079) = 0.079m
-  PID Output : (  0.000,   0.000,   0.178) m/s
-  Applied Force: (   0.00,   -0.00,    5.90) N (|F|=5.90N)
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (   0.00,    0.00,    5.90) N (|F|=5.90N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,   0.125) m/s
+  Actual Vel: (  0.000,  -0.000,   0.127) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 77] Δt = 1.00s
+[FRAME 80] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
   Position   : ( -0.000,  -0.000,   2.420)
-  Velocity   : (  0.000,  -0.000,  -0.066)
+  Velocity   : (  0.000,  -0.000,  -0.065)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.078) = 0.078m
+  Error      : (  0.000,   0.000,   0.077) = 0.077m
   PID Output : (  0.000,   0.000,   0.181) m/s
   Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.130) m/s
+  Actual Vel: (  0.000,  -0.000,   0.131) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.420)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 90] Δt = 1.00s
+[FRAME 93] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.422)
-  Velocity   : (  0.000,  -0.000,  -0.064)
+  Position   : ( -0.000,  -0.000,   2.423)
+  Velocity   : (  0.000,   0.000,  -0.064)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.076) = 0.076m
+  Error      : (  0.000,   0.000,   0.075) = 0.075m
   PID Output : (  0.000,   0.000,   0.182) m/s
-  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.132) m/s
+  Actual Vel: (  0.000,   0.000,   0.132) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
-
-
-********************************************************************************
-[ARM EVENT] Drone ARMED
-********************************************************************************
 
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.424)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 103] Δt = 1.00s
+[FRAME 106] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
   Position   : ( -0.000,  -0.000,   2.425)
-  Velocity   : (  0.000,   0.000,  -0.063)
+  Velocity   : (  0.000,  -0.000,  -0.063)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.073) = 0.073m
+  Error      : (  0.000,   0.000,   0.072) = 0.072m
   PID Output : (  0.000,   0.000,   0.182) m/s
-  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,   0.133) m/s
+  Actual Vel: (  0.000,  -0.000,   0.133) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 116] Δt = 1.00s
+[FRAME 119] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.427)
-  Velocity   : (  0.000,  -0.000,  -0.064)
+  Position   : ( -0.000,  -0.000,   2.428)
+  Velocity   : (  0.000,   0.000,  -0.064)
   Target Pos : ( -0.000,  -0.000,   2.498)
   Error      : (  0.000,   0.000,   0.070) = 0.070m
   PID Output : (  0.000,   0.000,   0.182) m/s
-  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.133) m/s
+  Actual Vel: (  0.000,   0.000,   0.133) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
@@ -371,15 +367,15 @@ Error loading custom environment. You should download custom envs folder from: h
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.428)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 129] Δt = 1.00s
+[FRAME 133] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.430)
+  Position   : ( -0.000,  -0.000,   2.431)
   Velocity   : (  0.000,   0.000,  -0.064)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.068) = 0.068m
+  Error      : (  0.000,   0.000,   0.067) = 0.067m
   PID Output : (  0.000,   0.000,   0.181) m/s
-  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
   Actual Vel: (  0.000,   0.000,   0.132) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
@@ -388,13 +384,29 @@ Error loading custom environment. You should download custom envs folder from: h
 [DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.432)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 142] Δt = 1.00s
+[FRAME 146] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.432)
-  Velocity   : (  0.000,  -0.000,  -0.064)
+  Position   : ( -0.000,  -0.000,   2.433)
+  Velocity   : (  0.000,   0.000,  -0.064)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.065) = 0.065m
+  Error      : (  0.000,   0.000,   0.064) = 0.064m
+  PID Output : (  0.000,   0.000,   0.181) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.132) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 159] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.435)
+  Velocity   : (  0.000,  -0.000,  -0.065)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.062) = 0.062m
   PID Output : (  0.000,   0.000,   0.181) m/s
   Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
@@ -402,32 +414,40 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.436)
+
+********************************************************************************
+[ARM EVENT] Drone ARMED
+********************************************************************************
+
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 156] Δt = 1.00s
+[FRAME 172] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.435)
-  Velocity   : (  0.000,   0.000,  -0.064)
+  Position   : ( -0.000,  -0.000,   2.438)
+  Velocity   : (  0.000,  -0.000,  -0.065)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.063) = 0.063m
-  PID Output : (  0.000,   0.000,   0.181) m/s
-  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Error      : (  0.000,   0.000,   0.060) = 0.060m
+  PID Output : (  0.000,   0.000,   0.180) m/s
+  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,   0.132) m/s
+  Actual Vel: (  0.000,  -0.000,   0.131) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.436)
+[DBG CACHE] Frame 180: Updating cache with pos=(-0.000,-0.000,2.439)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.439)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.439)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 170] Δt = 1.00s
+[FRAME 185] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LOITER
-  Position   : ( -0.000,  -0.000,   2.437)
+  Position   : ( -0.000,  -0.000,   2.440)
   Velocity   : (  0.000,   0.000,  -0.065)
   Target Pos : ( -0.000,  -0.000,   2.498)
-  Error      : (  0.000,   0.000,   0.060) = 0.060m
+  Error      : (  0.000,   0.000,   0.058) = 0.058m
   PID Output : (  0.000,   0.000,   0.180) m/s
   Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
@@ -435,230 +455,296 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 198] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.442)
+  Velocity   : (  0.000,   0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.055) = 0.055m
+  PID Output : (  0.000,   0.000,   0.180) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.131) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.443)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 211] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.444)
+  Velocity   : (  0.000,   0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.053) = 0.053m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.446)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 225] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.446)
+  Velocity   : (  0.000,  -0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.051) = 0.051m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,  -0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 239] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LOITER
+  Position   : ( -0.000,  -0.000,   2.448)
+  Velocity   : (  0.000,   0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   2.498)
+  Error      : (  0.000,   0.000,   0.049) = 0.049m
+  PID Output : (  0.000,   0.000,   0.179) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.130) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG CACHE] Frame 240: Updating cache with pos=(-0.000,-0.000,2.448)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.448)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.449)
 [Drone drone] Target position: (-0.00, -0.00, 1.50)
 [Drone drone] Mode: LOITER → POSITION
 [SAFETY] Takeoff service executed:
   Mode: POSITION
   Target: (-0.000, -0.000, 1.500)
-  Current: (-0.000, -0.000, 2.438)
-[DBG CACHE] Frame 180: Updating cache with pos=(-0.000,-0.000,2.383)
-[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,2.383)
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.364)
+  Current: (-0.000, -0.000, 2.449)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 183] Δt = 1.00s
+[FRAME 253] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   2.320)
-  Velocity   : (  0.000,   0.000,  -1.210)
+  Position   : ( -0.000,  -0.000,   2.375)
+  Velocity   : (  0.000,   0.000,  -1.034)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,  -0.820) = 0.820m
+  Error      : (  0.000,   0.000,  -0.875) = 0.875m
   PID Output : (  0.000,   0.000,  -1.500) m/s
-  Applied Force: (  -0.00,   -0.00,    3.75) N (|F|=3.75N)
+  Applied Force: (  -0.00,   -0.00,    3.04) N (|F|=3.04N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,  -1.086) m/s
+  Actual Vel: (  0.000,   0.000,  -0.933) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
-  ⚠️  WARNING: Large altitude error (0.82m)
+  ⚠️  WARNING: Large altitude error (0.87m)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 2.170)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 197] Δt = 1.00s
+[FRAME 267] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.931)
-  Velocity   : (  0.000,   0.000,  -1.434)
+  Position   : ( -0.000,  -0.000,   1.996)
+  Velocity   : (  0.000,   0.000,  -1.502)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,  -0.431) = 0.431m
-  PID Output : (  0.000,   0.000,  -0.952) m/s
-  Applied Force: (   0.00,   -0.00,    6.83) N (|F|=6.83N)
+  Error      : (  0.000,   0.000,  -0.496) = 0.496m
+  PID Output : (  0.000,   0.000,  -1.078) m/s
+  Applied Force: (  -0.00,   -0.00,    6.60) N (|F|=6.60N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,  -1.206) m/s
-  ℹ️  Velocity differs from PID (hybrid physics integration active)
-────────────────────────────────────────────────────────────────────────────────
-
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.829)
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 211] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.629)
-  Velocity   : (  0.000,   0.000,  -0.894)
-  Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,  -0.129) = 0.129m
-  PID Output : (  0.000,   0.000,  -0.367) m/s
-  Applied Force: (   0.00,   -0.00,    7.01) N (|F|=7.01N)
-  ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,  -0.661) m/s
+  Actual Vel: (  0.000,   0.000,  -1.282) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.503)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.668)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 225] Δt = 1.00s
+[FRAME 281] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.469)
-  Velocity   : (  0.000,   0.000,  -0.464)
+  Position   : ( -0.000,  -0.000,   1.668)
+  Velocity   : (  0.000,   0.000,  -0.987)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.031) = 0.031m
-  PID Output : (  0.000,   0.000,  -0.049) m/s
-  Applied Force: (  -0.00,   -0.00,    6.56) N (|F|=6.56N)
+  Error      : (  0.000,   0.000,  -0.168) = 0.168m
+  PID Output : (  0.000,   0.000,  -0.445) m/s
+  Applied Force: (  -0.00,   -0.00,    7.07) N (|F|=7.07N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,   0.000,  -0.245) m/s
+  Actual Vel: (  0.000,   0.000,  -0.751) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 238] Δt = 1.00s
+[FRAME 295] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.401)
-  Velocity   : (  0.000,  -0.000,  -0.242)
+  Position   : ( -0.000,  -0.000,   1.487)
+  Velocity   : (  0.000,   0.000,  -0.521)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.099) = 0.099m
-  PID Output : (  0.000,   0.000,   0.090) m/s
-  Applied Force: (  -0.00,    0.00,    6.23) N (|F|=6.23N)
+  Error      : (  0.000,   0.000,   0.013) = 0.013m
+  PID Output : (  0.000,   0.000,  -0.087) m/s
+  Applied Force: (  -0.00,   -0.00,    6.64) N (|F|=6.64N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,  -0.034) m/s
+  Actual Vel: (  0.000,   0.000,  -0.300) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 240: Updating cache with pos=(-0.000,-0.000,1.395)
-[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.395)
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.393)
+[DBG CACHE] Frame 300: Updating cache with pos=(-0.000,-0.000,1.449)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.449)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.443)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 251] Δt = 1.00s
+[FRAME 308] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.375)
-  Velocity   : (  0.000,  -0.000,  -0.133)
+  Position   : ( -0.000,  -0.000,   1.409)
+  Velocity   : (  0.000,   0.000,  -0.271)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.125) = 0.125m
-  PID Output : (  0.000,   0.000,   0.152) m/s
-  Applied Force: (  -0.00,    0.00,    6.05) N (|F|=6.05N)
+  Error      : (  0.000,   0.000,   0.091) = 0.091m
+  PID Output : (  0.000,   0.000,   0.073) m/s
+  Applied Force: (  -0.00,   -0.00,    6.28) N (|F|=6.28N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.068) m/s
+  Actual Vel: (  0.000,   0.000,  -0.062) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.368)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.377)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 264] Δt = 1.00s
+[FRAME 321] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.367)
-  Velocity   : (  0.000,  -0.000,  -0.085)
+  Position   : ( -0.000,  -0.000,   1.377)
+  Velocity   : (  0.000,   0.000,  -0.147)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.133) = 0.133m
-  PID Output : (  0.000,   0.000,   0.177) m/s
-  Applied Force: (   0.00,    0.00,    5.95) N (|F|=5.95N)
+  Error      : (  0.000,   0.000,   0.123) = 0.123m
+  PID Output : (  0.000,   0.000,   0.145) m/s
+  Applied Force: (  -0.00,   -0.00,    6.07) N (|F|=6.07N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.113) m/s
+  Actual Vel: (  0.000,   0.000,   0.056) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 278] Δt = 1.00s
+[FRAME 335] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.367)
-  Velocity   : (  0.000,  -0.000,  -0.065)
+  Position   : ( -0.000,  -0.000,   1.366)
+  Velocity   : (  0.000,   0.000,  -0.088)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.133) = 0.133m
+  Error      : (  0.000,   0.000,   0.134) = 0.134m
+  PID Output : (  0.000,   0.000,   0.175) m/s
+  Applied Force: (   0.00,   -0.00,    5.96) N (|F|=5.96N)
+  ✅ Gravity compensation active (Fz > 0)
+  Actual Vel: (  0.000,   0.000,   0.110) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.365)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 349] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=POSITION
+  Position   : ( -0.000,  -0.000,   1.366)
+  Velocity   : (  0.000,   0.000,  -0.066)
+  Target Pos : ( -0.000,  -0.000,   1.500)
+  Error      : (  0.000,   0.000,   0.134) = 0.134m
   PID Output : (  0.000,   0.000,   0.186) m/s
-  Applied Force: (  -0.00,    0.00,    5.91) N (|F|=5.91N)
+  Applied Force: (  -0.00,   -0.00,    5.91) N (|F|=5.91N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.132) m/s
+  Actual Vel: (  0.000,   0.000,   0.131) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.368)
+[DBG CACHE] Frame 360: Updating cache with pos=(-0.000,-0.000,1.369)
+[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.369)
+[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.369)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 292] Δt = 1.00s
+[FRAME 363] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.371)
-  Velocity   : (  0.000,  -0.000,  -0.058)
+  Position   : ( -0.000,  -0.000,   1.370)
+  Velocity   : (  0.000,   0.000,  -0.058)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.129) = 0.129m
+  Error      : (  0.000,   0.000,   0.130) = 0.130m
   PID Output : (  0.000,   0.000,   0.189) m/s
-  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.138) m/s
+  Actual Vel: (  0.000,   0.000,   0.138) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 300: Updating cache with pos=(-0.000,-0.000,1.373)
-[DBG ROS2] Publishing to /drone/odom: pos=(-0.000,-0.000,1.373)
-[DBG RENDER] Viewport sync triggered at pos (-0.000, -0.000, 1.374)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 305] Δt = 1.00s
+[FRAME 376] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : ( -0.000,  -0.000,   1.375)
-  Velocity   : (  0.000,  -0.000,  -0.056)
+  Position   : ( -0.000,  -0.000,   1.374)
+  Velocity   : (  0.000,   0.000,  -0.056)
   Target Pos : ( -0.000,  -0.000,   1.500)
-  Error      : (  0.000,   0.000,   0.125) = 0.125m
+  Error      : (  0.000,   0.000,   0.126) = 0.126m
   PID Output : (  0.000,   0.000,   0.189) m/s
-  Applied Force: (   0.00,    0.00,    5.89) N (|F|=5.89N)
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.000,  -0.000,   0.140) m/s
+  Actual Vel: (  0.000,   0.000,   0.140) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[Drone drone] Target position: (1.00, 0.50, 1.88)
+[Drone drone] Target position: (1.00, 0.50, 1.87)
+[DBG RENDER] Viewport sync triggered at pos (0.018, 0.009, 1.387)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 318] Δt = 1.00s
+[FRAME 389] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.137,   0.068,   1.464)
-  Velocity   : (  0.900,   0.450,   0.486)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.863,   0.432,   0.411) = 1.049m
-  PID Output : (  1.056,   0.528,   0.793) m/s
+  Position   : (  0.137,   0.068,   1.462)
+  Velocity   : (  0.900,   0.450,   0.485)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.863,   0.432,   0.412) = 1.049m
+  PID Output : (  1.056,   0.528,   0.792) m/s
   Applied Force: (   0.63,    0.31,    6.13) N (|F|=6.17N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.921,   0.460,   0.690) m/s
+  Actual Vel: (  0.921,   0.460,   0.689) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (0.193, 0.096, 1.498)
+[DBG RENDER] Viewport sync triggered at pos (0.362, 0.181, 1.593)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 331] Δt = 1.00s
+[FRAME 402] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.380,   0.190,   1.604)
-  Velocity   : (  0.891,   0.445,   0.402)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.620,   0.310,   0.271) = 0.745m
+  Position   : (  0.380,   0.190,   1.602)
+  Velocity   : (  0.891,   0.445,   0.401)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.620,   0.310,   0.272) = 0.745m
   PID Output : (  0.782,   0.391,   0.535) m/s
   Applied Force: (  -0.43,   -0.22,    5.44) N (|F|=5.46N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.876,   0.438,   0.584) m/s
+  Actual Vel: (  0.876,   0.438,   0.583) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (0.540, 0.270, 1.683)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 344] Δt = 1.00s
+[FRAME 415] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.582,   0.291,   1.701)
-  Velocity   : (  0.676,   0.338,   0.210)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.418,   0.209,   0.175) = 0.499m
+  Position   : (  0.582,   0.291,   1.699)
+  Velocity   : (  0.676,   0.338,   0.209)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.418,   0.209,   0.176) = 0.500m
   PID Output : (  0.551,   0.276,   0.358) m/s
   Applied Force: (  -0.50,   -0.25,    5.50) N (|F|=5.53N)
   ✅ Gravity compensation active (Fz > 0)
@@ -666,15 +752,18 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG CACHE] Frame 420: Updating cache with pos=(0.644,0.322,1.723)
+[DBG ROS2] Publishing to /drone/odom: pos=(0.644,0.322,1.723)
+[DBG RENDER] Viewport sync triggered at pos (0.656, 0.328, 1.727)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 357] Δt = 1.00s
+[FRAME 428] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.729,   0.365,   1.754)
+  Position   : (  0.729,   0.365,   1.752)
   Velocity   : (  0.480,   0.240,   0.074)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.271,   0.135,   0.121) = 0.326m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.271,   0.135,   0.123) = 0.327m
   PID Output : (  0.382,   0.191,   0.262) m/s
   Applied Force: (  -0.39,   -0.20,    5.66) N (|F|=5.67N)
   ✅ Gravity compensation active (Fz > 0)
@@ -682,18 +771,16 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 360: Updating cache with pos=(0.756,0.378,1.762)
-[DBG ROS2] Publishing to /drone/odom: pos=(0.756,0.378,1.762)
-[DBG RENDER] Viewport sync triggered at pos (0.765, 0.382, 1.764)
+[DBG RENDER] Viewport sync triggered at pos (0.832, 0.416, 1.778)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 371] Δt = 1.00s
+[FRAME 442] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.839,   0.419,   1.782)
+  Position   : (  0.839,   0.419,   1.780)
   Velocity   : (  0.324,   0.162,  -0.005)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.161,   0.081,   0.093) = 0.203m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.161,   0.081,   0.094) = 0.203m
   PID Output : (  0.256,   0.128,   0.213) m/s
   Applied Force: (  -0.27,   -0.14,    5.78) N (|F|=5.78N)
   ✅ Gravity compensation active (Fz > 0)
@@ -701,16 +788,15 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (0.894, 0.447, 1.792)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 385] Δt = 1.00s
+[FRAME 456] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.913,   0.456,   1.795)
+  Position   : (  0.913,   0.456,   1.793)
   Velocity   : (  0.217,   0.108,  -0.040)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.087,   0.044,   0.080) = 0.126m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.087,   0.044,   0.081) = 0.127m
   PID Output : (  0.170,   0.085,   0.193) m/s
   Applied Force: (  -0.19,   -0.09,    5.84) N (|F|=5.84N)
   ✅ Gravity compensation active (Fz > 0)
@@ -718,51 +804,51 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (0.932, 0.466, 1.796)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 399] Δt = 1.00s
+[FRAME 470] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.962,   0.481,   1.802)
+  Position   : (  0.962,   0.481,   1.800)
   Velocity   : (  0.144,   0.072,  -0.055)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.038,   0.019,   0.073) = 0.085m
-  PID Output : (  0.113,   0.056,   0.185) m/s
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.038,   0.019,   0.074) = 0.086m
+  PID Output : (  0.113,   0.056,   0.186) m/s
   Applied Force: (  -0.13,   -0.06,    5.87) N (|F|=5.87N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.140,   0.070,   0.140) m/s
+  Actual Vel: (  0.140,   0.070,   0.141) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (0.967, 0.484, 1.803)
+[DBG CACHE] Frame 480: Updating cache with pos=(0.986,0.493,1.803)
+[DBG ROS2] Publishing to /drone/odom: pos=(0.986,0.493,1.803)
+[DBG RENDER] Viewport sync triggered at pos (0.988, 0.494, 1.803)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 413] Δt = 1.00s
+[FRAME 484] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  0.994,   0.497,   1.806)
+  Position   : (  0.994,   0.497,   1.804)
   Velocity   : (  0.095,   0.048,  -0.061)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : (  0.006,   0.003,   0.069) = 0.069m
-  PID Output : (  0.074,   0.037,   0.182) m/s
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : (  0.006,   0.003,   0.070) = 0.070m
+  PID Output : (  0.074,   0.037,   0.183) m/s
   Applied Force: (  -0.08,   -0.04,    5.88) N (|F|=5.88N)
   ✅ Gravity compensation active (Fz > 0)
   Actual Vel: (  0.093,   0.046,   0.135) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 420: Updating cache with pos=(1.006,0.503,1.808)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.006,0.503,1.808)
-[DBG RENDER] Viewport sync triggered at pos (1.008, 0.504, 1.808)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 427] Δt = 1.00s
+[FRAME 498] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.016,   0.508,   1.809)
+  Position   : (  1.016,   0.508,   1.807)
   Velocity   : (  0.063,   0.031,  -0.063)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.016,  -0.008,   0.066) = 0.068m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.016,  -0.008,   0.067) = 0.069m
   PID Output : (  0.048,   0.024,   0.181) m/s
   Applied Force: (  -0.06,   -0.03,    5.88) N (|F|=5.88N)
   ✅ Gravity compensation active (Fz > 0)
@@ -770,49 +856,49 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.030, 0.515, 1.812)
+[DBG RENDER] Viewport sync triggered at pos (1.019, 0.510, 1.808)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 441] Δt = 1.00s
+[FRAME 511] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.030,   0.515,   1.812)
-  Velocity   : (  0.040,   0.020,  -0.064)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.030,  -0.015,   0.063) = 0.071m
-  PID Output : (  0.031,   0.016,   0.181) m/s
+  Position   : (  1.029,   0.514,   1.810)
+  Velocity   : (  0.042,   0.021,  -0.064)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.029,  -0.014,   0.064) = 0.072m
+  PID Output : (  0.032,   0.016,   0.181) m/s
   Applied Force: (  -0.04,   -0.02,    5.88) N (|F|=5.88N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.039,   0.020,   0.132) m/s
+  Actual Vel: (  0.040,   0.020,   0.132) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (1.036, 0.518, 1.812)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 454] Δt = 1.00s
+[FRAME 524] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.038,   0.519,   1.814)
-  Velocity   : (  0.027,   0.013,  -0.065)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.038,  -0.019,   0.061) = 0.074m
-  PID Output : (  0.020,   0.010,   0.180) m/s
+  Position   : (  1.038,   0.519,   1.812)
+  Velocity   : (  0.027,   0.014,  -0.065)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.038,  -0.019,   0.062) = 0.075m
+  PID Output : (  0.021,   0.010,   0.180) m/s
   Applied Force: (  -0.03,   -0.01,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.026,   0.013,   0.131) m/s
+  Actual Vel: (  0.027,   0.013,   0.132) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.041, 0.521, 1.815)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 468] Δt = 1.00s
+[FRAME 538] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.044,   0.522,   1.817)
-  Velocity   : (  0.016,   0.008,  -0.065)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.044,  -0.022,   0.058) = 0.076m
+  Position   : (  1.044,   0.522,   1.815)
+  Velocity   : (  0.017,   0.008,  -0.065)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.044,  -0.022,   0.060) = 0.077m
   PID Output : (  0.012,   0.006,   0.180) m/s
   Applied Force: (  -0.02,   -0.01,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
@@ -820,18 +906,18 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 480: Updating cache with pos=(1.047,0.524,1.819)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.047,0.524,1.819)
-[DBG RENDER] Viewport sync triggered at pos (1.047, 0.524, 1.819)
+[DBG CACHE] Frame 540: Updating cache with pos=(1.044,0.522,1.815)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.044,0.522,1.815)
+[DBG RENDER] Viewport sync triggered at pos (1.045, 0.522, 1.815)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 481] Δt = 1.00s
+[FRAME 552] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.047,   0.524,   1.819)
+  Position   : (  1.047,   0.524,   1.817)
   Velocity   : (  0.010,   0.005,  -0.065)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.047,  -0.024,   0.056) = 0.077m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.047,  -0.024,   0.057) = 0.078m
   PID Output : (  0.007,   0.003,   0.180) m/s
   Applied Force: (  -0.01,   -0.01,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
@@ -839,129 +925,114 @@ Error loading custom environment. You should download custom envs folder from: h
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (1.049, 0.524, 1.819)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 494] Δt = 1.00s
+[FRAME 566] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=POSITION
-  Position   : (  1.049,   0.525,   1.821)
-  Velocity   : (  0.006,   0.003,  -0.066)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.049,  -0.025,   0.054) = 0.077m
-  PID Output : (  0.004,   0.002,   0.179) m/s
+  Position   : (  1.049,   0.525,   1.819)
+  Velocity   : (  0.005,   0.003,  -0.066)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.049,  -0.025,   0.055) = 0.078m
+  PID Output : (  0.003,   0.002,   0.179) m/s
   Applied Force: (  -0.01,   -0.00,    5.89) N (|F|=5.89N)
   ✅ Gravity compensation active (Fz > 0)
-  Actual Vel: (  0.005,   0.003,   0.130) m/s
+  Actual Vel: (  0.005,   0.003,   0.131) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.822)
 [Drone drone] Mode: POSITION → LANDING
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 507] Δt = 1.00s
+[FRAME 579] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.807)
-  Velocity   : (  0.002,   0.001,  -0.311)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.068) = 0.088m
+  Position   : (  1.050,   0.525,   1.800)
+  Velocity   : (  0.002,   0.001,  -0.342)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.074) = 0.093m
   PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.01,   -0.00,    4.95) N (|F|=4.95N)
-  Actual Vel: (  0.002,   0.001,  -0.146) m/s
+  Applied Force: (  -0.01,   -0.00,    5.07) N (|F|=5.07N)
+  Actual Vel: (  0.001,   0.001,  -0.173) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.787)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 520] Δt = 1.00s
+[FRAME 592] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.710)
-  Velocity   : (  0.000,   0.000,  -0.509)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.165) = 0.175m
+  Position   : (  1.050,   0.525,   1.699)
+  Velocity   : (  0.000,   0.000,  -0.514)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.175) = 0.184m
   PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.00,   -0.00,    5.74) N (|F|=5.74N)
-  Actual Vel: (  0.000,   0.000,  -0.317) m/s
+  Applied Force: (  -0.00,   -0.00,    5.76) N (|F|=5.76N)
+  Actual Vel: (  0.000,   0.000,  -0.322) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.701)
+[DBG CACHE] Frame 600: Updating cache with pos=(1.050,0.525,1.627)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,1.627)
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.617)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 533] Δt = 1.00s
+[FRAME 605] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.591)
+  Position   : (  1.050,   0.525,   1.580)
   Velocity   : (  0.000,   0.000,  -0.540)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.284) = 0.289m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.294) = 0.299m
   PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.00,   -0.00,    5.86) N (|F|=5.86N)
-  Actual Vel: (  0.000,   0.000,  -0.344) m/s
+  Applied Force: (  -0.00,   -0.00,    5.87) N (|F|=5.87N)
+  Actual Vel: (  0.000,   0.000,  -0.345) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 540: Updating cache with pos=(1.050,0.525,1.526)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,1.526)
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.516)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 546] Δt = 1.00s
+[FRAME 619] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.469)
-  Velocity   : (  0.000,   0.000,  -0.544)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.406) = 0.410m
+  Position   : (  1.050,   0.525,   1.449)
+  Velocity   : (  0.000,   0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.425) = 0.429m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,   -0.00,    5.88) N (|F|=5.88N)
   Actual Vel: (  0.000,   0.000,  -0.348) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.430)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 560] Δt = 1.00s
+[FRAME 633] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.337)
+  Position   : (  1.050,   0.525,   1.317)
   Velocity   : (  0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.538) = 0.541m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.557) = 0.560m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,   0.000,  -0.349) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.328)
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.241)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 574] Δt = 1.00s
+[FRAME 646] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.205)
+  Position   : (  1.050,   0.525,   1.194)
   Velocity   : (  0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.670) = 0.672m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
-  Actual Vel: (  0.000,   0.000,  -0.349) m/s
-  ℹ️  Velocity differs from PID (hybrid physics integration active)
-────────────────────────────────────────────────────────────────────────────────
-
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.139)
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 587] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   1.083)
-  Velocity   : (  0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.793) = 0.795m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.680) = 0.682m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,   0.000,  -0.349) m/s
@@ -970,47 +1041,63 @@ Error loading custom environment. You should download custom envs folder from: h
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 600] Δt = 1.00s
+[FRAME 660] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.960)
+  Position   : (  1.050,   0.525,   1.062)
   Velocity   : (  0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   0.915) = 0.917m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.812) = 0.814m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,   0.000,  -0.349) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG CACHE] Frame 600: Updating cache with pos=(1.050,0.525,0.960)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,0.960)
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.951)
+[DBG CACHE] Frame 660: Updating cache with pos=(1.050,0.525,1.062)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,1.062)
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 1.053)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 613] Δt = 1.00s
+[FRAME 674] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.837)
+  Position   : (  1.050,   0.525,   0.930)
   Velocity   : (  0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.038) = 1.039m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   0.944) = 0.946m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,   0.000,  -0.349) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.762)
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.864)
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 626] Δt = 1.00s
+[FRAME 688] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.715)
+  Position   : (  1.050,   0.525,   0.798)
+  Velocity   : (  0.000,   0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.076) = 1.078m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (  -0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: (  0.000,   0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.675)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 702] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.050,   0.525,   0.666)
   Velocity   : (  0.000,  -0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.160) = 1.162m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.208) = 1.210m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,  -0.000,  -0.349) m/s
@@ -1019,47 +1106,47 @@ Error loading custom environment. You should download custom envs folder from: h
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 639] Δt = 1.00s
+[FRAME 716] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.592)
-  Velocity   : (  0.000,  -0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.283) = 1.284m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
-  Actual Vel: (  0.000,  -0.000,  -0.349) m/s
-  ℹ️  Velocity differs from PID (hybrid physics integration active)
-────────────────────────────────────────────────────────────────────────────────
-
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.573)
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 652] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.469)
-  Velocity   : (  0.000,  -0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.406) = 1.407m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
-  Actual Vel: (  0.000,  -0.000,  -0.349) m/s
-  ℹ️  Velocity differs from PID (hybrid physics integration active)
-────────────────────────────────────────────────────────────────────────────────
-
-[DBG CACHE] Frame 660: Updating cache with pos=(1.050,0.525,0.394)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,0.394)
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.385)
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 665] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.347)
+  Position   : (  1.050,   0.525,   0.534)
   Velocity   : ( -0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.528) = 1.529m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.340) = 1.342m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: ( -0.000,   0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG CACHE] Frame 720: Updating cache with pos=(1.050,0.525,0.496)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.525,0.496)
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.487)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 729] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.050,   0.525,   0.411)
+  Velocity   : (  0.000,  -0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.463) = 1.464m
+  PID Output : (  0.000,   0.000,  -0.300) m/s
+  Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
+  Actual Vel: (  0.000,  -0.000,  -0.349) m/s
+  ℹ️  Velocity differs from PID (hybrid physics integration active)
+────────────────────────────────────────────────────────────────────────────────
+
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.298)
+
+────────────────────────────────────────────────────────────────────────────────
+[FRAME 742] Δt = 1.00s
+────────────────────────────────────────────────────────────────────────────────
+  State      : Armed=True, Mode=LANDING
+  Position   : (  1.050,   0.525,   0.289)
+  Velocity   : ( -0.000,   0.000,  -0.545)
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.586) = 1.587m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
   Actual Vel: ( -0.000,   0.000,  -0.349) m/s
@@ -1068,98 +1155,42 @@ Error loading custom environment. You should download custom envs folder from: h
 
 
 ────────────────────────────────────────────────────────────────────────────────
-[FRAME 679] Δt = 1.00s
+[FRAME 756] Δt = 1.00s
 ────────────────────────────────────────────────────────────────────────────────
   State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.215)
-  Velocity   : ( -0.000,   0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.660) = 1.661m
-  PID Output : (  0.000,   0.000,  -0.300) m/s
-  Applied Force: (   0.00,   -0.00,    5.89) N (|F|=5.89N)
-  Actual Vel: ( -0.000,   0.000,  -0.349) m/s
-  ℹ️  Velocity differs from PID (hybrid physics integration active)
-────────────────────────────────────────────────────────────────────────────────
-
-[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.196)
-
-────────────────────────────────────────────────────────────────────────────────
-[FRAME 693] Δt = 1.00s
-────────────────────────────────────────────────────────────────────────────────
-  State      : Armed=True, Mode=LANDING
-  Position   : (  1.050,   0.525,   0.083)
+  Position   : (  1.050,   0.525,   0.156)
   Velocity   : (  0.000,  -0.000,  -0.545)
-  Target Pos : (  1.000,   0.500,   1.875)
-  Error      : ( -0.050,  -0.025,   1.792) = 1.793m
+  Target Pos : (  1.000,   0.500,   1.874)
+  Error      : ( -0.050,  -0.025,   1.718) = 1.719m
   PID Output : (  0.000,   0.000,  -0.300) m/s
   Applied Force: (  -0.00,    0.00,    5.89) N (|F|=5.89N)
   Actual Vel: (  0.000,  -0.000,  -0.349) m/s
   ℹ️  Velocity differs from PID (hybrid physics integration active)
 ────────────────────────────────────────────────────────────────────────────────
 
+[DBG RENDER] Viewport sync triggered at pos (1.050, 0.525, 0.109)
 [Drone drone] Mode: LANDING → DISARMED
 [Drone drone] Landed and disarmed
-[DBG CACHE] Frame 720: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 780: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 840: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 900: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 960: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1020: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1080: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1140: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1200: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1260: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1320: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1380: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1440: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1500: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1560: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1620: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1680: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1740: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1800: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1860: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1920: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 1980: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2040: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2100: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2160: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2220: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2280: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2340: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2400: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2460: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2520: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
-[DBG CACHE] Frame 2580: Updating cache with pos=(1.050,0.521,0.075)
-[DBG ROS2] Publishing to /drone/odom: pos=(1.050,0.521,0.075)
+[DBG CACHE] Frame 780: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 840: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 900: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 960: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1020: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1080: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1140: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1200: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1260: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[DBG CACHE] Frame 1320: Updating cache with pos=(1.051,0.525,0.075)
+[DBG ROS2] Publishing to /drone/odom: pos=(1.051,0.525,0.075)
+[INFO] Shutting down simulation...
+[INFO] ROS2 shutdown complete
+[INFO] Simulation shutdown complete
