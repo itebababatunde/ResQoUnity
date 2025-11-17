@@ -1027,6 +1027,19 @@ def run_sim():
             # env stepping (MUST happen first to step physics)
             obs, _, _, _ = env.step(actions)
             
+            # Publish odometry for environment robots (for drones: robot0, robot1, etc.)
+            if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
+                robot = env.unwrapped.scene["robot"]
+                num_envs = env.unwrapped.num_envs
+                
+                for env_idx in range(num_envs):
+                    # Get current pose from physics
+                    current_pos = robot.data.root_pos_w[env_idx]  # tensor [x, y, z]
+                    current_quat = robot.data.root_quat_w[env_idx]  # tensor [w, x, y, z]
+                    
+                    # Publish odometry
+                    base_node.publish_odom(current_pos, current_quat, env_idx)
+            
             # World-level drone control (AFTER env.step to read latest physics state)
             if world_drone_path is not None and custom_rl_env.world_drone_controller is not None:
                 # Lazy initialization: Create ArticulationView after first physics step
