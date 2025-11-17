@@ -586,13 +586,13 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
     if enable_world_drone:
         print("[INFO] Adding /drone namespace ROS2 interface")
         try:
-            # Topics
-            node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
-            node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
-            node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
+        # Topics
+        node_test.create_subscription(Twist, '/drone/cmd_vel', world_drone_cmd_vel_cb, 10)
+        node_test.create_subscription(PoseStamped, '/drone/cmd_position', world_drone_cmd_position_cb, 10)
+        node_test.create_subscription(Float32, '/drone/cmd_altitude', world_drone_cmd_altitude_cb, 10)
             print("[INFO] Drone topics created: cmd_vel, cmd_position, cmd_altitude")
-            
-            # Services
+        
+        # Services
             arm_srv = node_test.create_service(SetBool, '/drone/arm', world_drone_arm_cb)
             takeoff_srv = node_test.create_service(Trigger, '/drone/takeoff', world_drone_takeoff_cb)
             land_srv = node_test.create_service(Trigger, '/drone/land', world_drone_land_cb)
@@ -602,7 +602,7 @@ def add_cmd_sub(num_envs, enable_world_drone=False):
             print(f"  - /drone/takeoff: {takeoff_srv is not None}")
             print(f"  - /drone/land: {land_srv is not None}")
             print(f"  - /drone/emergency_stop: {estop_srv is not None}")
-            print("[INFO] Drone control interface ready on /drone namespace")
+        print("[INFO] Drone control interface ready on /drone namespace")
         except Exception as e:
             print(f"[ERROR] Failed to create drone ROS2 interface: {e}")
             import traceback
@@ -953,14 +953,21 @@ def run_sim():
             # agent stepping
             actions = policy(obs)
             
-            # Motor-based control for drones (uses physics)
+            # FORCE-BASED VELOCITY CONTROL for drones (bypass motor actions)
+            # Motor commands don't work because USD has no thrust physics
+            # Instead: calculate forces → integrate velocity → apply directly
             if args_cli.robot == "drone" or args_cli.robot == "quadcopter":
                 # Access the robot articulation
                 robot = env.unwrapped.scene["robot"]
                 num_envs = env.unwrapped.num_envs
                 
-                # Build motor commands for all environments
-                all_motor_commands = []
+                # Calculate drone mass once  
+                if not hasattr(custom_rl_env, 'env_drone_mass'):
+                    custom_rl_env.env_drone_mass = 0.5  # kg (Crazyflie 5x scaled estimate)
+                    print(f"[INFO] Environment drone mass: {custom_rl_env.env_drone_mass}kg")
+                
+                # Build velocity commands for all environments
+                new_velocities_list = []
                 
                 for env_idx in range(num_envs):
                     controller = custom_rl_env.drone_controllers.get(str(env_idx))
@@ -1000,12 +1007,28 @@ def run_sim():
                             custom_rl_env.drone_mode[str(env_idx)] = 'LOITER'
                             print(f"[INFO] Drone {env_idx} switched to LOITER at position ({current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f})")
                         
-                        # Get motor commands from controller
-                        motor_cmds = controller.compute_motor_command()
+                        # FORCE-BASED CONTROL: Calculate desired velocities from PID
+                        desired_vx = 0.0
+                        desired_vy = 0.0
+                        desired_vz = 0.0
                         
-                        # For VELOCITY mode, convert velocity inputs to motor commands
-                        if controller.mode.value == 'VELOCITY':
-                            # Get velocity commands from cmd_vel/keyboard
+                        if controller.mode.value == 'POSITION' or controller.mode.value == 'LOITER':
+                            # Position control: PID computes velocity from position error
+                            error = controller.target_position - current_pos
+                            desired_vx = controller.pid_x.update(error[0], dt)
+                            desired_vy = controller.pid_y.update(error[1], dt)
+                            desired_vz = controller.pid_z.update(error[2], dt)
+                        
+                        elif controller.mode.value == 'ALTITUDE_HOLD':
+                            # Altitude control only
+                            error_z = controller.target_altitude - current_pos[2]
+                            desired_vz = controller.pid_z.update(error_z, dt)
+                            cmd = custom_rl_env.base_command.get(str(env_idx), [0, 0, 0])
+                            desired_vx = cmd[0]
+                            desired_vy = cmd[1]
+                        
+                        elif controller.mode.value == 'VELOCITY':
+                            # Direct velocity control
                             cmd = custom_rl_env.base_command.get(str(env_idx), [0, 0, 0])
                             if env_idx == 0:
                                 altitude_cmd = getattr(custom_rl_env, 'drone_altitude', 0.0)
@@ -1013,34 +1036,70 @@ def run_sim():
                                 altitude_cmd = getattr(custom_rl_env, 'drone_altitude_1', 0.0)
                             else:
                                 altitude_cmd = 0.0
-                            
-                            # Convert velocities to motor commands (simplified)
-                            vx, vy, vz, yaw_rate = cmd[0], cmd[1], altitude_cmd, cmd[2]
-                            
-                            desired_pitch = -vx * 0.3
-                            desired_roll = vy * 0.3
-                            thrust = controller.hover_thrust + vz * 0.2
-                            thrust = np.clip(thrust, 0.0, 1.0)
-                            
-                            # Simple mapping
-                            motor_cmds = controller._motor_mixer(thrust, desired_roll, desired_pitch, yaw_rate * 0.1)
-                            
-                            # Debug: print motor commands occasionally
-                            if env_idx == 0 and int(time.time() * 10) % 30 == 0:  # Every 3 seconds
-                                print(f"[DEBUG] Motors: [{motor_cmds[0]:.3f}, {motor_cmds[1]:.3f}, {motor_cmds[2]:.3f}, {motor_cmds[3]:.3f}] Thrust:{thrust:.3f}")
+                            desired_vx = cmd[0]
+                            desired_vy = cmd[1]
+                            desired_vz = altitude_cmd
+                        
+                        elif controller.mode.value == 'LANDING':
+                            desired_vz = controller.landing_velocity
+                        
+                        elif controller.mode.value == 'IDLE':
+                            # IDLE: hover in place (zero velocity change)
+                            desired_vx = 0.0
+                            desired_vy = 0.0
+                            desired_vz = 0.0
+                        
+                        # Clamp desired velocities
+                        desired_vx = np.clip(desired_vx, -controller.max_vel, controller.max_vel)
+                        desired_vy = np.clip(desired_vy, -controller.max_vel, controller.max_vel)
+                        desired_vz = np.clip(desired_vz, -controller.max_climb_rate, controller.max_climb_rate)
+                        
+                        # Calculate forces needed (with gravity compensation)
+                        desired_velocity_vec = np.array([desired_vx, desired_vy, desired_vz])
+                        forces = calculate_drone_forces(
+                            desired_velocity=desired_velocity_vec,
+                            current_velocity=current_vel,
+                            mass=custom_rl_env.env_drone_mass,
+                            dt=dt,
+                            gravity=9.81
+                        )
+                        
+                        # Convert forces to velocity change: dv = (F/m) * dt
+                        accel = forces / custom_rl_env.env_drone_mass
+                        velocity_change = accel * dt
+                        new_vel = current_vel + velocity_change
+                        
+                        # Apply damping (air resistance)
+                        new_vel *= 0.95
+                        
+                        # Clamp for safety
+                        new_vel = np.clip(new_vel, -5.0, 5.0)
+                        
+                        new_velocities_list.append(new_vel)
+                        
+                        # Log occasionally
+                        if not hasattr(custom_rl_env, 'log_counter'):
+                            custom_rl_env.log_counter = 0
+                        if custom_rl_env.log_counter % 10 == 0:
+                            print(f"[FORCE] env{env_idx} pos:({current_pos[0]:.2f},{current_pos[1]:.2f},{current_pos[2]:.2f}) des_vel:({desired_vx:.2f},{desired_vy:.2f},{desired_vz:.2f}) new_vel:({new_vel[0]:.2f},{new_vel[1]:.2f},{new_vel[2]:.2f})")
+                        custom_rl_env.log_counter += 1
                     
                     else:
-                        # Not armed or no controller: zero motors
-                        motor_cmds = np.zeros(4)
-                    
-                    all_motor_commands.append(motor_cmds)
+                        # Not armed: zero velocity
+                        new_velocities_list.append(np.array([0.0, 0.0, 0.0]))
                 
-                # Convert to tensor for action manager
-                # Action shape: (num_envs, 4) for 4 motors
-                motor_tensor = torch.tensor(all_motor_commands, device=robot.device, dtype=torch.float32)
+                # Convert to tensor and write to simulation
+                velocities_tensor = torch.tensor(new_velocities_list, device=robot.device, dtype=torch.float32)
                 
-                # Override the policy actions with motor commands
-                actions = motor_tensor
+                # Add angular velocities (zero for now - could add yaw control later)
+                angular_vels = torch.zeros((num_envs, 3), device=robot.device, dtype=torch.float32)
+                full_vels = torch.cat([velocities_tensor, angular_vels], dim=1)  # Shape: (num_envs, 6)
+                
+                # Write velocities directly to simulation (bypasses action manager!)
+                robot.write_root_velocity_to_sim(full_vels)
+                
+                # Use zero actions since we're controlling via velocities directly
+                actions = torch.zeros((num_envs, 4), device=robot.device, dtype=torch.float32)
             
             # env stepping (MUST happen first to step physics)
             obs, _, _, _ = env.step(actions)
@@ -1523,26 +1582,26 @@ def run_sim():
                         if hasattr(custom_rl_env, '_dbg_ctr') and custom_rl_env._dbg_ctr % 60 == 0:
                             p = cache['position'].cpu().numpy()
                             print(f"[DBG ROS2] Publishing to /drone/odom: pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
-                        
-                        # Publish odometry (position + orientation)
-                        base_node.publish_drone_odom(
+                    
+                    # Publish odometry (position + orientation)
+                    base_node.publish_drone_odom(
                             cache['position'],  # xyz position
                             cache['orientation']  # wxyz quaternion
-                        )
-                        
-                        # Publish IMU (orientation + velocities)
-                        base_node.publish_drone_imu(
+                    )
+                    
+                    # Publish IMU (orientation + velocities)
+                    base_node.publish_drone_imu(
                             cache['orientation'],  # wxyz quaternion
                             cache['linear_velocity'],  # linear velocity
                             cache['angular_velocity']  # angular velocity
-                        )
-                        
-                        # Publish joint states
+                    )
+                    
+                    # Publish joint states
                         base_node.publish_drone_joints(
                             cache['joint_names'],
                             cache['joint_positions']
                         )
-                    except Exception as e:
+                except Exception as e:
                         # Log publishing errors for debugging
                         if not hasattr(base_node, '_publish_error_logged'):
                             print(f"[ERROR] Failed to publish world drone data: {e}")
