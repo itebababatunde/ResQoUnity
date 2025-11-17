@@ -978,12 +978,23 @@ def run_sim():
                         controller.update(dt, current_pos, current_vel)
                         
                         # CRITICAL: Switch to LOITER after first update (now has real position)
-                        # DEBUG: Log the check
-                        if not hasattr(custom_rl_env, '_loiter_switch_checked'):
-                            print(f"[DBG] First frame check - Mode: {controller.mode.value}, drone_mode: {custom_rl_env.drone_mode.get(str(env_idx), 'UNKNOWN')}")
-                            custom_rl_env._loiter_switch_checked = True
+                        # Wait 2 frames to ensure physics has stepped and position is valid
+                        if not hasattr(custom_rl_env, '_loiter_switch_frame'):
+                            custom_rl_env._loiter_switch_frame = {}
                         
-                        if controller.mode.value == 'IDLE' and custom_rl_env.drone_mode[str(env_idx)] == 'IDLE':
+                        if str(env_idx) not in custom_rl_env._loiter_switch_frame:
+                            custom_rl_env._loiter_switch_frame[str(env_idx)] = 0
+                        
+                        custom_rl_env._loiter_switch_frame[str(env_idx)] += 1
+                        
+                        # DEBUG: Log the check on first few frames
+                        if custom_rl_env._loiter_switch_frame[str(env_idx)] <= 5:
+                            print(f"[DBG] Frame {custom_rl_env._loiter_switch_frame[str(env_idx)]} - Mode: {controller.mode.value}, Pos: ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
+                        
+                        # Switch to LOITER after 2 frames (ensure physics is initialized)
+                        if (controller.mode.value == 'IDLE' and 
+                            custom_rl_env.drone_mode[str(env_idx)] == 'IDLE' and
+                            custom_rl_env._loiter_switch_frame[str(env_idx)] >= 2):
                             from drone_controller import DroneState
                             controller.set_mode(DroneState.LOITER)
                             custom_rl_env.drone_mode[str(env_idx)] = 'LOITER'
