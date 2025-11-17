@@ -493,17 +493,20 @@ def world_drone_land_cb(request, response):
     """Initiate landing sequence for world-level drone
     THREAD-SAFE: Uses world_drone_lock for concurrent access"""
     from drone_controller import DroneState
+    print("[ROS2 SERVICE] /drone/land called")
     with custom_rl_env.world_drone_lock:
         controller = custom_rl_env.world_drone_controller
         
         if not controller or not controller.armed:
             response.success = False
             response.message = "Drone not armed or controller missing"
+            print(f"[ROS2 SERVICE] /drone/land failed: {response.message}")
             return response
         
         controller.set_mode(DroneState.LANDING)
         response.success = True
         response.message = "Landing sequence initiated"
+        print(f"[ROS2 SERVICE] /drone/land success: Mode set to LANDING")
         return response
 
 
@@ -1604,10 +1607,23 @@ def run_sim():
                                          new_angular_vel[0], new_angular_vel[1], new_angular_vel[2]]
                                     ], dtype=torch.float32, device=device)
                                     
-                                    world_drone_view.set_velocities(new_vels)
+                                    # CRITICAL FIX: Manually integrate position and SET IT directly
+                                    # Velocity-based control doesn't update viewport for world drones
+                                    # So we manually integrate and force the position update
                                     
-                                    # CRITICAL: Force viewport update for GPU PhysX
-                                    # World-level objects need explicit render flush
+                                    # Integrate position: p_new = p_current + v * dt
+                                    new_position = current_pos + new_linear_vel * dt
+                                    
+                                    # Set both velocity AND position to force viewport update
+                                    world_drone_view.set_velocities(new_vels, indices=[0])
+                                    
+                                    # Force position update via USD (this WILL update viewport)
+                                    new_pos_tensor = torch.tensor([[new_position[0], new_position[1], new_position[2]]], 
+                                                                   dtype=torch.float32, device=device)
+                                    current_quat = world_drone_view.get_world_poses()[1]  # Keep orientation
+                                    world_drone_view.set_world_poses(positions=new_pos_tensor, orientations=current_quat, indices=[0])
+                                    
+                                    # Force viewport update
                                     try:
                                         sim = env.unwrapped.sim if hasattr(env.unwrapped, 'sim') else env.sim
                                         sim.render()  # Sync GPU physics state to viewport
