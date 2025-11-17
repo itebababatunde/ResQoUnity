@@ -780,7 +780,9 @@ def run_sim():
                 hover_thrust=0.45      # Slightly increased from 0.35
             )
             # Auto-arm environment drones for immediate flight
-            custom_rl_env.drone_controllers[str(i)].arm()
+            custom_rl_env.drone_controllers[str(i)].armed = True
+            from drone_controller import DroneState
+            custom_rl_env.drone_controllers[str(i)].set_mode(DroneState.LOITER)
             custom_rl_env.drone_armed[str(i)] = True
             custom_rl_env.drone_mode[str(i)] = 'LOITER'
             print(f"[INFO] Drone {i} controller initialized and ARMED (auto-hover at spawn height)")
