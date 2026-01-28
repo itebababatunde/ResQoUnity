@@ -68,7 +68,7 @@ drone_armed = {}  # {robot_id: bool}
 
 # Separate world-level drone state (independent from robot0)
 # THREAD-SAFE: Protected by world_drone_lock for ROS2 callback access
-world_drone_lock = threading.Lock()
+world_drone_lock = threading.RLock()  # Reentrant lock to prevent deadlocks
 world_drone_controller = None  # Single DroneController for /World/Drone
 world_drone_command = [0.0, 0.0, 0.0]  # [vx, vy, yaw_rate] for velocity mode
 world_drone_altitude = 0.0  # Altitude command for /drone
@@ -311,6 +311,12 @@ class LocomotionVelocityRoughEnvCfg(RLTaskEnvCfg):
         self.sim.dt = 0.005
         self.sim.disable_contact_processing = True
         self.sim.physics_material = self.scene.terrain.physics_material
+
+        # CPU mode: Disable GPU physics when --cpu flag is passed
+        # This allows direct pose manipulation (setGlobalPose) which is illegal with GPU PhysX
+        if args_cli.cpu:
+            self.sim.device = "cpu"
+            print("[INFO] CPU physics mode enabled - GPU PhysX disabled")
 
         # update sensor update periods
         # we tick all the sensors based on the smallest update period (physics update period)
