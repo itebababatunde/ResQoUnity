@@ -151,14 +151,36 @@ def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, star
         try:
             if (time.time() - start_time) > 1/20:
                 for j in range(num_envs):
+                    if not annotator_lst or j >= len(annotator_lst):
+                        continue
                     data = annotator_lst[j].get_data()
-                    # Use raw lidar data - don't transform to world frame
-                    # Frame_id is set to robot{j}/base_link in publish_lidar
-                    point_cloud = data['data']
+                    if data is None:
+                        if not getattr(pub_robo_data_ros2, "_lidar_none_logged", False):
+                            print("[WARN] LiDAR annotator get_data() returned None (sensor may not be ready yet)")
+                            pub_robo_data_ros2._lidar_none_logged = True
+                        continue
+                    if "data" not in data:
+                        if not getattr(pub_robo_data_ros2, "_lidar_key_logged", False):
+                            print("[WARN] LiDAR data missing 'data' key; keys:", list(data.keys()) if hasattr(data, "keys") else type(data))
+                            pub_robo_data_ros2._lidar_key_logged = True
+                        continue
+                    point_cloud = data["data"]
+                    # Ensure Nx3 float for create_cloud (Isaac may return different shape/dtype)
+                    if hasattr(point_cloud, "shape") and len(point_cloud.shape) >= 2 and point_cloud.shape[1] > 3:
+                        point_cloud = np.asarray(point_cloud[:, :3], dtype=np.float32)
+                    elif hasattr(point_cloud, "shape") and (len(point_cloud.shape) != 2 or point_cloud.shape[1] != 3):
+                        point_cloud = np.asarray(point_cloud, dtype=np.float32)
+                        if point_cloud.ndim == 1:
+                            point_cloud = point_cloud.reshape(-1, 3)
                     base_node.publish_lidar(point_cloud, j)
                 start_time = time.time()
-        except :
-            pass
+        except Exception as e:
+            # Log so you see the real error in Isaac Sim terminal (was previously silent)
+            if not getattr(pub_robo_data_ros2, "_lidar_err_logged", False):
+                print("[ERROR] LiDAR publish failed:", e)
+                import traceback
+                traceback.print_exc()
+                pub_robo_data_ros2._lidar_err_logged = True
 
 
 class RobotBaseNode(Node):
