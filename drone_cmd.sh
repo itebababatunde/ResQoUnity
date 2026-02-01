@@ -1,5 +1,10 @@
 #!/bin/bash
 # Drone Control Script - Simple commands for the world drone
+
+# Source ROS2
+source /opt/ros/humble/setup.bash
+
+# Use FastDDS (CycloneDDS has issues with service discovery)
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
 case "$1" in

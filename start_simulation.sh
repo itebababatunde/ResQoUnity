@@ -77,7 +77,8 @@ echo -e "  ${GREEN}✓${NC} Pydantic patched"
 echo -e "${GREEN}[3/8]${NC} Setting up ROS environment..."
 export ROS_DISTRO=humble
 source /opt/ros/$ROS_DISTRO/setup.bash
-echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced"
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced (using FastDDS)"
 
 echo -e "${GREEN}[4/8]${NC} Building ROS workspaces..."
 # Build Isaac Sim ROS workspace
