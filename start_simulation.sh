@@ -1,11 +1,11 @@
 #!/bin/bash
 ################################################################################
 # Go2 Robot Simulation Startup Script
-# 
+#
 # This script handles all environment setup and launches the Isaac Sim
 # simulation with the Go2 robot in one command.
 #
-# Usage: ./start_simulation.sh [--robot_amount N] [--robot ROBOT] [--terrain TYPE]
+# Usage: ./start_simulation.sh [ROBOT] [AMOUNT] [TERRAIN] [ENV]
 ################################################################################
 
 set -e  # Exit on error
@@ -25,14 +25,16 @@ ROBOT_TYPE="${1:-go2}"        # Default: go2 (also accepts: drone, quadcopter, g
 ROBOT_AMOUNT="${2:-1}"        # Default: 1 robot
 TERRAIN="${3:-flat}"          # Default: flat (also accepts: rough)
 CUSTOM_ENV="${4:-office}"     # Default: office (also accepts: warehouse)
-shift 4 2>/dev/null || true  # Remove parsed args, keep any extras
-EXTRA_ARGS="$@"               # Capture remaining args (e.g., --calibrate)
+
+# Clear extra args - we only use the 4 positional args
+EXTRA_ARGS=""
 
 echo -e "${YELLOW}Configuration:${NC}"
 echo -e "  Robot Type:    ${GREEN}$ROBOT_TYPE${NC}"
 echo -e "  Robot Amount:  ${GREEN}$ROBOT_AMOUNT${NC}"
 echo -e "  Terrain:       ${GREEN}$TERRAIN${NC}"
 echo -e "  Environment:   ${GREEN}$CUSTOM_ENV${NC}"
+echo -e "  Physics Mode:  ${YELLOW}CPU (GPU PhysX disabled for testing)${NC}"
 if [ -n "$EXTRA_ARGS" ]; then
     echo -e "  Extra Args:    ${GREEN}$EXTRA_ARGS${NC}"
 fi
@@ -75,7 +77,8 @@ echo -e "  ${GREEN}✓${NC} Pydantic patched"
 echo -e "${GREEN}[3/8]${NC} Setting up ROS environment..."
 export ROS_DISTRO=humble
 source /opt/ros/$ROS_DISTRO/setup.bash
-echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced"
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced (using FastDDS)"
 
 echo -e "${GREEN}[4/8]${NC} Building ROS workspaces..."
 # Build Isaac Sim ROS workspace
@@ -198,27 +201,54 @@ source ~/ResQoUnity/IsaacSim-ros_workspaces/${ROS_DISTRO}_ws/install/setup.bash
 source ~/ResQoUnity/go2_omniverse_ws/install/setup.bash
 
 cd ~/ResQoUnity
+
+# Create logs directory if it doesn't exist
+mkdir -p ~/ResQoUnity/logs/simulation
+
+# Generate timestamped log file
+LOG_TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+LOG_FILE=~/ResQoUnity/logs/simulation/sim_${LOG_TIMESTAMP}.log
+
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Starting Isaac Sim${NC}"
+echo -e "${GREEN}Starting Isaac Sim (CPU Physics Mode)${NC}"
 echo -e "  Robot Type:    ${YELLOW}$ROBOT_TYPE${NC}"
 echo -e "  Robot Amount:  ${YELLOW}$ROBOT_AMOUNT${NC}"
 echo -e "  Terrain:       ${YELLOW}$TERRAIN${NC}"
 echo -e "  Environment:   ${YELLOW}$CUSTOM_ENV${NC}"
-echo -e "  Note: ${YELLOW}Enable extensions via Window→Extensions if needed${NC}"
+echo -e "  Log File:      ${YELLOW}$LOG_FILE${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# Launch simulation with specified parameters
-${ISAACSIM_PYTHON_EXE} main.py \
+# Write header to log file
+{
+    echo "========================================"
+    echo "ResQoUnity Simulation Log"
+    echo "========================================"
+    echo "Timestamp:    $(date)"
+    echo "Robot Type:   $ROBOT_TYPE"
+    echo "Robot Amount: $ROBOT_AMOUNT"
+    echo "Terrain:      $TERRAIN"
+    echo "Environment:  $CUSTOM_ENV"
+    echo "CPU Mode:     ENABLED (hardcoded for testing)"
+    echo "========================================"
+    echo ""
+} > "$LOG_FILE"
+
+# Launch simulation with CPU mode hardcoded
+${ISAACSIM_PYTHON_EXE} -u main.py \
     --robot $ROBOT_TYPE \
     --robot_amount $ROBOT_AMOUNT \
     --terrain $TERRAIN \
     --custom_env $CUSTOM_ENV \
-    $EXTRA_ARGS
+    --cpu \
+    $EXTRA_ARGS 2>&1 | tee -a "$LOG_FILE"
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Simulation ended${NC}"
+echo -e "${GREEN}Log saved to: ${YELLOW}$LOG_FILE${NC}"
 echo -e "${GREEN}========================================${NC}"
 
+# Create symlink to latest log
+ln -sf "$LOG_FILE" ~/ResQoUnity/logs/simulation/latest.log

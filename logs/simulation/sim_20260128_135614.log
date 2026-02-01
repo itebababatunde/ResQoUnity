@@ -1,0 +1,25 @@
+========================================
+ResQoUnity Simulation Log
+========================================
+Timestamp:    Wed Jan 28 01:56:14 PM CST 2026
+Robot Type:   drone
+Robot Amount: 1
+Terrain:      flat
+Environment:  office
+CPU Mode:     disabled (GPU)
+Extra Args:   drone 1 flat office
+========================================
+
+usage: main.py [-h] [--cpu] [--disable_fabric] [--num_envs NUM_ENVS]
+               [--task TASK] [--seed SEED] [--custom_env CUSTOM_ENV]
+               [--robot ROBOT] [--terrain TERRAIN]
+               [--robot_amount ROBOT_AMOUNT] [--calibrate]
+               [--experiment_name EXPERIMENT_NAME] [--run_name RUN_NAME]
+               [--resume RESUME] [--load_run LOAD_RUN]
+               [--checkpoint CHECKPOINT]
+               [--logger {neptune,tensorboard,wandb}]
+               [--log_project_name LOG_PROJECT_NAME] [--headless]
+               [--livestream {0,1,2,3}] [--offscreen_render] [--verbose]
+               [--experience EXPERIENCE]
+main.py: error: unrecognized arguments: drone 1 flat office
+There was an error running python

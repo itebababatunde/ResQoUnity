@@ -47,12 +47,14 @@ class DroneDebugLogger:
             print(f"[MODE CHANGE] Target position: ({target_pos[0]:.2f}, {target_pos[1]:.2f}, {target_pos[2]:.2f})")
         print()
     
-    def log_frame(self, current_pos, current_vel, target_pos, mode, 
+    def log_frame(self, current_pos, current_vel, target_pos, mode,
                   desired_vel, error, armed, actual_vel_applied=None, applied_force=None):
-        """Log frame-by-frame state"""
+        """Log frame-by-frame state - DISABLED for cleaner output"""
         self.frame_count += 1
+        # Frame logging disabled - too noisy. Uncomment below to re-enable.
+        return
         current_time = time.time()
-        
+
         # Log every second
         if current_time - self.last_log_time >= self.log_interval:
             self.last_log_time = current_time

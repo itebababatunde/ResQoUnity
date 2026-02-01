@@ -530,8 +530,11 @@ def world_drone_emergency_stop_cb(request, response):
 def world_drone_arm_cb(request, response):
     """Arm or disarm the world-level drone
     THREAD-SAFE: Uses world_drone_lock for concurrent access"""
+    print(f"[ROS2 SERVICE] /drone/arm called with data={request.data}")
     from drone_controller import DroneState
+    print("[ROS2 SERVICE] Waiting for lock...")
     with custom_rl_env.world_drone_lock:
+        print("[ROS2 SERVICE] Lock acquired")
         controller = custom_rl_env.world_drone_controller
         logger = custom_rl_env.world_drone_logger if hasattr(custom_rl_env, 'world_drone_logger') else None
         
@@ -716,6 +719,13 @@ def run_sim():
     print(f"[INFO] Robot: {args_cli.robot}, Amount: {args_cli.robot_amount}, Terrain: {args_cli.terrain}")
     env = gym.make(args_cli.task, cfg=env_cfg)
     print("[INFO] Environment created successfully!")
+
+    # Log physics mode for debugging
+    if args_cli.cpu:
+        print("[INFO] ========================================")
+        print("[INFO] PHYSICS MODE: CPU (GPU PhysX DISABLED)")
+        print("[INFO] Direct pose manipulation is ALLOWED")
+        print("[INFO] ========================================")
     # wrap around environment for rsl-rl
     env = RslRlVecEnvWrapper(env)
     print("[INFO] Environment wrapped for RSL-RL")
@@ -1501,23 +1511,23 @@ def run_sim():
                                     # Altitude control only, XY from cmd_vel
                                     error_z = controller.target_altitude - current_pos[2]
                                     desired_vz = controller.pid_z.update(error_z, dt)
-                                    with custom_rl_env.world_drone_lock:
-                                        cmd_vel = custom_rl_env.world_drone_command
-                                        desired_vx = cmd_vel[0]
-                                        desired_vy = cmd_vel[1]
-                                        desired_yaw_rate = cmd_vel[2]
+                                    # Already inside world_drone_lock - no nested lock needed
+                                    cmd_vel = custom_rl_env.world_drone_command
+                                    desired_vx = cmd_vel[0]
+                                    desired_vy = cmd_vel[1]
+                                    desired_yaw_rate = cmd_vel[2]
                                 
                                 elif controller.mode.value == 'LANDING':
                                     desired_vz = controller.landing_velocity  # Fixed descent rate
                                 
                                 elif controller.mode.value == 'VELOCITY':
                                     # Direct velocity control from cmd_vel
-                                    with custom_rl_env.world_drone_lock:
-                                        cmd_vel = custom_rl_env.world_drone_command
-                                        desired_vx = cmd_vel[0]
-                                        desired_vy = cmd_vel[1]
-                                        desired_yaw_rate = cmd_vel[2]
-                                        desired_vz = custom_rl_env.world_drone_altitude
+                                    # Already inside world_drone_lock - no nested lock needed
+                                    cmd_vel = custom_rl_env.world_drone_command
+                                    desired_vx = cmd_vel[0]
+                                    desired_vy = cmd_vel[1]
+                                    desired_yaw_rate = cmd_vel[2]
+                                    desired_vz = custom_rl_env.world_drone_altitude
                                 
                                 # Convert desired velocities to forces (F=ma approach)
                                 
@@ -1614,9 +1624,9 @@ def run_sim():
                                     # Integrate position: p_new = p_current + v * dt
                                     new_position = current_pos + new_linear_vel * dt
                                     
-                                    # DEBUG: Confirm this code path is executing
-                                    if hasattr(logger, 'frame_count') and logger.frame_count % 50 == 0:
-                                        print(f"[VIEWPORT FIX] Setting drone position to ({new_position[0]:.3f}, {new_position[1]:.3f}, {new_position[2]:.3f})")
+                                    # DEBUG: Disabled - too noisy
+                                    # if hasattr(logger, 'frame_count') and logger.frame_count % 50 == 0:
+                                    #     print(f"[VIEWPORT FIX] Setting drone position to ({new_position[0]:.3f}, {new_position[1]:.3f}, {new_position[2]:.3f})")
                                     
                                     # Set both velocity AND position to force viewport update
                                     world_drone_view.set_velocities(new_vels, indices=[0])
@@ -1644,9 +1654,9 @@ def run_sim():
                                         sim = env.unwrapped.sim if hasattr(env.unwrapped, 'sim') else env.sim
                                         sim.render()  # Sync GPU physics state to viewport
                                         
-                                        # Verify render was called (log occasionally)
-                                        if hasattr(logger, 'frame_count') and logger.frame_count % 20 == 0:
-                                            print(f"[DBG RENDER] Viewport sync triggered at pos ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
+                                        # DEBUG: Disabled - too noisy
+                                        # if hasattr(logger, 'frame_count') and logger.frame_count % 20 == 0:
+                                        #     print(f"[DBG RENDER] Viewport sync triggered at pos ({current_pos[0]:.3f}, {current_pos[1]:.3f}, {current_pos[2]:.3f})")
                                     except AttributeError:
                                         # Fallback: try direct simulation app update
                                         try:
@@ -1737,13 +1747,13 @@ def run_sim():
                         velocities = world_drone_view.get_velocities()
                         joint_positions = world_drone_view.get_joint_positions()
                         
-                        # DEBUG: Verify cache is being updated
+                        # DEBUG: Disabled - too noisy
                         if not hasattr(custom_rl_env, '_dbg_ctr'):
                             custom_rl_env._dbg_ctr = 0
                         custom_rl_env._dbg_ctr += 1
-                        if custom_rl_env._dbg_ctr % 60 == 0:
-                            p = positions[0].cpu().numpy()
-                            print(f"[DBG CACHE] Frame {custom_rl_env._dbg_ctr}: Updating cache with pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
+                        # if custom_rl_env._dbg_ctr % 60 == 0:
+                        #     p = positions[0].cpu().numpy()
+                        #     print(f"[DBG CACHE] Frame {custom_rl_env._dbg_ctr}: Updating cache with pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
                         
                         custom_rl_env.world_drone_state_cache = {
                             'position': positions[0],
@@ -1768,10 +1778,10 @@ def run_sim():
                     try:
                         cache = custom_rl_env.world_drone_state_cache
                         
-                        # DEBUG: Print what we're publishing
-                        if hasattr(custom_rl_env, '_dbg_ctr') and custom_rl_env._dbg_ctr % 60 == 0:
-                            p = cache['position'].cpu().numpy()
-                            print(f"[DBG ROS2] Publishing to /drone/odom: pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
+                        # DEBUG: Disabled - too noisy
+                        # if hasattr(custom_rl_env, '_dbg_ctr') and custom_rl_env._dbg_ctr % 60 == 0:
+                        #     p = cache['position'].cpu().numpy()
+                        #     print(f"[DBG ROS2] Publishing to /drone/odom: pos=({p[0]:.3f},{p[1]:.3f},{p[2]:.3f})")
                     
                         
                         # Publish odometry (position + orientation)
