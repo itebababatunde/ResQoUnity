@@ -78,7 +78,10 @@ echo -e "${GREEN}[3/8]${NC} Setting up ROS environment..."
 export ROS_DISTRO=humble
 source /opt/ros/$ROS_DISTRO/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced (using FastDDS)"
+export ROS_DOMAIN_ID=0
+# So sim and ros2 CLI on same machine discover each other (no multicast needed)
+export ROS_LOCALHOST_ONLY=1
+echo -e "  ${GREEN}✓${NC} ROS $ROS_DISTRO sourced (FastDDS, ROS_DOMAIN_ID=0, LOCALHOST_ONLY=1)"
 
 echo -e "${GREEN}[4/8]${NC} Building ROS workspaces..."
 # Build Isaac Sim ROS workspace
@@ -196,9 +199,12 @@ export PYTHONPATH="${ISAACLAB_PATH}/source/extensions/omni.isaac.orbit_assets:${
 echo -e "  ${GREEN}✓${NC} PYTHONPATH configured with IsaacLab extensions"
 
 echo -e "${GREEN}[8/8]${NC} Launching simulation..."
-# Re-source ROS workspaces for Isaac Sim Python
+# Re-source ROS workspaces for Isaac Sim Python (same discovery as below)
 source ~/ResQoUnity/IsaacSim-ros_workspaces/${ROS_DISTRO}_ws/install/setup.bash
 source ~/ResQoUnity/go2_omniverse_ws/install/setup.bash
+# Ensure sim and external ros2 tools see each other
+export ROS_DOMAIN_ID=0
+export ROS_LOCALHOST_ONLY=1
 
 cd ~/ResQoUnity
 
