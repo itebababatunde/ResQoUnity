@@ -917,7 +917,8 @@ def run_sim():
                             convention="ros"
                         ),
                     )
-                    Camera(drone_cam_cfg)
+                    # Keep ref so Camera isn't GC'd before _rep_registry is set (avoids __del__ AttributeError)
+                    custom_rl_env.world_drone_bottom_camera = Camera(drone_cam_cfg)
                     print("[INFO] Drone bottom camera initialized")
                 except Exception as cam_e:
                     print(f"[WARN] Failed to add drone camera: {cam_e}")
@@ -935,7 +936,8 @@ def run_sim():
     control_node = add_cmd_sub(env_cfg.scene.num_envs, enable_world_drone=enable_world_drone)
 
     annotator_lst = add_rtx_lidar(env_cfg.scene.num_envs, args_cli.robot, False)
-    add_camera(env_cfg.scene.num_envs, args_cli.robot)
+    # Keep refs to avoid Camera.__del__ AttributeError on _rep_registry (Isaac Lab teardown)
+    env_cameras = add_camera(env_cfg.scene.num_envs, args_cli.robot)
     setup_custom_env()
     
     # Set up viewport camera to see the robot

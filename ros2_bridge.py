@@ -103,6 +103,8 @@ def add_rtx_lidar(num_envs, robot_type, debug=False):
 
 
 def add_camera(num_envs, robot_type):
+    """Create cameras for each env. Returns list of Camera instances so refs are kept (avoids Camera.__del__ AttributeError on _rep_registry)."""
+    cameras = []
     for i in range(num_envs):
         cameraCfg = CameraCfg(
             prim_path=f"/World/envs/env_{i}/Robot/base/front_cam",
@@ -124,7 +126,8 @@ def add_camera(num_envs, robot_type):
             cameraCfg.prim_path = f"/World/envs/env_{i}/Robot/base/front_cam"
             cameraCfg.offset = CameraCfg.OffsetCfg(pos=(0.1, 0.0, -0.05), rot=(0.5, -0.5, 0.5, -0.5), convention="ros")
 
-        Camera(cameraCfg)
+        cameras.append(Camera(cameraCfg))
+    return cameras
 
 
 def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, start_time):
