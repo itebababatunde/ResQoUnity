@@ -23,6 +23,7 @@
 
 
 import asyncio
+import os
 import time
 
 import numpy as np
@@ -173,6 +174,10 @@ def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, star
                         if point_cloud.ndim == 1:
                             point_cloud = point_cloud.reshape(-1, 3)
                     base_node.publish_lidar(point_cloud, j)
+                    # One-time log so you can confirm LiDAR is publishing from sim terminal
+                    if not getattr(pub_robo_data_ros2, "_lidar_ok_logged", False):
+                        print("[INFO] LiDAR publishing to /robot{}/point_cloud2 (ROS_DOMAIN_ID={})".format(j, os.environ.get("ROS_DOMAIN_ID", "0")))
+                        pub_robo_data_ros2._lidar_ok_logged = True
                 start_time = time.time()
         except Exception as e:
             # Log so you see the real error in Isaac Sim terminal (was previously silent)
