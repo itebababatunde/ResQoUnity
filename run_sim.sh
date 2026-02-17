@@ -12,8 +12,24 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== ResQoUnity Simulation Setup ===${NC}"
-echo -e "${YELLOW}This script will set up everything needed to run the simulation${NC}"
+# Parse arguments
+CUSTOM_ENV="none"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --env)
+            CUSTOM_ENV="$2"
+            shift 2
+            ;;
+        *)
+            echo -e "${RED}Unknown argument: $1${NC}"
+            echo "Usage: $0 [--env office|warehouse]"
+            exit 1
+            ;;
+    esac
+done
+
+echo -e "${BLUE}=== ResQoUnity Boids Swarm Simulation ===${NC}"
+echo -e "${YELLOW}2x Go2 Dogs + Drone | Environment: ${CUSTOM_ENV}${NC}"
 
 # Set default ROS_DISTRO if not set
 if [ -z "$ROS_DISTRO" ]; then
@@ -78,6 +94,9 @@ echo -e "${GREEN}✓ Found IsaacLab at: $ISAACLAB_PATH${NC}"
 # Setup ROS environment
 echo -e "${BLUE}Setting up ROS environment...${NC}"
 source /opt/ros/${ROS_DISTRO}/setup.bash
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_DOMAIN_ID=0
+export ROS_LOCALHOST_ONLY=1
 
 # Build ROS workspaces
 echo -e "${BLUE}Building ROS workspaces...${NC}"
@@ -164,9 +183,9 @@ source "$SCRIPT_DIR/go2_omniverse_ws/install/setup.bash" 2>/dev/null || true
 
 # Run the simulation
 echo -e "${GREEN}=== Starting Simulation ===${NC}"
-echo -e "${BLUE}Command: ./orbit.sh --sim $SCRIPT_DIR/main.py --robot_amount 1 --robot go2 --terrain flat${NC}"
+echo -e "${BLUE}Command: ./orbit.sh --sim $SCRIPT_DIR/main.py --robot_amount 2 --robot go2 --terrain flat --custom_env $CUSTOM_ENV${NC}"
 echo -e "${YELLOW}Note: First run may take longer as Isaac Sim initializes extensions${NC}"
 
 # Change back to IsaacLab directory for execution
 cd "$ISAACLAB_PATH"
-./orbit.sh --sim "$SCRIPT_DIR/main.py" --robot_amount 2 --robot go2 --terrain flat
+./orbit.sh --sim "$SCRIPT_DIR/main.py" --robot_amount 2 --robot go2 --terrain flat --custom_env "$CUSTOM_ENV"

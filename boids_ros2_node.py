@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """
-Leader-Follower Coordination ROS2 Node.
+Boids Swarm Coordination ROS2 Node.
 
-Standalone node that coordinates a drone (leader) and two Go2 dogs (followers)
-by reading odometry from the simulation and publishing commands.
+Standalone node that coordinates a drone (leader) and two Go2 dogs (boids)
+using Reynolds' Boids flocking rules (separation, alignment, cohesion).
 
-Both dogs follow the drone independently using APF controllers with
-inter-dog repulsion to avoid collisions.
-
-The simulation (run_sim.sh) must already be running with both robots spawned.
+The simulation (run_sim.sh) must already be running with 2 dogs + drone spawned.
 
 Usage:
-    Terminal 1: ./start_simulation.sh
-    Terminal 2: ./run_leader_follower_ros2.sh
+    Terminal 1: ./run_sim.sh
+    Terminal 2: ./run_boids_ros2.sh
 """
 
 import sys
@@ -34,7 +31,10 @@ from std_srvs.srv import SetBool, Trigger
 # Add project root so we can import planner/controller
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lawnmower_planner import LawnmowerPlanner, LawnmowerConfig
-from apf_controller import APFController, APFConfig
+from boids_controller import BoidsController, BoidsConfig
+
+
+NUM_DOGS = 2
 
 
 class MissionState(Enum):
@@ -55,19 +55,20 @@ def quat_to_yaw(x, y, z, w):
     return math.atan2(siny_cosp, cosy_cosp)
 
 
-class LeaderFollowerNode(Node):
+class BoidsSwarmNode(Node):
     def __init__(self):
-        super().__init__('leader_follower_node')
+        super().__init__('boids_swarm_node')
 
         # Declare ROS2 parameters with defaults
         self.declare_parameter('workspace_size', 10.0)
         self.declare_parameter('sweep_spacing', 2.0)
         self.declare_parameter('drone_speed', 1.0)
         self.declare_parameter('drone_altitude', 3.0)
-        self.declare_parameter('k_att', 1.0)
-        self.declare_parameter('k_rep', 2.0)
-        self.declare_parameter('d_safe', 2.0)
-        self.declare_parameter('d_influence', 3.0)
+        self.declare_parameter('w_separation', 2.0)
+        self.declare_parameter('w_alignment', 1.0)
+        self.declare_parameter('w_cohesion', 1.0)
+        self.declare_parameter('separation_radius', 2.5)
+        self.declare_parameter('neighbor_radius', 10.0)
         self.declare_parameter('max_velocity', 1.5)
         self.declare_parameter('yaw_p_gain', 1.5)
         self.declare_parameter('altitude_wait_sec', 3.0)
@@ -79,17 +80,18 @@ class LeaderFollowerNode(Node):
         spacing = self.get_parameter('sweep_spacing').value
         speed = self.get_parameter('drone_speed').value
         alt = self.get_parameter('drone_altitude').value
-        k_att = self.get_parameter('k_att').value
-        k_rep = self.get_parameter('k_rep').value
-        d_safe = self.get_parameter('d_safe').value
-        d_inf = self.get_parameter('d_influence').value
+        w_sep = self.get_parameter('w_separation').value
+        w_ali = self.get_parameter('w_alignment').value
+        w_coh = self.get_parameter('w_cohesion').value
+        sep_r = self.get_parameter('separation_radius').value
+        neigh_r = self.get_parameter('neighbor_radius').value
         max_vel = self.get_parameter('max_velocity').value
         self.yaw_p_gain = self.get_parameter('yaw_p_gain').value
         self.altitude_wait_sec = self.get_parameter('altitude_wait_sec').value
         self.completion_hover_sec = self.get_parameter('completion_hover_sec').value
         control_hz = self.get_parameter('control_rate_hz').value
 
-        # Planner & controllers
+        # Planner
         planner_cfg = LawnmowerConfig(
             workspace_size=ws,
             sweep_spacing=spacing,
@@ -98,18 +100,26 @@ class LeaderFollowerNode(Node):
         )
         self.planner = LawnmowerPlanner(planner_cfg)
 
-        apf_cfg = APFConfig(
-            k_att=k_att,
-            k_rep=k_rep,
-            d_safe=d_safe,
-            d_influence=d_inf,
+        # One BoidsController per dog (independent smoothing state)
+        boids_cfg = BoidsConfig(
+            w_separation=w_sep,
+            w_alignment=w_ali,
+            w_cohesion=w_coh,
+            separation_radius=sep_r,
+            neighbor_radius=neigh_r,
             max_velocity=max_vel,
         )
-        self.apf = APFController(apf_cfg)
-        self.apf_second = APFController(apf_cfg)
+        self.boids = [BoidsController(BoidsConfig(
+            w_separation=w_sep,
+            w_alignment=w_ali,
+            w_cohesion=w_coh,
+            separation_radius=sep_r,
+            neighbor_radius=neigh_r,
+            max_velocity=max_vel,
+        )) for _ in range(NUM_DOGS)]
 
         self.get_logger().info(f'Planner: {self.planner}')
-        self.get_logger().info(f'APF: {self.apf}')
+        self.get_logger().info(f'Boids[0]: {self.boids[0]}')
         self.get_logger().info(f'Total mission time: {self.planner.total_time:.1f}s')
 
         # State machine
@@ -117,51 +127,44 @@ class LeaderFollowerNode(Node):
         self.mission_start_time = None
         self.state_enter_time = None
 
-        # Odometry state — Dog 0 (robot0)
+        # Drone odometry state
         self.drone_pos = None       # [x, y, z]
         self.drone_quat = None      # [x, y, z, w]
-        self.dog_pos = None         # [x, y, z]
-        self.dog_quat = None        # [x, y, z, w]
-        self.dog_yaw = 0.0
         self.drone_odom_received = False
-        self.dog_odom_received = False
 
-        # Dog 0 velocity estimation
-        self.dog_prev_pos = None
-        self.dog_prev_time = None
-        self.dog_vel_estimate = np.array([0.0, 0.0])
+        # Per-dog state arrays
+        self.dog_pos = [None] * NUM_DOGS         # [x, y, z]
+        self.dog_quat = [None] * NUM_DOGS        # (x, y, z, w)
+        self.dog_yaw = [0.0] * NUM_DOGS
+        self.dog_odom_received = [False] * NUM_DOGS
+        self.dog_prev_pos = [None] * NUM_DOGS
+        self.dog_prev_time = [None] * NUM_DOGS
+        self.dog_vel_estimate = [np.array([0.0, 0.0]) for _ in range(NUM_DOGS)]
 
-        # Odometry state — Dog 1 (robot1)
-        self.second_dog_pos = None
-        self.second_dog_quat = None
-        self.second_dog_yaw = 0.0
-        self.second_dog_odom_received = False
-
-        # Dog 1 velocity estimation
-        self.second_dog_prev_pos = None
-        self.second_dog_prev_time = None
-        self.second_dog_vel_estimate = np.array([0.0, 0.0])
-
-        # Safety tracking
-        self.min_separation = float('inf')
-        self.max_separation = 0.0
+        # Safety tracking (per-dog)
+        self.min_drone_sep = [float('inf')] * NUM_DOGS
+        self.max_drone_sep = [0.0] * NUM_DOGS
+        self.min_inter_dog_distance = float('inf')
         self.safety_violations = 0
-        self.min_separation_second = float('inf')
-        self.max_separation_second = 0.0
-        self.safety_violations_second = 0
-        self.min_dog_dog_separation = float('inf')
         self.total_control_steps = 0
 
-        # Subscribers
+        # Subscribers (store references to prevent GC)
         qos = QoSProfile(depth=10)
-        self.create_subscription(Odometry, '/drone/odom', self._drone_odom_cb, qos)
-        self.create_subscription(Odometry, '/robot0/odom', self._dog_odom_cb, qos)
-        self.create_subscription(Odometry, '/robot1/odom', self._second_dog_odom_cb, qos)
+        self._subs = []
+        self._subs.append(
+            self.create_subscription(Odometry, '/drone/odom', self._drone_odom_cb, qos))
+        for i in range(NUM_DOGS):
+            self._subs.append(
+                self.create_subscription(
+                    Odometry, f'/robot{i}/odom',
+                    lambda msg, idx=i: self._dog_odom_cb(msg, idx), qos))
 
         # Publishers
         self.drone_cmd_pub = self.create_publisher(PoseStamped, '/drone/cmd_position', qos)
-        self.dog_cmd_pub = self.create_publisher(Twist, '/robot0/cmd_vel', qos)
-        self.second_dog_cmd_pub = self.create_publisher(Twist, '/robot1/cmd_vel', qos)
+        self.dog_cmd_pubs = [
+            self.create_publisher(Twist, f'/robot{i}/cmd_vel', qos)
+            for i in range(NUM_DOGS)
+        ]
 
         # Service clients
         self.arm_client = self.create_client(SetBool, '/drone/arm')
@@ -176,8 +179,11 @@ class LeaderFollowerNode(Node):
         # Control timer
         period = 1.0 / control_hz
         self.timer = self.create_timer(period, self._control_loop)
+        self._init_start_time = time.monotonic()
+        self._init_last_log = 0.0
 
-        self.get_logger().info('Leader-Follower node initialized (2 dogs). Waiting for odometry...')
+        self.get_logger().info(
+            f'Boids Swarm node initialized ({NUM_DOGS} dogs). Waiting for odometry...')
 
     # ------------------------------------------------------------------
     # Odometry callbacks
@@ -192,47 +198,27 @@ class LeaderFollowerNode(Node):
             self.get_logger().info(
                 f'Drone odom received: ({p.x:.2f}, {p.y:.2f}, {p.z:.2f})')
 
-    def _dog_odom_cb(self, msg: Odometry):
+    def _dog_odom_cb(self, msg: Odometry, idx: int):
         p = msg.pose.pose.position
-        self.dog_pos = np.array([p.x, p.y, p.z])
+        self.dog_pos[idx] = np.array([p.x, p.y, p.z])
         q = msg.pose.pose.orientation
-        self.dog_quat = (q.x, q.y, q.z, q.w)
-        self.dog_yaw = quat_to_yaw(q.x, q.y, q.z, q.w)
+        self.dog_quat[idx] = (q.x, q.y, q.z, q.w)
+        self.dog_yaw[idx] = quat_to_yaw(q.x, q.y, q.z, q.w)
 
         # Estimate velocity by differentiating position
         now = time.monotonic()
-        if self.dog_prev_pos is not None and self.dog_prev_time is not None:
-            dt = now - self.dog_prev_time
+        if self.dog_prev_pos[idx] is not None and self.dog_prev_time[idx] is not None:
+            dt = now - self.dog_prev_time[idx]
             if dt > 0.001:
-                self.dog_vel_estimate = (self.dog_pos[:2] - self.dog_prev_pos[:2]) / dt
-        self.dog_prev_pos = self.dog_pos.copy()
-        self.dog_prev_time = now
+                self.dog_vel_estimate[idx] = (
+                    self.dog_pos[idx][:2] - self.dog_prev_pos[idx][:2]) / dt
+        self.dog_prev_pos[idx] = self.dog_pos[idx].copy()
+        self.dog_prev_time[idx] = now
 
-        if not self.dog_odom_received:
-            self.dog_odom_received = True
+        if not self.dog_odom_received[idx]:
+            self.dog_odom_received[idx] = True
             self.get_logger().info(
-                f'Dog0 odom received: ({p.x:.2f}, {p.y:.2f}, {p.z:.2f})')
-
-    def _second_dog_odom_cb(self, msg: Odometry):
-        p = msg.pose.pose.position
-        self.second_dog_pos = np.array([p.x, p.y, p.z])
-        q = msg.pose.pose.orientation
-        self.second_dog_quat = (q.x, q.y, q.z, q.w)
-        self.second_dog_yaw = quat_to_yaw(q.x, q.y, q.z, q.w)
-
-        # Estimate velocity by differentiating position
-        now = time.monotonic()
-        if self.second_dog_prev_pos is not None and self.second_dog_prev_time is not None:
-            dt = now - self.second_dog_prev_time
-            if dt > 0.001:
-                self.second_dog_vel_estimate = (self.second_dog_pos[:2] - self.second_dog_prev_pos[:2]) / dt
-        self.second_dog_prev_pos = self.second_dog_pos.copy()
-        self.second_dog_prev_time = now
-
-        if not self.second_dog_odom_received:
-            self.second_dog_odom_received = True
-            self.get_logger().info(
-                f'Dog1 odom received: ({p.x:.2f}, {p.y:.2f}, {p.z:.2f})')
+                f'Dog{idx} odom received: ({p.x:.2f}, {p.y:.2f}, {p.z:.2f})')
 
     # ------------------------------------------------------------------
     # Command helpers
@@ -248,17 +234,10 @@ class LeaderFollowerNode(Node):
         msg.pose.orientation.w = 1.0
         self.drone_cmd_pub.publish(msg)
 
-    def _publish_dog_velocity(self, world_vx, world_vy, yaw_rate, dog_index=0):
+    def _publish_dog_velocity(self, idx, world_vx, world_vy, yaw_rate):
         """Convert world-frame velocity to body frame and publish Twist."""
-        if dog_index == 0:
-            yaw = self.dog_yaw
-            pub = self.dog_cmd_pub
-        else:
-            yaw = self.second_dog_yaw
-            pub = self.second_dog_cmd_pub
-
-        cos_yaw = math.cos(yaw)
-        sin_yaw = math.sin(yaw)
+        cos_yaw = math.cos(self.dog_yaw[idx])
+        sin_yaw = math.sin(self.dog_yaw[idx])
         body_vx = cos_yaw * world_vx + sin_yaw * world_vy
         body_vy = -sin_yaw * world_vx + cos_yaw * world_vy
 
@@ -266,13 +245,12 @@ class LeaderFollowerNode(Node):
         msg.linear.x = float(body_vx)
         msg.linear.y = float(body_vy)
         msg.angular.z = float(yaw_rate)
-        pub.publish(msg)
+        self.dog_cmd_pubs[idx].publish(msg)
 
-    def _stop_dogs(self):
-        """Publish zero velocity to both dogs."""
-        msg = Twist()
-        self.dog_cmd_pub.publish(msg)
-        self.second_dog_cmd_pub.publish(msg)
+    def _stop_all_dogs(self):
+        """Publish zero velocity to all dogs."""
+        for pub in self.dog_cmd_pubs:
+            pub.publish(Twist())
 
     # ------------------------------------------------------------------
     # State machine
@@ -287,14 +265,32 @@ class LeaderFollowerNode(Node):
             return 0.0
         return time.monotonic() - self.state_enter_time
 
+    def _all_odom_received(self):
+        return self.drone_odom_received and all(self.dog_odom_received)
+
     def _control_loop(self):
         """Main 20 Hz control loop with state machine."""
 
-        # ---- INIT: wait for all 3 odom topics ----
+        # ---- INIT: wait for all odom topics ----
         if self.state == MissionState.INIT:
-            if self.drone_odom_received and self.dog_odom_received and self.second_dog_odom_received:
-                self.get_logger().info('Odometry received from all 3 robots (drone + 2 dogs)')
+            if self._all_odom_received():
+                self.get_logger().info('Odometry received from all 3 robots')
                 self._transition(MissionState.ARMING)
+                return
+
+            # Periodic diagnostics every 5 seconds
+            elapsed = time.monotonic() - self._init_start_time
+            if elapsed - self._init_last_log >= 5.0:
+                self._init_last_log = elapsed
+                missing = []
+                if not self.drone_odom_received:
+                    missing.append('/drone/odom')
+                for i in range(NUM_DOGS):
+                    if not self.dog_odom_received[i]:
+                        missing.append(f'/robot{i}/odom')
+                self.get_logger().warn(
+                    f'Still waiting for odom ({elapsed:.0f}s): {", ".join(missing)}. '
+                    f'Check ros2 topic list / simulation.')
             return
 
         # ---- ARMING: call /drone/arm ----
@@ -349,14 +345,14 @@ class LeaderFollowerNode(Node):
                     self._transition(MissionState.RUNNING)
             return
 
-        # ---- RUNNING: main leader-follower loop ----
+        # ---- RUNNING: main boids swarm loop ----
         if self.state == MissionState.RUNNING:
-            self._run_leader_follower()
+            self._run_boids_swarm()
             return
 
         # ---- COMPLETING: brief hover before landing ----
         if self.state == MissionState.COMPLETING:
-            self._stop_dogs()
+            self._stop_all_dogs()
             if self._time_in_state() > self.completion_hover_sec:
                 self._print_mission_summary()
                 self._transition(MissionState.LANDING)
@@ -364,7 +360,7 @@ class LeaderFollowerNode(Node):
 
         # ---- LANDING: call /drone/land ----
         if self.state == MissionState.LANDING:
-            self._stop_dogs()
+            self._stop_all_dogs()
             if self._land_future is None:
                 if not self.land_client.service_is_ready():
                     return
@@ -379,14 +375,14 @@ class LeaderFollowerNode(Node):
 
         # ---- DONE ----
         if self.state == MissionState.DONE:
-            self._stop_dogs()
+            self._stop_all_dogs()
             return
 
     # ------------------------------------------------------------------
-    # Leader-follower control
+    # Boids swarm control
     # ------------------------------------------------------------------
-    def _run_leader_follower(self):
-        if self.drone_pos is None or self.dog_pos is None or self.second_dog_pos is None:
+    def _run_boids_swarm(self):
+        if self.drone_pos is None or any(p is None for p in self.dog_pos):
             return
 
         t = time.monotonic() - self.mission_start_time
@@ -394,7 +390,7 @@ class LeaderFollowerNode(Node):
         # Check completion
         if self.planner.is_complete(t):
             self.get_logger().info('Lawnmower sweep complete!')
-            self._stop_dogs()
+            self._stop_all_dogs()
             self._transition(MissionState.COMPLETING)
             return
 
@@ -402,90 +398,80 @@ class LeaderFollowerNode(Node):
         target_pos = self.planner.get_position(t)
         self._publish_drone_position(target_pos)
 
-        drone_2d = self.drone_pos[:2]
-        dog0_2d = self.dog_pos[:2]
-        dog1_2d = self.second_dog_pos[:2]
+        # --- Drone velocity from planner (deterministic) ---
+        drone_vel_3d = self.planner.get_velocity(t)
+        drone_pos_2d = self.drone_pos[:2]
+        drone_vel_2d = drone_vel_3d[:2]
 
-        # --- Dog 0: compute APF velocity with dog1 as obstacle ---
-        apf_vel_0 = self.apf.compute_velocity(
-            drone_2d, dog0_2d, self.dog_vel_estimate, obstacles=[dog1_2d])
-
-        dx0 = self.drone_pos[0] - self.dog_pos[0]
-        dy0 = self.drone_pos[1] - self.dog_pos[1]
-        desired_yaw_0 = math.atan2(dy0, dx0)
-        yaw_error_0 = math.atan2(
-            math.sin(desired_yaw_0 - self.dog_yaw),
-            math.cos(desired_yaw_0 - self.dog_yaw))
-        yaw_rate_0 = self.yaw_p_gain * yaw_error_0
-
-        self._publish_dog_velocity(apf_vel_0[0], apf_vel_0[1], yaw_rate_0, dog_index=0)
-
-        # --- Dog 1: compute APF velocity with dog0 as obstacle ---
-        apf_vel_1 = self.apf_second.compute_velocity(
-            drone_2d, dog1_2d, self.second_dog_vel_estimate, obstacles=[dog0_2d])
-
-        dx1 = self.drone_pos[0] - self.second_dog_pos[0]
-        dy1 = self.drone_pos[1] - self.second_dog_pos[1]
-        desired_yaw_1 = math.atan2(dy1, dx1)
-        yaw_error_1 = math.atan2(
-            math.sin(desired_yaw_1 - self.second_dog_yaw),
-            math.cos(desired_yaw_1 - self.second_dog_yaw))
-        yaw_rate_1 = self.yaw_p_gain * yaw_error_1
-
-        self._publish_dog_velocity(apf_vel_1[0], apf_vel_1[1], yaw_rate_1, dog_index=1)
-
-        # --- Safety metrics ---
-        sep0 = np.linalg.norm(drone_2d - dog0_2d)
-        sep1 = np.linalg.norm(drone_2d - dog1_2d)
-        dog_dog_sep = np.linalg.norm(dog0_2d - dog1_2d)
-
+        # --- Each dog: compute boids velocity ---
         self.total_control_steps += 1
-        self.min_separation = min(self.min_separation, sep0)
-        self.max_separation = max(self.max_separation, sep0)
-        if sep0 < self.apf.config.d_safe:
+
+        for i in range(NUM_DOGS):
+            dog_i_pos = self.dog_pos[i][:2]
+
+            # Build neighbor list: other dogs (not self)
+            neighbors = []
+            for j in range(NUM_DOGS):
+                if j != i:
+                    neighbors.append((self.dog_pos[j][:2], self.dog_vel_estimate[j]))
+
+            # Compute boids velocity
+            boids_vel = self.boids[i].compute_velocity(
+                dog_i_pos, neighbors, drone_pos_2d, drone_vel_2d)
+
+            # Yaw rate: P-control to orient toward drone
+            dx = self.drone_pos[0] - self.dog_pos[i][0]
+            dy = self.drone_pos[1] - self.dog_pos[i][1]
+            desired_yaw = math.atan2(dy, dx)
+            yaw_error = desired_yaw - self.dog_yaw[i]
+            yaw_error = math.atan2(math.sin(yaw_error), math.cos(yaw_error))
+            yaw_rate = self.yaw_p_gain * yaw_error
+
+            self._publish_dog_velocity(i, boids_vel[0], boids_vel[1], yaw_rate)
+
+            # Per-dog safety metrics
+            drone_sep = np.linalg.norm(drone_pos_2d - dog_i_pos)
+            self.min_drone_sep[i] = min(self.min_drone_sep[i], drone_sep)
+            self.max_drone_sep[i] = max(self.max_drone_sep[i], drone_sep)
+
+        # Inter-dog distance
+        inter_dog_dist = np.linalg.norm(self.dog_pos[0][:2] - self.dog_pos[1][:2])
+        self.min_inter_dog_distance = min(self.min_inter_dog_distance, inter_dog_dist)
+        if inter_dog_dist < self.boids[0].config.separation_radius:
             self.safety_violations += 1
-        self.min_separation_second = min(self.min_separation_second, sep1)
-        self.max_separation_second = max(self.max_separation_second, sep1)
-        if sep1 < self.apf_second.config.d_safe:
-            self.safety_violations_second += 1
-        self.min_dog_dog_separation = min(self.min_dog_dog_separation, dog_dog_sep)
 
         # Periodic logging (every ~2 seconds at 20 Hz)
         if self.total_control_steps % 40 == 0:
             progress = self.planner.get_progress(t) * 100.0
+            d0_sep = np.linalg.norm(drone_pos_2d - self.dog_pos[0][:2])
+            d1_sep = np.linalg.norm(drone_pos_2d - self.dog_pos[1][:2])
             self.get_logger().info(
-                f'[{progress:5.1f}%] '
-                f'drone=({self.drone_pos[0]:.1f},{self.drone_pos[1]:.1f},{self.drone_pos[2]:.1f}) '
-                f'dog0=({self.dog_pos[0]:.1f},{self.dog_pos[1]:.1f}) sep={sep0:.2f}m '
-                f'dog1=({self.second_dog_pos[0]:.1f},{self.second_dog_pos[1]:.1f}) sep={sep1:.2f}m '
-                f'dog-dog={dog_dog_sep:.2f}m')
+                f'[{progress:5.1f}%] dog_sep={inter_dog_dist:.2f}m '
+                f'd0_drone={d0_sep:.2f}m d1_drone={d1_sep:.2f}m '
+                f'drone=({self.drone_pos[0]:.1f},{self.drone_pos[1]:.1f},{self.drone_pos[2]:.1f})')
 
     # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
     def _print_mission_summary(self):
-        self.get_logger().info('=' * 60)
-        self.get_logger().info('              MISSION SUMMARY')
-        self.get_logger().info('=' * 60)
-        self.get_logger().info(f'  Total control steps : {self.total_control_steps}')
+        self.get_logger().info('=' * 55)
+        self.get_logger().info('          BOIDS SWARM MISSION SUMMARY')
+        self.get_logger().info('=' * 55)
+        self.get_logger().info(f'  Total control steps   : {self.total_control_steps}')
         elapsed = time.monotonic() - self.mission_start_time if self.mission_start_time else 0
-        self.get_logger().info(f'  Mission duration    : {elapsed:.1f}s')
-        self.get_logger().info(f'  --- Dog 0 (robot0) ---')
-        self.get_logger().info(f'  Min separation      : {self.min_separation:.2f}m')
-        self.get_logger().info(f'  Max separation      : {self.max_separation:.2f}m')
-        self.get_logger().info(f'  APF min observed    : {self.apf.get_min_distance_observed():.2f}m')
-        self.get_logger().info(f'  Safety violations   : {self.safety_violations} '
-                               f'({self.safety_violations/max(self.total_control_steps,1)*100:.1f}%)')
-        self.get_logger().info(f'  --- Dog 1 (robot1) ---')
-        self.get_logger().info(f'  Min separation      : {self.min_separation_second:.2f}m')
-        self.get_logger().info(f'  Max separation      : {self.max_separation_second:.2f}m')
-        self.get_logger().info(f'  APF min observed    : {self.apf_second.get_min_distance_observed():.2f}m')
-        self.get_logger().info(f'  Safety violations   : {self.safety_violations_second} '
-                               f'({self.safety_violations_second/max(self.total_control_steps,1)*100:.1f}%)')
-        self.get_logger().info(f'  --- Inter-dog ---')
-        self.get_logger().info(f'  Min dog-dog dist    : {self.min_dog_dog_separation:.2f}m')
-        self.get_logger().info(f'  d_safe threshold    : {self.apf.config.d_safe:.1f}m')
-        self.get_logger().info('=' * 60)
+        self.get_logger().info(f'  Mission duration      : {elapsed:.1f}s')
+        for i in range(NUM_DOGS):
+            self.get_logger().info(
+                f'  Dog{i} min/max drone sep: '
+                f'{self.min_drone_sep[i]:.2f}m / {self.max_drone_sep[i]:.2f}m')
+            self.get_logger().info(
+                f'  Dog{i} boids min observed: '
+                f'{self.boids[i].get_min_distance_observed():.2f}m')
+        self.get_logger().info(f'  Min inter-dog distance: {self.min_inter_dog_distance:.2f}m')
+        self.get_logger().info(f'  Safety violations     : {self.safety_violations} '
+                               f'({self.safety_violations / max(self.total_control_steps, 1) * 100:.1f}%)')
+        self.get_logger().info(f'  Separation radius     : {self.boids[0].config.separation_radius:.1f}m')
+        self.get_logger().info('=' * 55)
 
     # ------------------------------------------------------------------
     # Graceful shutdown
@@ -493,17 +479,16 @@ class LeaderFollowerNode(Node):
     def shutdown(self):
         """Attempt to land drone on shutdown."""
         self.get_logger().info('Shutdown requested — landing drone...')
-        self._stop_dogs()
+        self._stop_all_dogs()
         if self.land_client.service_is_ready():
             future = self.land_client.call_async(Trigger.Request())
-            # Best-effort wait
             rclpy.spin_until_future_complete(self, future, timeout_sec=3.0)
         self.get_logger().info('Shutdown complete.')
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = LeaderFollowerNode()
+    node = BoidsSwarmNode()
 
     try:
         rclpy.spin(node)

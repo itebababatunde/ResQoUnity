@@ -7,7 +7,7 @@ repulsive potential fields.
 """
 
 from dataclasses import dataclass
-from typing import Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 
 
@@ -47,7 +47,8 @@ class APFController:
         self,
         leader_pos: np.ndarray,
         follower_pos: np.ndarray,
-        follower_vel: np.ndarray = None
+        follower_vel: np.ndarray = None,
+        obstacles: Optional[List[np.ndarray]] = None
     ) -> np.ndarray:
         """
         Compute velocity command for follower based on APF.
@@ -56,6 +57,7 @@ class APFController:
             leader_pos: [x, y] position of leader (drone)
             follower_pos: [x, y] position of follower (dog)
             follower_vel: [vx, vy] current velocity of follower (optional, for damping)
+            obstacles: list of [x, y] positions of obstacles to avoid (e.g. other dogs)
 
         Returns:
             velocity: [vx, vy] velocity command for follower
@@ -82,24 +84,38 @@ class APFController:
         # Attractive force (always active, linear)
         F_att = cfg.k_att * to_leader
 
-        # Repulsive force (active when d < d_influence, stronger when d < d_safe)
+        # Repulsive force from leader (active when d < d_influence, stronger when d < d_safe)
         F_rep = np.array([0.0, 0.0])
         if distance < cfg.d_influence:
             if distance < cfg.d_safe:
-                # Strong repulsion when inside safety zone
-                # F_rep = k_rep * (1/d - 1/d_safe) * (1/d^2) * direction_away
                 repulsion_magnitude = cfg.k_rep * (1.0/distance - 1.0/cfg.d_safe) * (1.0 / distance**2)
             else:
-                # Gentle repulsion in influence zone (smooth transition)
-                # Linear ramp from 0 at d_influence to small value at d_safe
                 influence_factor = (cfg.d_influence - distance) / (cfg.d_influence - cfg.d_safe)
                 repulsion_magnitude = cfg.k_rep * 0.1 * influence_factor
 
             # Direction away from leader
             F_rep = -repulsion_magnitude * direction_to_leader
 
+        # Repulsive forces from obstacles (e.g. other dogs)
+        F_obs = np.array([0.0, 0.0])
+        if obstacles is not None:
+            for obs_pos in obstacles:
+                obs_2d = np.array(obs_pos[:2], dtype=np.float64)
+                to_obs = obs_2d - follower_2d
+                obs_dist = np.linalg.norm(to_obs)
+                if obs_dist < 0.001:
+                    continue
+                if obs_dist < cfg.d_influence:
+                    obs_dir = to_obs / obs_dist
+                    if obs_dist < cfg.d_safe:
+                        obs_rep_mag = cfg.k_rep * (1.0/obs_dist - 1.0/cfg.d_safe) * (1.0 / obs_dist**2)
+                    else:
+                        obs_inf_factor = (cfg.d_influence - obs_dist) / (cfg.d_influence - cfg.d_safe)
+                        obs_rep_mag = cfg.k_rep * 0.1 * obs_inf_factor
+                    F_obs -= obs_rep_mag * obs_dir
+
         # Total force
-        F_total = F_att + F_rep
+        F_total = F_att + F_rep + F_obs
 
         # Convert force to velocity command
         velocity = F_total

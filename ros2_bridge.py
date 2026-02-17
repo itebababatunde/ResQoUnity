@@ -133,24 +133,31 @@ def add_camera(num_envs, robot_type):
 def pub_robo_data_ros2(robot_type, num_envs, base_node, env, annotator_lst, start_time):
 
     for i in range(num_envs):
-        # publish ros2 info - joints, odometry, IMU (common to all robots)
-        base_node.publish_joints(env.env.scene["robot"].data.joint_names, env.env.scene["robot"].data.joint_pos[i], i)
-        base_node.publish_odom(env.env.scene["robot"].data.root_state_w[i, :3], env.env.scene["robot"].data.root_state_w[i, 3:7], i)
-        base_node.publish_imu(env.env.scene["robot"].data.root_state_w[i, 3:7], env.env.scene["robot"].data.root_lin_vel_b[i, :], env.env.scene["robot"].data.root_ang_vel_b[i, :], i)
-        
-        # Robot-specific telemetry
-        if robot_type == "go2":
-            base_node.publish_robot_state([
-                env.env.scene["contact_forces"].data.net_forces_w[i][4][2], 
-                env.env.scene["contact_forces"].data.net_forces_w[i][8][2], 
-                env.env.scene["contact_forces"].data.net_forces_w[i][14][2], 
-                env.env.scene["contact_forces"].data.net_forces_w[i][18][2]
-                ], i)
-        elif robot_type == "drone" or robot_type == "quadcopter":
-            # Drone-specific state (altitude is already in odometry Z position)
-            # Could publish rotor speeds from joint velocities if needed
-            # For now, standard topics (odom, imu) provide sufficient telemetry
-            pass
+        try:
+            # publish ros2 info - joints, odometry, IMU (common to all robots)
+            base_node.publish_joints(env.env.scene["robot"].data.joint_names, env.env.scene["robot"].data.joint_pos[i], i)
+            base_node.publish_odom(env.env.scene["robot"].data.root_state_w[i, :3], env.env.scene["robot"].data.root_state_w[i, 3:7], i)
+            base_node.publish_imu(env.env.scene["robot"].data.root_state_w[i, 3:7], env.env.scene["robot"].data.root_lin_vel_b[i, :], env.env.scene["robot"].data.root_ang_vel_b[i, :], i)
+
+            # Robot-specific telemetry
+            if robot_type == "go2":
+                base_node.publish_robot_state([
+                    env.env.scene["contact_forces"].data.net_forces_w[i][4][2],
+                    env.env.scene["contact_forces"].data.net_forces_w[i][8][2],
+                    env.env.scene["contact_forces"].data.net_forces_w[i][14][2],
+                    env.env.scene["contact_forces"].data.net_forces_w[i][18][2]
+                    ], i)
+            elif robot_type == "drone" or robot_type == "quadcopter":
+                # Drone-specific state (altitude is already in odometry Z position)
+                # Could publish rotor speeds from joint velocities if needed
+                # For now, standard topics (odom, imu) provide sufficient telemetry
+                pass
+        except Exception as e:
+            if not getattr(pub_robo_data_ros2, f"_robot{i}_err_logged", False):
+                print(f"[ERROR] Failed to publish data for robot{i}: {e}")
+                import traceback
+                traceback.print_exc()
+                setattr(pub_robo_data_ros2, f"_robot{i}_err_logged", True)
 
         try:
             if (time.time() - start_time) > 1/20:

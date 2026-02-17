@@ -831,9 +831,9 @@ def run_sim():
             # Get USD path from config
             drone_usd_path = QUADCOPTER_CFG.spawn.usd_path
             
-            # CRITICAL FIX: Spawn inside environment scene so env.step() updates it
-            # Changed from /World/Drone to /World/envs/env_0/Drone
-            world_drone_path = "/World/envs/env_0/Drone"
+            # Spawn outside env system namespace to avoid Cloner conflicts with num_envs>1.
+            # PhysX steps ALL bodies on the stage; ArticulationView works at any path.
+            world_drone_path = "/World/Drone"
             
             print(f"[INFO] Spawning drone at {world_drone_path} (inside env for physics stepping)")
             
@@ -946,7 +946,7 @@ def run_sim():
         from omni.isaac.core.utils.viewports import set_camera_view
         # Position camera to look at the robot from a good angle
         # eye: camera position, target: what camera looks at
-        set_camera_view(eye=[3.0, 3.0, 2.0], target=[0.0, 0.0, 0.5], camera_prim_path="/OmniverseKit_Persp")
+        set_camera_view(eye=[5.0, 5.0, 4.0], target=[1.25, 0.0, 0.5], camera_prim_path="/OmniverseKit_Persp")
         print("[INFO] Camera positioned to view robot")
     except Exception as e:
         print(f"[WARN] Could not set camera view: {e}")
@@ -1638,7 +1638,7 @@ def run_sim():
                                         from pxr import UsdGeom, Gf
                                         import omni.usd
                                         stage = omni.usd.get_context().get_stage()
-                                        drone_prim = stage.GetPrimAtPath("/World/envs/env_0/Drone")
+                                        drone_prim = stage.GetPrimAtPath(world_drone_path)
                                         if drone_prim and drone_prim.IsValid():
                                             xformable = UsdGeom.Xformable(drone_prim)
                                             xform_op = xformable.GetOrderedXformOps()[0]  # Get the transform op

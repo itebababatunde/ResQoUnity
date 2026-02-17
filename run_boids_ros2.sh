@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Leader-Follower ROS2 Node Launcher
+# Boids Swarm ROS2 Node Launcher
 #
-# Runs the standalone leader-follower coordination node.
+# Runs the standalone boids swarm coordination node.
 # The simulation must already be running (./run_sim.sh) in another terminal.
 #
 # Usage:
-#   Terminal 1:  ./run_sim.sh                    # starts Isaac Sim + Go2 + drone
-#   Terminal 2:  ./run_leader_follower_ros2.sh   # starts this coordination node
+#   Terminal 1:  ./run_sim.sh              # starts Isaac Sim + 2x Go2 + drone
+#   Terminal 2:  ./run_boids_ros2.sh       # starts this coordination node
 
 set -e
 
@@ -20,8 +20,8 @@ NC='\033[0m'
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 echo -e "${BLUE}============================================${NC}"
-echo -e "${BLUE}   Leader-Follower ROS2 Coordination Node${NC}"
-echo -e "${BLUE}   Drone (Leader) + Go2 Dog (Follower)${NC}"
+echo -e "${BLUE}   Boids Swarm ROS2 Coordination Node${NC}"
+echo -e "${BLUE}   Drone (Leader) + 2x Go2 Dogs (Boids)${NC}"
 echo -e "${BLUE}============================================${NC}"
 
 # Source ROS2
@@ -34,12 +34,6 @@ else
     exit 1
 fi
 
-# Match the simulation's DDS settings so nodes can discover each other
-export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export ROS_DOMAIN_ID=0
-export ROS_LOCALHOST_ONLY=1
-echo -e "${GREEN}ROS2 DDS: FastRTPS, DOMAIN_ID=0, LOCALHOST_ONLY=1${NC}"
-
 # Source project workspaces (for custom message types)
 if [[ -f "$SCRIPT_DIR/IsaacSim-ros_workspaces/${ROS_DISTRO}_ws/install/setup.bash" ]]; then
     source "$SCRIPT_DIR/IsaacSim-ros_workspaces/${ROS_DISTRO}_ws/install/setup.bash"
@@ -49,7 +43,7 @@ if [[ -f "$SCRIPT_DIR/go2_omniverse_ws/install/setup.bash" ]]; then
 fi
 
 echo -e "${YELLOW}Ensure the simulation is running in another terminal (./run_sim.sh)${NC}"
-echo -e "${GREEN}Starting leader-follower node...${NC}"
+echo -e "${GREEN}Starting boids swarm node...${NC}"
 echo ""
 
-python3 "$SCRIPT_DIR/leader_follower_ros2_node.py" "$@"
+python3 "$SCRIPT_DIR/boids_ros2_node.py" "$@"
