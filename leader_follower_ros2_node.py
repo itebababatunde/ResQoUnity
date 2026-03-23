@@ -17,8 +17,10 @@ Usage:
 
 import sys
 import os
+import csv
 import math
 import time
+from datetime import datetime
 from enum import Enum, auto
 
 import numpy as np
@@ -27,14 +29,17 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped, Twist
+from nav_msgs.msg import Odometry, Path
+from geometry_msgs.msg import PoseStamped, Twist, Point
 from std_srvs.srv import SetBool, Trigger
+from visualization_msgs.msg import Marker
+from std_msgs.msg import ColorRGBA
 
 # Add project root so we can import planner/controller
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lawnmower_planner import LawnmowerPlanner, LawnmowerConfig
 from apf_controller import APFController, APFConfig
+from follower_strategies import get_strategy, STRATEGIES
 
 
 class MissionState(Enum):
@@ -62,7 +67,7 @@ class LeaderFollowerNode(Node):
         # Declare ROS2 parameters with defaults
         self.declare_parameter('workspace_size', 10.0)
         self.declare_parameter('sweep_spacing', 2.0)
-        self.declare_parameter('drone_speed', 1.0)
+        self.declare_parameter('drone_speed', 0.4)
         self.declare_parameter('drone_altitude', 3.0)
         self.declare_parameter('k_att', 1.0)
         self.declare_parameter('k_rep', 2.0)
@@ -73,6 +78,9 @@ class LeaderFollowerNode(Node):
         self.declare_parameter('altitude_wait_sec', 3.0)
         self.declare_parameter('completion_hover_sec', 3.0)
         self.declare_parameter('control_rate_hz', 20.0)
+        self.declare_parameter('strategy', 'naive')
+        self.declare_parameter('lateral_offset', 2.0)
+        self.declare_parameter('trail_delay', 3.0)
 
         # Read parameters
         ws = self.get_parameter('workspace_size').value
@@ -108,8 +116,27 @@ class LeaderFollowerNode(Node):
         self.apf = APFController(apf_cfg)
         self.apf_second = APFController(apf_cfg)
 
+        # Follower strategy
+        strategy_name = self.get_parameter('strategy').value
+        strategy_kwargs = {}
+        if strategy_name == 'lateral_offset':
+            strategy_kwargs = dict(
+                offset_distance=self.get_parameter('lateral_offset').value,
+                workspace_origin=planner_cfg.start_corner,
+                workspace_size=ws,
+            )
+        elif strategy_name == 'trailing':
+            control_hz = self.get_parameter('control_rate_hz').value
+            strategy_kwargs = dict(
+                trail_delay=self.get_parameter('trail_delay').value,
+                dt=1.0 / control_hz,
+            )
+        self.strategy = get_strategy(strategy_name, **strategy_kwargs)
+        self.strategy_name = strategy_name
+
         self.get_logger().info(f'Planner: {self.planner}')
         self.get_logger().info(f'APF: {self.apf}')
+        self.get_logger().info(f'Strategy: {self.strategy}')
         self.get_logger().info(f'Total mission time: {self.planner.total_time:.1f}s')
 
         # State machine
@@ -163,6 +190,25 @@ class LeaderFollowerNode(Node):
         self.dog_cmd_pub = self.create_publisher(Twist, '/robot0/cmd_vel', qos)
         self.second_dog_cmd_pub = self.create_publisher(Twist, '/robot1/cmd_vel', qos)
 
+        # Visualization publishers
+        self.planned_path_pub = self.create_publisher(Path, '/viz/planned_path', qos)
+        self.workspace_boundary_pub = self.create_publisher(Marker, '/viz/workspace_boundary', qos)
+        self.sweep_lines_pub = self.create_publisher(Marker, '/viz/sweep_lines', qos)
+        self.drone_trail_pub = self.create_publisher(Path, '/viz/drone_trail', qos)
+        self.dog0_trail_pub = self.create_publisher(Path, '/viz/dog0_trail', qos)
+        self.dog1_trail_pub = self.create_publisher(Path, '/viz/dog1_trail', qos)
+        self.current_target_pub = self.create_publisher(Marker, '/viz/current_target', qos)
+        self.progress_pub = self.create_publisher(Marker, '/viz/progress', qos)
+
+        # Trail state
+        self.drone_trail_msg = Path()
+        self.drone_trail_msg.header.frame_id = 'odom'
+        self.dog0_trail_msg = Path()
+        self.dog0_trail_msg.header.frame_id = 'odom'
+        self.dog1_trail_msg = Path()
+        self.dog1_trail_msg.header.frame_id = 'odom'
+        self.static_viz_published = False
+
         # Service clients
         self.arm_client = self.create_client(SetBool, '/drone/arm')
         self.takeoff_client = self.create_client(Trigger, '/drone/takeoff')
@@ -177,7 +223,23 @@ class LeaderFollowerNode(Node):
         period = 1.0 / control_hz
         self.timer = self.create_timer(period, self._control_loop)
 
+        # CSV position logger
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        self.csv_path = os.path.join(log_dir, f'mission_{self.strategy_name}_{timestamp}.csv')
+        self._csv_file = open(self.csv_path, 'w', newline='')
+        self._csv_writer = csv.writer(self._csv_file)
+        self._csv_writer.writerow([
+            't', 'step',
+            'drone_x', 'drone_y', 'drone_z',
+            'dog0_x', 'dog0_y', 'dog0_z',
+            'dog1_x', 'dog1_y', 'dog1_z',
+            'target_x', 'target_y', 'target_z',
+        ])
+
         self.get_logger().info('Leader-Follower node initialized (2 dogs). Waiting for odometry...')
+        self.get_logger().info(f'CSV log: {self.csv_path}')
 
     # ------------------------------------------------------------------
     # Odometry callbacks
@@ -351,6 +413,9 @@ class LeaderFollowerNode(Node):
 
         # ---- RUNNING: main leader-follower loop ----
         if self.state == MissionState.RUNNING:
+            if not self.static_viz_published:
+                self._publish_static_viz()
+                self.static_viz_published = True
             self._run_leader_follower()
             return
 
@@ -406,12 +471,17 @@ class LeaderFollowerNode(Node):
         dog0_2d = self.dog_pos[:2]
         dog1_2d = self.second_dog_pos[:2]
 
-        # --- Dog 0: compute APF velocity with dog1 as obstacle ---
-        apf_vel_0 = self.apf.compute_velocity(
-            drone_2d, dog0_2d, self.dog_vel_estimate, obstacles=[dog1_2d])
+        # --- Compute strategy targets for each dog ---
+        drone_vel = self.planner.get_velocity(t)
+        target0_2d, target1_2d = self.strategy.get_targets(
+            self.drone_pos, drone_vel, self.dog_pos, self.second_dog_pos)
 
-        dx0 = self.drone_pos[0] - self.dog_pos[0]
-        dy0 = self.drone_pos[1] - self.dog_pos[1]
+        # --- Dog 0: compute APF velocity toward strategy target ---
+        apf_vel_0 = self.apf.compute_velocity(
+            target0_2d, dog0_2d, self.dog_vel_estimate, obstacles=[dog1_2d])
+
+        dx0 = target0_2d[0] - self.dog_pos[0]
+        dy0 = target0_2d[1] - self.dog_pos[1]
         desired_yaw_0 = math.atan2(dy0, dx0)
         yaw_error_0 = math.atan2(
             math.sin(desired_yaw_0 - self.dog_yaw),
@@ -420,12 +490,12 @@ class LeaderFollowerNode(Node):
 
         self._publish_dog_velocity(apf_vel_0[0], apf_vel_0[1], yaw_rate_0, dog_index=0)
 
-        # --- Dog 1: compute APF velocity with dog0 as obstacle ---
+        # --- Dog 1: compute APF velocity toward strategy target ---
         apf_vel_1 = self.apf_second.compute_velocity(
-            drone_2d, dog1_2d, self.second_dog_vel_estimate, obstacles=[dog0_2d])
+            target1_2d, dog1_2d, self.second_dog_vel_estimate, obstacles=[dog0_2d])
 
-        dx1 = self.drone_pos[0] - self.second_dog_pos[0]
-        dy1 = self.drone_pos[1] - self.second_dog_pos[1]
+        dx1 = target1_2d[0] - self.second_dog_pos[0]
+        dy1 = target1_2d[1] - self.second_dog_pos[1]
         desired_yaw_1 = math.atan2(dy1, dx1)
         yaw_error_1 = math.atan2(
             math.sin(desired_yaw_1 - self.second_dog_yaw),
@@ -440,6 +510,16 @@ class LeaderFollowerNode(Node):
         dog_dog_sep = np.linalg.norm(dog0_2d - dog1_2d)
 
         self.total_control_steps += 1
+
+        # Log to CSV
+        self._csv_writer.writerow([
+            f'{t:.4f}', self.total_control_steps,
+            f'{self.drone_pos[0]:.4f}', f'{self.drone_pos[1]:.4f}', f'{self.drone_pos[2]:.4f}',
+            f'{self.dog_pos[0]:.4f}', f'{self.dog_pos[1]:.4f}', f'{self.dog_pos[2]:.4f}',
+            f'{self.second_dog_pos[0]:.4f}', f'{self.second_dog_pos[1]:.4f}', f'{self.second_dog_pos[2]:.4f}',
+            f'{target_pos[0]:.4f}', f'{target_pos[1]:.4f}', f'{target_pos[2]:.4f}',
+        ])
+
         self.min_separation = min(self.min_separation, sep0)
         self.max_separation = max(self.max_separation, sep0)
         if sep0 < self.apf.config.d_safe:
@@ -449,6 +529,9 @@ class LeaderFollowerNode(Node):
         if sep1 < self.apf_second.config.d_safe:
             self.safety_violations_second += 1
         self.min_dog_dog_separation = min(self.min_dog_dog_separation, dog_dog_sep)
+
+        # Visualization
+        self._publish_dynamic_viz(t)
 
         # Periodic logging (every ~2 seconds at 20 Hz)
         if self.total_control_steps % 40 == 0:
@@ -461,9 +544,142 @@ class LeaderFollowerNode(Node):
                 f'dog-dog={dog_dog_sep:.2f}m')
 
     # ------------------------------------------------------------------
+    # Visualization
+    # ------------------------------------------------------------------
+    def _publish_static_viz(self):
+        """Publish one-time visualization: planned path, workspace boundary, sweep lines."""
+        now = self.get_clock().now().to_msg()
+        ws = self.planner.config.workspace_size
+        x0, y0 = self.planner.config.start_corner
+
+        # --- Planned path ---
+        path_msg = Path()
+        path_msg.header.stamp = now
+        path_msg.header.frame_id = 'odom'
+        for wp in self.planner.get_waypoints():
+            ps = PoseStamped()
+            ps.header.stamp = now
+            ps.header.frame_id = 'odom'
+            ps.pose.position.x = float(wp[0])
+            ps.pose.position.y = float(wp[1])
+            ps.pose.position.z = float(wp[2])
+            ps.pose.orientation.w = 1.0
+            path_msg.poses.append(ps)
+        self.planned_path_pub.publish(path_msg)
+
+        # --- Workspace boundary (LINE_STRIP) ---
+        boundary = Marker()
+        boundary.header.stamp = now
+        boundary.header.frame_id = 'odom'
+        boundary.ns = 'workspace'
+        boundary.id = 0
+        boundary.type = Marker.LINE_STRIP
+        boundary.action = Marker.ADD
+        boundary.scale.x = 0.15
+        boundary.color = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
+        boundary.pose.orientation.w = 1.0
+        corners = [
+            (x0, y0), (x0 + ws, y0), (x0 + ws, y0 + ws), (x0, y0 + ws), (x0, y0)
+        ]
+        for cx, cy in corners:
+            p = Point(x=float(cx), y=float(cy), z=0.1)
+            boundary.points.append(p)
+        self.workspace_boundary_pub.publish(boundary)
+
+        # --- Sweep lines (LINE_LIST) ---
+        sweep = Marker()
+        sweep.header.stamp = now
+        sweep.header.frame_id = 'odom'
+        sweep.ns = 'sweep'
+        sweep.id = 0
+        sweep.type = Marker.LINE_LIST
+        sweep.action = Marker.ADD
+        sweep.scale.x = 0.05
+        sweep.color = ColorRGBA(r=0.5, g=0.5, b=0.5, a=0.5)
+        sweep.pose.orientation.w = 1.0
+        wps = self.planner.get_waypoints()
+        for i in range(0, len(wps) - 1, 2):
+            sweep.points.append(Point(x=float(wps[i][0]), y=float(wps[i][1]), z=0.1))
+            sweep.points.append(Point(x=float(wps[i+1][0]), y=float(wps[i+1][1]), z=0.1))
+        self.sweep_lines_pub.publish(sweep)
+
+        self.get_logger().info('Published static visualization (path, boundary, sweep lines)')
+
+    def _publish_dynamic_viz(self, t):
+        """Publish per-step visualization: trails, current target, progress text."""
+        now = self.get_clock().now().to_msg()
+
+        # --- Current target sphere (every step) ---
+        target_pos = self.planner.get_position(t)
+        target_marker = Marker()
+        target_marker.header.stamp = now
+        target_marker.header.frame_id = 'odom'
+        target_marker.ns = 'target'
+        target_marker.id = 0
+        target_marker.type = Marker.SPHERE
+        target_marker.action = Marker.ADD
+        target_marker.pose.position.x = float(target_pos[0])
+        target_marker.pose.position.y = float(target_pos[1])
+        target_marker.pose.position.z = float(target_pos[2])
+        target_marker.pose.orientation.w = 1.0
+        target_marker.scale.x = 0.5
+        target_marker.scale.y = 0.5
+        target_marker.scale.z = 0.5
+        target_marker.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=0.9)
+        self.current_target_pub.publish(target_marker)
+
+        # --- Trails (every 5th step to keep messages small) ---
+        if self.total_control_steps % 5 == 0:
+            def _make_pose(pos):
+                ps = PoseStamped()
+                ps.header.stamp = now
+                ps.header.frame_id = 'odom'
+                ps.pose.position.x = float(pos[0])
+                ps.pose.position.y = float(pos[1])
+                ps.pose.position.z = float(pos[2]) if len(pos) > 2 else 0.0
+                ps.pose.orientation.w = 1.0
+                return ps
+
+            self.drone_trail_msg.header.stamp = now
+            self.drone_trail_msg.poses.append(_make_pose(self.drone_pos))
+            self.drone_trail_pub.publish(self.drone_trail_msg)
+
+            self.dog0_trail_msg.header.stamp = now
+            self.dog0_trail_msg.poses.append(_make_pose(self.dog_pos))
+            self.dog0_trail_pub.publish(self.dog0_trail_msg)
+
+            self.dog1_trail_msg.header.stamp = now
+            self.dog1_trail_msg.poses.append(_make_pose(self.second_dog_pos))
+            self.dog1_trail_pub.publish(self.dog1_trail_msg)
+
+        # --- Progress text (every 40th step, matching logging rate) ---
+        if self.total_control_steps % 40 == 0:
+            progress = self.planner.get_progress(t) * 100.0
+            ws = self.planner.config.workspace_size
+            x0, y0 = self.planner.config.start_corner
+
+            text_marker = Marker()
+            text_marker.header.stamp = now
+            text_marker.header.frame_id = 'odom'
+            text_marker.ns = 'progress'
+            text_marker.id = 0
+            text_marker.type = Marker.TEXT_VIEW_FACING
+            text_marker.action = Marker.ADD
+            text_marker.pose.position.x = float(x0 + ws / 2.0)
+            text_marker.pose.position.y = float(y0 + ws + 1.0)
+            text_marker.pose.position.z = 1.0
+            text_marker.pose.orientation.w = 1.0
+            text_marker.scale.z = 1.0
+            text_marker.color = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
+            text_marker.text = f'{progress:.1f}% complete'
+            self.progress_pub.publish(text_marker)
+
+    # ------------------------------------------------------------------
     # Summary
     # ------------------------------------------------------------------
     def _print_mission_summary(self):
+        self._csv_file.flush()
+        self.get_logger().info(f'CSV log saved: {self.csv_path}')
         self.get_logger().info('=' * 60)
         self.get_logger().info('              MISSION SUMMARY')
         self.get_logger().info('=' * 60)
@@ -493,6 +709,8 @@ class LeaderFollowerNode(Node):
     def shutdown(self):
         """Attempt to land drone on shutdown."""
         self.get_logger().info('Shutdown requested — landing drone...')
+        self._csv_file.close()
+        self.get_logger().info(f'CSV log saved: {self.csv_path}')
         self._stop_dogs()
         if self.land_client.service_is_ready():
             future = self.land_client.call_async(Trigger.Request())

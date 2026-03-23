@@ -1,0 +1,333 @@
+========================================
+ResQoUnity Simulation Log
+========================================
+Timestamp:    Fri Feb 20 10:55:04 AM CST 2026
+Robot Type:   go2
+Robot Amount: 2
+Terrain:      flat
+Environment:  none
+CPU Mode:     ENABLED (hardcoded for testing)
+========================================
+
+[INFO][AppLauncher]: Loading experience file: /home/kishi/IsaacLab-0.3.1/source/apps/orbit.python.kit
+[Warning] [omni.isaac.kit.simulation_app] Modules: ['omniverse_sim'] were loaded before SimulationApp was started and might not be loaded correctly.
+[Warning] [omni.isaac.kit.simulation_app] Please check to make sure no extra omniverse or pxr modules are imported before the call to SimulationApp(...)
+Starting kit application with the following args:  ['/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.kit/omni/isaac/kit/simulation_app.py', '/home/kishi/IsaacLab-0.3.1/source/apps/orbit.python.kit', '--/app/tokens/exe-path=/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/kit', '--/persistent/app/viewport/displayOptions=3094', '--/rtx/materialDb/syncLoads=True', '--/rtx/hydra/materialSyncLoads=True', '--/omni.kit.plugin/syncUsdLoads=True', '--/app/renderer/resolution/width=1280', '--/app/renderer/resolution/height=720', '--/app/window/width=1440', '--/app/window/height=900', '--/renderer/multiGpu/enabled=True', '--/app/fastShutdown=True', '--ext-folder', '/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts', '--ext-folder', '/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/apps', '--/physics/cudaDevice=0', '--portable']
+Passing the following args to the base kit application:  ['--robot', 'go2', '--robot_amount', '2', '--terrain', 'flat', '--custom_env', 'none', '--cpu']
+Loading user config located at: '/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/kit/data/Kit/Isaac-Sim/2023.1/user.config.json'
+[Info] [carb] Logging to file: /home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/kit/logs/Kit/Isaac-Sim/2023.1/kit_20260220_105504.log
+2026-02-20 16:55:04 [0ms] [Warning] [omni.kit.app.plugin] No crash reporter present, dumps uploading isn't available.
+2026-02-20 16:55:04 [1ms] [Warning] [omni.ext.plugin] [ext: omni.replicator.core] Extensions config 'extension.toml' doesn't exist '/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.replicator.core' or '/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.replicator.core/config'
+[0.034s] [ext: omni.kit.async_engine-0.0.0] startup
+[0.172s] [ext: omni.activity.core-1.0.1] startup
+[0.174s] [ext: omni.assets.plugins-0.0.0] startup
+[0.175s] [ext: omni.stats-0.0.0] startup
+[0.175s] [ext: omni.client-1.0.1] startup
+[0.179s] [ext: omni.activity.profiler-1.0.2] startup
+[0.180s] [ext: omni.gpu_foundation-0.0.0] startup
+[0.187s] [ext: omni.rtx.shadercache.vulkan-1.0.0] startup
+[0.188s] [ext: carb.windowing.plugins-1.0.0] startup
+[0.193s] [ext: omni.kit.renderer.init-0.0.0] startup
+2026-02-20 16:55:04 [283ms] [Warning] [gpu.foundation.plugin] Skipping unsupported non-NVIDIA GPU: Intel(R) UHD Graphics 770 (ADL-S GT1)
+2026-02-20 16:55:04 [283ms] [Warning] [gpu.foundation.plugin] Skipping unsupported non-NVIDIA GPU: Intel(R) UHD Graphics 770 (ADL-S GT1)
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 550.163.01    | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA GeForce RTX 3080          | Yes: 0 |     | 10486   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2216      | 677e3bbe.. |
+|     |                                  |        |     |            | 1         |            |
+|---------------------------------------------------------------------------------------------|
+| 1   | Intel(R) UHD Graphics 770 (ADL.. |        |     | 48010   MB | 8086      | 0          |
+|     |                                  |        |     |            | 4680      | 86808046.. |
+|     |                                  |        |     |            | 0         |            |
+|=============================================================================================|
+| OS: 22.04.5 LTS (Jammy Jellyfish) ubuntu, Version: 22.04.5, Kernel: 6.8.0-90-generic
+| XServer Vendor: The X.Org Foundation, XServer Version: 12101004 (1.21.1.4)
+| Processor: 12th Gen Intel(R) Core(TM) i9-12900K | Cores: 16 | Logical: 32
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 64013 | Free Memory: 46264
+| Total Page/Swap (MB): 2047 | Free Page/Swap: 1213
+|---------------------------------------------------------------------------------------------|
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] IOMMU is enabled. Found 12 items in /sys/kernel/iommu_groups/.
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] An input-output memory management unit (IOMMU) appears to be enabled on this system.
+On bare-metal Linux systems, CUDA and the display driver do not support IOMMU-enabled PCIe peer to peer memory copy.
+If you are on a bare-metal Linux system, please disable the IOMMU. Otherwise you risk image corruption and program instability.
+This typically can be controlled via BIOS settings (Intel Virtualization Technology for Directed I/O (VT-d) or AMD I/O Virtualization Technology (AMD-Vi)) and kernel parameters (iommu, intel_iommu, amd_iommu).
+Note that in virtual machines with GPU pass-through (vGPU) the IOMMU needs to be enabled.
+Since we can not reliably detect whether this system is bare-metal or a virtual machine, we show this warning in any case when an IOMMU appears to be enabled.
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]  
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] -----------------------------------------------------------------------
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] !!!!! Local system validation failed! Incorrect configuration detected.
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]       Summary below. Details above.
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] -----------------------------------------------------------------------
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]  
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]  - ECC:                         OK
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]  - IOMMU:                       FAILED
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin]  
+2026-02-20 16:55:04 [461ms] [Warning] [gpu.foundation.plugin] -----------------------------------------------------------------------
+[0.576s] [ext: omni.kit.pipapi-0.0.0] startup
+[0.577s] [ext: omni.kit.pip_archive-0.0.0] startup
+[0.577s] [ext: omni.pip.compute-1.2.0] startup
+[0.577s] [ext: omni.pip.torch-2_0_1-2.0.2] startup
+[0.604s] [ext: omni.pip.cloud-1.0.1] startup
+[0.607s] [ext: omni.isaac.core_archive-2.2.1] startup
+[0.607s] [ext: omni.isaac.ml_archive-1.1.3] startup
+[0.607s] [ext: omni.kit.loop-isaac-1.1.0] startup
+[0.608s] [ext: omni.kit.test-0.0.0] startup
+[0.608s] [ext: omni.kit.telemetry-0.5.0] startup
+[0.622s] [ext: omni.mtlx-0.1.0] startup
+[0.623s] [ext: omni.usd.config-1.0.3] startup
+[0.625s] [ext: omni.gpucompute.plugins-0.0.0] startup
+[0.625s] [ext: omni.usd.libs-1.0.0] startup
+[0.688s] [ext: omni.appwindow-1.1.5] startup
+[0.905s] [ext: omni.kit.renderer.core-0.0.0] startup
+[1.580s] [ext: omni.kit.renderer.capture-0.0.0] startup
+[1.582s] [ext: omni.kit.renderer.imgui-0.0.0] startup
+[1.637s] [ext: carb.audio-0.1.0] startup
+[1.639s] [ext: omni.ui-2.18.5] startup
+[1.647s] [ext: omni.uiaudio-1.0.0] startup
+[1.648s] [ext: omni.kit.mainwindow-1.0.1] startup
+[1.649s] [ext: omni.kit.uiapp-0.0.0] startup
+[1.649s] [ext: omni.usd.schema.physics-0.0.0] startup
+[1.728s] [ext: omni.usd.schema.omniscripting-1.0.0] startup
+[1.733s] [ext: omni.usd.schema.scene.visualization-2.0.2] startup
+[1.733s] [ext: omni.usd.schema.anim-0.0.0] startup
+[1.749s] [ext: omni.usd.schema.geospatial-0.0.0] startup
+[1.751s] [ext: omni.usd.schema.forcefield-0.0.0] startup
+[1.755s] [ext: omni.usd.schema.physx-0.0.0] startup
+[1.773s] [ext: omni.usd.schema.semantics-0.0.0] startup
+[1.775s] [ext: omni.usd.schema.audio-0.0.0] startup
+[1.778s] [ext: omni.usd.schema.isaac-2.0.1] startup
+[1.783s] [ext: omni.usd.schema.omnigraph-1.0.0] startup
+[1.787s] [ext: omni.usd_resolver-1.0.1] startup
+[1.790s] [ext: omni.resourcemonitor-105.0.0] startup
+[1.792s] [ext: omni.usd.core-1.1.8] startup
+[1.794s] [ext: omni.graph.exec-0.3.0] startup
+[1.795s] [ext: omni.timeline-1.0.9] startup
+[1.796s] [ext: omni.kit.actions.core-1.0.0] startup
+[1.798s] [ext: omni.kit.window.popup_dialog-2.0.23] startup
+[1.802s] [ext: omni.hydra.usdrt_delegate-7.2.34] startup
+[1.816s] [ext: omni.hydra.scene_delegate-0.3.2] startup
+[1.822s] [ext: omni.kit.commands-1.4.6] startup
+[1.824s] [ext: omni.kit.widget.nucleus_connector-1.1.4] startup
+[1.825s] [ext: omni.kit.exec.core-0.5.0] startup
+[1.827s] [ext: omni.kit.audiodeviceenum-1.0.1] startup
+[1.828s] [ext: omni.kit.collaboration.telemetry-1.0.0] startup
+[1.828s] [ext: omni.usd-1.10.18] startup
+[1.869s] [ext: omni.kit.collaboration.channel_manager-1.0.11] startup
+[1.870s] [ext: omni.kit.usd.layers-2.1.27] startup
+[1.876s] [ext: omni.kit.menu.utils-1.5.6] startup
+[1.883s] [ext: omni.iray.libs-0.0.0] startup
+[1.886s] [ext: omni.kit.primitive.mesh-1.0.15] startup
+[1.888s] [ext: omni.mdl.neuraylib-0.2.0] startup
+[1.889s] [ext: omni.kit.stage_templates-1.1.20] startup
+[1.890s] [ext: omni.mdl-0.2.1] startup
+[1.903s] [ext: omni.kit.viewport.registry-104.0.5] startup
+[1.903s] [ext: omni.kit.widget.nucleus_info-1.0.2] startup
+[1.904s] [ext: omni.kit.helper.file_utils-0.1.6] startup
+[1.923s] [ext: omni.kit.search_core-1.0.5] startup
+[1.923s] [ext: omni.kit.widget.filebrowser-2.3.35] startup
+[1.926s] [ext: omni.kit.widget.path_field-2.0.8] startup
+[1.927s] [ext: omni.kit.notification_manager-1.0.6] startup
+[1.928s] [ext: omni.kit.widget.browser_bar-2.0.9] startup
+[1.928s] [ext: omni.ui.scene-1.7.0] startup
+[1.933s] [ext: omni.inspect-1.0.1] startup
+[1.934s] [ext: omni.kit.widget.search_delegate-1.0.4] startup
+[1.935s] [ext: omni.kit.widget.versioning-1.4.6] startup
+[1.936s] [ext: omni.hydra.engine.stats-1.0.1] startup
+[1.940s] [ext: omni.graph.tools-1.41.3] startup
+[1.956s] [ext: omni.graph.core-2.139.12] startup
+[1.958s] [ext: omni.kit.clipboard-1.0.3] startup
+[1.959s] [ext: omni.volume-0.4.0] startup
+[1.960s] [ext: omni.kit.window.filepicker-2.10.13] startup
+[1.973s] [ext: omni.hydra.rtx-0.1.0] startup
+[1.983s] [ext: omni.hydra.pxr-1.1.6] startup
+[1.991s] [ext: omni.kit.window.file_importer-1.0.22] startup
+[1.994s] [ext: omni.kit.hydra_texture-1.1.12] startup
+[2.003s] [ext: omni.kit.viewport.legacy_gizmos-1.0.14] startup
+[2.009s] [ext: omni.kit.window.file_exporter-1.0.22] startup
+[2.011s] [ext: omni.kit.window.drop_support-1.0.1] startup
+[2.011s] [ext: omni.kit.widget.viewport-105.1.7] startup
+[2.018s] [ext: omni.kit.material.library-1.3.41] startup
+[2.022s] [ext: omni.kit.window.file-1.3.44] startup
+[2.023s] [ext: omni.kit.viewport.window-105.1.12] startup
+[2.034s] [ext: omni.command.usd-1.0.2] startup
+[2.034s] [ext: omni.kit.viewport.utility-1.0.16] startup
+[2.035s] [ext: omni.kit.selection-0.1.3] startup
+[2.035s] [ext: usdrt.scenegraph-7.2.34] startup
+[2.065s] [ext: omni.kit.usd_undo-0.1.2] startup
+[2.065s] [ext: omni.kit.menu.edit-1.1.14] startup
+[2.067s] [ext: omni.graph-1.106.1] startup
+[2.154s] [ext: omni.kit.menu.file-1.1.7] startup
+[2.161s] [ext: omni.isaac.kit-1.4.7] startup
+[2.162s] [ext: omni.graph.action-1.55.1] startup
+[2.203s] [ext: omni.kvdb-0.0.0] startup
+[2.204s] [ext: omni.kit.collaboration.presence_layer-1.0.8] startup
+[2.206s] [ext: omni.localcache-0.0.0] startup
+[2.208s] [ext: omni.kit.widget.options_menu-1.0.5] startup
+[2.209s] [ext: omni.physx.foundation-105.1.12-5.1] startup
+[2.210s] [ext: omni.kit.menu.create-1.0.11] startup
+[2.212s] [ext: omni.usdphysics-105.1.12-5.1] startup
+[2.215s] [ext: omni.convexdecomposition-105.1.12-5.1] startup
+[2.220s] [ext: omni.kit.widget.filter-1.1.2] startup
+[2.221s] [ext: omni.kit.hotkeys.core-1.3.0] startup
+[2.224s] [ext: omni.kit.context_menu-1.6.8] startup
+[2.226s] [ext: omni.physx.cooking-105.1.12-5.1] startup
+[2.236s] [ext: omni.kit.window.content_browser_registry-0.0.1] startup
+[2.237s] [ext: omni.kit.widget.stage-2.9.6] startup
+[2.244s] [ext: omni.kit.widget.stage_icons-1.0.4] startup
+[2.246s] [ext: omni.physics.tensors-0.1.0] startup
+[2.252s] [ext: omni.physx-105.1.12-5.1] startup
+2026-02-20 16:55:06 [2,248ms] [Warning] [omni.stageupdate.plugin] Deprecated: direct use of IStageUpdate callbacks is deprecated. Use IStageUpdate::getStageUpdate instead.
+[2.263s] [ext: omni.kit.window.content_browser-2.7.17] startup
+[2.273s] [ext: omni.kit.numpy.common-0.1.2] startup
+[2.274s] [ext: omni.kit.window.stage-2.4.4] startup
+[2.278s] [ext: omni.warp.core-1.0.0-beta.2] startup
+Warp 1.0.0-beta.2 initialized:
+   CUDA Toolkit: 11.5, Driver: 12.4
+   Devices:
+     "cpu"    | x86_64
+     "cuda:0" | NVIDIA GeForce RTX 3080 (sm_86)
+   Kernel cache: /home/kishi/.cache/warp/1.0.0-beta.2
+[2.369s] [ext: omni.physx.tensors-0.1.0] startup
+[2.373s] [ext: omni.isaac.version-1.0.3] startup
+[2.374s] [ext: omni.isaac.dynamic_control-1.2.6] startup
+[2.382s] [ext: omni.kit.menu.stage-1.2.3] startup
+[2.384s] [ext: omni.isaac.core-3.3.2] startup
+[3.192s] [ext: omni.kit.widget.highlight_label-1.0.1] startup
+[3.193s] [ext: omni.kit.widget.searchable_combobox-1.0.5] startup
+[3.194s] [ext: omni.kit.widget.searchfield-1.1.3] startup
+[3.195s] [ext: omni.kit.widget.graph-1.8.4] startup
+[3.199s] [ext: omni.ui_query-1.1.1] startup
+[3.200s] [ext: omni.kit.manipulator.viewport-104.0.9] startup
+[3.201s] [ext: omni.kit.widget.settings-1.0.6] startup
+[3.203s] [ext: omni.kit.window.property-1.9.6] startup
+[3.205s] [ext: omni.kit.window.extensions-1.3.0] startup
+[3.209s] [ext: omni.kit.ui_test-1.2.13] startup
+[3.210s] [ext: omni.graph.visualization.nodes-2.1.1] startup
+[3.220s] [ext: omni.kit.profiler.window-2.1.2] startup
+/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core_archive/pip_prebundle/gunicorn/util.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+2026-02-20 16:55:07 [3,316ms] [Warning] [omni.kit.profiler.window] remove _SpanInstance.__lt__ and use insort 'key' arg instead
+[3.333s] [ext: omni.isaac.ui-0.13.5] startup
+[3.339s] [ext: omni.kit.window.preferences-1.3.23] startup
+[3.343s] [ext: omni.kit.widget.prompt-1.0.6] startup
+[3.344s] [ext: omni.isaac.utils-0.6.0] startup
+[3.351s] [ext: omni.kit.widget.live_session_management-1.2.22] startup
+[3.355s] [ext: omni.isaac.cloner-0.7.2] startup
+[3.356s] [ext: omni.kit.widget.layers-1.6.32] startup
+[3.364s] [ext: omni.kit.raycast.query-1.0.1] startup
+[3.371s] [ext: omni.kit.widget.toolbar-1.5.6] startup
+[3.377s] [ext: omni.kit.manipulator.transform-104.6.15] startup
+[3.378s] [ext: omni.kit.widget.spinner-1.0.6] startup
+[3.380s] [ext: omni.kit.window.cursor-1.1.2] startup
+[3.381s] [ext: omni.kit.manipulator.tool.snap-1.4.2] startup
+[3.386s] [ext: omni.kit.manipulator.selector-1.0.1] startup
+[3.387s] [ext: omni.kit.viewport.menubar.core-105.0.19] startup
+[3.396s] [ext: omni.kit.viewport.actions-105.1.6] startup
+[3.400s] [ext: omni.kit.manipulator.prim-105.0.11] startup
+[3.405s] [ext: omni.kit.viewport.menubar.camera-105.1.9] startup
+[3.409s] [ext: omni.kit.viewport.menubar.display-105.1.0] startup
+[3.411s] [ext: omni.kit.viewport.menubar.render-105.1.1] startup
+[3.413s] [ext: omni.kit.viewport.menubar.settings-105.0.9] startup
+[3.417s] [ext: omni.kit.manipulator.selection-104.0.8] startup
+[3.418s] [ext: omni.kit.manipulator.camera-105.0.4] startup
+[3.421s] [ext: omni.rtx.window.settings-0.6.9] startup
+[3.425s] [ext: semantics.schema.editor-0.3.4] startup
+[3.428s] [ext: omni.kit.viewport.bundle-104.0.1] startup
+[3.428s] [ext: omni.hydra.pxr.settings-1.0.5] startup
+[3.429s] [ext: omni.activity.pump-1.0.0] startup
+[3.431s] [ext: omni.kit.property.layer-1.1.5] startup
+[3.433s] [ext: omni.kit.property.usd-3.21.15] startup
+[3.441s] [ext: omni.kit.viewport.menubar.lighting-105.0.7] startup
+[3.444s] [ext: omni.kit.viewport.pxr-104.0.1] startup
+[3.444s] [ext: omni.kit.viewport.ready-1.0.5] startup
+[3.445s] [ext: omni.kit.viewport.rtx-104.0.0] startup
+[3.445s] [ext: omni.kit.property.audio-1.0.9] startup
+[3.449s] [ext: omni.kit.widget.live-2.1.6] startup
+[3.451s] [ext: omni.debugdraw-0.1.2] startup
+[3.456s] [ext: omni.kit.property.camera-1.0.5] startup
+[3.457s] [ext: omni.kit.property.light-1.0.8] startup
+[3.459s] [ext: omni.kit.property.geometry-1.2.11] startup
+[3.462s] [ext: omni.kit.widget.cache_indicator-2.0.8] startup
+[3.464s] [ext: omni.usdphysics.ui-105.1.12-5.1] startup
+2026-02-20 16:55:07 [3,450ms] [Warning] [omni.kit.widget.cache_indicator.cache_state_menu] Unable to detect Omniverse Cache Server. File /home/kishi/.nvidia-omniverse/config/omniverse.toml is not found. Consider installing it for better IO performance.
+[3.490s] [ext: omni.physx.commands-105.1.12-5.1] startup
+[3.493s] [ext: omni.kit.property.skel-1.0.4] startup
+[3.495s] [ext: omni.kit.property.render-1.1.1] startup
+[3.500s] [ext: omni.kit.window.commands-0.2.4] startup
+[3.501s] [ext: omni.physx.ui-105.1.12-5.1] startup
+[3.526s] [ext: omni.hydra.scene_api-0.1.2] startup
+[3.533s] [ext: usdrt.gf-1.0.2] startup
+[3.533s] [ext: omni.kit.widget.text_editor-1.0.2] startup
+[3.535s] [ext: omni.kit.property.material-1.8.36] startup
+[3.538s] [ext: omni.kit.property.transform-1.3.10] startup
+[3.541s] [ext: omni.physx.demos-105.1.12-5.1] startup
+[3.545s] [ext: omni.kit.property.physx-0.1.0] startup
+[3.593s] [ext: omni.kit.property.bundle-1.2.9] startup
+[3.595s] [ext: omni.kit.actions.window-1.1.0] startup
+[3.597s] [ext: omni.kit.window.console-0.2.10] startup
+[3.606s] [ext: omni.kit.window.script_editor-1.7.4] startup
+[3.609s] [ext: omni.physx.camera-105.1.12-5.1] startup
+[3.616s] [ext: omni.kit.property.isaac-0.2.2] startup
+[3.618s] [ext: omni.kit.hotkeys.window-1.4.1] startup
+[3.622s] [ext: omni.isaac.debug_draw-0.6.1] startup
+2026-02-20 16:55:07 [3,612ms] [Warning] [omni.stageupdate.plugin] Deprecated: direct use of IStageUpdate callbacks is deprecated. Use IStageUpdate::getStageUpdate instead.
+2026-02-20 16:55:07 [3,612ms] [Warning] [omni.stageupdate.plugin] Deprecated: direct use of IStageUpdate callbacks is deprecated. Use IStageUpdate::getStageUpdate instead.
+[3.630s] [ext: omni.physx.graph-105.1.12-5.1] startup
+[3.640s] [ext: omni.kit.window.toolbar-1.5.4] startup
+[3.643s] [ext: omni.kit.widget.zoombar-1.0.5] startup
+[3.644s] [ext: omni.physx.cct-105.1.12-5.1] startup
+[3.655s] [ext: omni.physx.vehicle-105.1.12-5.1] startup
+[3.665s] [ext: omni.physx.supportui-105.1.12-5.1] startup
+[3.677s] [ext: omni.kit.browser.core-2.3.10] startup
+[3.681s] [ext: omni.kit.window.status_bar-0.1.6] startup
+[3.685s] [ext: omni.kit.window.title-1.1.3] startup
+[3.686s] [ext: omni.physx.bundle-105.1.12-5.1] startup
+[3.686s] [ext: omni.kit.browser.folder.core-1.9.7] startup
+[3.690s] [ext: omni.kit.graph.delegate.default-1.1.1] startup
+[3.690s] [ext: omni.graph.image.core-0.1.0] startup
+[3.691s] [ext: omni.graph.nodes-1.106.3] startup
+[3.829s] [ext: omni.kit.browser.sample-1.4.6] startup
+[3.832s] [ext: omni.kit.widget.material_preview-1.0.8] startup
+[3.833s] [ext: omni.kit.graph.usd.commands-1.3.0] startup
+[3.834s] [ext: omni.kit.graph.editor.core-1.5.1] startup
+[3.836s] [ext: omni.kit.renderer.cuda_interop-1.0.1] startup
+[3.838s] [ext: omni.syntheticdata-0.4.10] startup
+[3.859s] [ext: omni.warp-1.0.0-beta.2] startup
+[3.911s] [ext: omni.kit.window.material_graph-1.8.11] startup
+[3.923s] [ext: omni.graph.scriptnode-1.1.6] startup
+[3.928s] [ext: omni.kit.stage_column.payload-1.0.12] startup
+[3.930s] [ext: omni.kit.livestream.core-2.3.0] startup
+[3.931s] [ext: omni.kit.streamsdk.plugins-2.5.2] startup
+[3.931s] [ext: omni.replicator.core-1.10.20] startup
+2026-02-20 16:55:08 [3,934ms] [Warning] [omni.replicator.core.scripts.annotators] Annotator PostProcessDispatch is already registered, overwriting annotator template
+[4.081s] [ext: semantics.schema.property-1.0.2] startup
+[4.083s] [ext: omni.rtx.settings.core-0.5.13] startup
+[4.088s] [ext: omni.kit.stage_column.variant-1.0.13] startup
+[4.089s] [ext: omni.kit.menu.common-1.1.4] startup
+[4.091s] [ext: omni.kit.livestream.native-2.4.0] startup
+
+Active user not found. Using default user [kiosk]2026-02-20 16:55:13 [9,426ms] [Error] [carb.livestream.plugin] Stream Server: starting the server failed, 0x800B1002
+2026-02-20 16:55:13 [9,426ms] [Error] [carb.livestream.plugin] Could not initialize streaming components
+2026-02-20 16:55:13 [9,427ms] [Error] [carb.livestream.plugin] Couldn't initialize the capture device.
+[9.441s] [ext: omni.kit.window.stats-0.1.4] startup
+[9.443s] [ext: orbit.python-2023.1.1] startup
+[9.444s] Simulation App Starting
+2026-02-20 16:55:13 [9,446ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/ecoMode/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,447ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/directLighting/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,447ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/reflections/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,447ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/translucency/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,447ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/raytracing/subsurface/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,447ms] [Warning] [omni.kit.widget.settings.settings_model] a value for setting /rtx/caustics/enabled has been requested but is not available
+2026-02-20 16:55:13 [9,479ms] [Warning] [omni.kvdb.plugin] wasn't able to load the meta database, trying to repair it ...
+2026-02-20 16:55:14 [9,860ms] [Warning] [omni.kvdb.plugin] repair failed
+2026-02-20 16:55:14 [10,650ms] [Warning] [omni.kit.hotkeys.core.registry] [Hotkey] duplicated action as SPACE (On Press) with omni.kit.widget.toolbar.omni.kit.widget.toolbar::toolbar::play!
+2026-02-20 16:55:14 [10,650ms] [Warning] [omni.kit.hotkeys.core.registry] [Hotkey] Cannot register Global [omni.kit.widget.toolbar] omni.kit.widget.toolbar::toolbar::play.SPACE, error code: Duplicated action definition
+/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/python.sh: line 41: 4184041 Killed                  $python_exe "$@" $args
+There was an error running python
