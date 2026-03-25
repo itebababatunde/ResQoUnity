@@ -62,3 +62,43 @@ def create_front_cam_omnigraph(robot_num):
 
         },
     )
+
+
+def create_world_drone_cam_omnigraph():
+    """
+    Create an OmniGraph that publishes the world (non-env) drone's bottom camera
+    to the ROS2 topic /drone/front_cam/rgb at 10 Hz.
+
+    The camera prim path matches the one initialized in omniverse_sim.py:
+        /World/Drone/base/bottom_cam
+    """
+    keys = og.Controller.Keys
+    graph_path = "/ROS_world_drone_cam"
+    og.Controller.edit(
+        {
+            "graph_path": graph_path,
+            "evaluator_name": "execution",
+            "pipeline_stage": og.GraphPipelineStage.GRAPH_PIPELINE_STAGE_SIMULATION,
+        },
+        {
+            keys.CREATE_NODES: [
+                ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
+                ("IsaacCreateRenderProduct", "omni.isaac.core_nodes.IsaacCreateRenderProduct"),
+                ("ROS2CameraHelper", "omni.isaac.ros2_bridge.ROS2CameraHelper"),
+            ],
+
+            keys.SET_VALUES: [
+                ("IsaacCreateRenderProduct.inputs:cameraPrim", "/World/Drone/base/bottom_cam"),
+                ("IsaacCreateRenderProduct.inputs:enabled", True),
+                ("ROS2CameraHelper.inputs:type", "rgb"),
+                ("ROS2CameraHelper.inputs:topicName", "drone/front_cam/rgb"),
+                ("ROS2CameraHelper.inputs:frameId", "drone"),
+            ],
+
+            keys.CONNECT: [
+                ("OnPlaybackTick.outputs:tick", "IsaacCreateRenderProduct.inputs:execIn"),
+                ("IsaacCreateRenderProduct.outputs:execOut", "ROS2CameraHelper.inputs:execIn"),
+                ("IsaacCreateRenderProduct.outputs:renderProductPath", "ROS2CameraHelper.inputs:renderProductPath"),
+            ],
+        },
+    )

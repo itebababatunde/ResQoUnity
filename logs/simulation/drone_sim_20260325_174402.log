@@ -1,0 +1,9 @@
+================================================================================
+SIMULATION LOG - 2026-03-25 17:44:02
+Log file: /home/kishi/ResQoUnity/logs/simulation/drone_sim_20260325_174402.log
+================================================================================
+
+[INFO] CPU physics mode enabled - GPU PhysX disabled
+[MazeEnv] Dog spawn position set to maze start cell (-2.5, -2.5, 0.5)
+[INFO] Creating environment: Isaac-Velocity-Rough-Unitree-Go2-v0
+[INFO] Robot: go2, Amount: 1, Terrain: flat

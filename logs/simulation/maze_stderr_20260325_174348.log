@@ -1,0 +1,2 @@
+/home/kishi/.local/share/ov/pkg/isaac-sim-2023.1.1/exts/omni.isaac.core_archive/pip_prebundle/gunicorn/util.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources

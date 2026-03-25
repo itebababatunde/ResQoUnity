@@ -87,7 +87,7 @@ import agent_cfg as agent_cfg_module
 import custom_rl_env as custom_env_module
 import custom_rl_env
 
-from omnigraph import create_front_cam_omnigraph
+from omnigraph import create_front_cam_omnigraph, create_world_drone_cam_omnigraph
 from robots.quadcopter.config import QUADCOPTER_CFG
 
 
@@ -133,10 +133,10 @@ def calculate_drone_forces(desired_velocity, current_velocity, mass, dt=0.016, g
 
 
 class _RslRlEnvShim:
-    """Shim to adapt env.get_observations() to return only observations for older rsl_rl versions.
+    """Shim to adapt env.get_observations() for rsl_rl v2.x.
 
-    Some versions of rsl_rl expect env.get_observations() -> dict (no info tuple).
-    IsaacLab/gymnasium returns (obs, info). This shim unwraps the tuple for the runner.
+    rsl_rl v2.x expects: obs, extras = env.get_observations()
+    where obs is a torch.Tensor and extras is a dict.
     """
     def __init__(self, env):
         self._env = env
@@ -146,12 +146,15 @@ class _RslRlEnvShim:
 
     def get_observations(self):
         result = self._env.get_observations()
-        if isinstance(result, tuple):
-            result = result[0]
-        # Ensure rsl_rl gets a dict when obs_groups are defined
-        if isinstance(result, dict):
+        # Already a (obs, extras) tuple — pass through directly
+        if isinstance(result, tuple) and len(result) == 2:
             return result
-        return {"policy": result}
+        # Single dict — extract policy tensor and wrap extras
+        if isinstance(result, dict):
+            obs = result.get("policy", next(iter(result.values())))
+            return obs, {"observations": result}
+        # Bare tensor
+        return result, {}
 
 
  
@@ -227,8 +230,28 @@ def setup_custom_env():
         if (args_cli.custom_env == "office" and args_cli.terrain == 'flat'):
             cfg_scene = sim_utils.UsdFileCfg(usd_path="./envs/office.usd")
             cfg_scene.func("/World/office", cfg_scene, translation=(0.0, 0.0, 0.0))
-    except:
-        print("Error loading custom environment. You should download custom envs folder from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing")
+
+        if args_cli.custom_env == "maze":
+            import omni.usd
+            from maze_generator import generate_maze_grid, get_occupancy_grid, spawn_walls_in_stage, spawn_markers
+            stage = omni.usd.get_context().get_stage()
+            maze_seed = getattr(args_cli, 'seed', 42) or 42
+            maze_grid = generate_maze_grid(seed=maze_seed)
+            spawn_walls_in_stage(maze_grid, stage)
+            spawn_markers(stage)
+            # Expose ground-truth grid for vision IoU evaluation
+            import custom_rl_env as _cre
+            _cre.maze_gt_grid = get_occupancy_grid(maze_grid)
+            print("[MazeEnv] Maze spawned. Ground-truth grid stored in custom_rl_env.maze_gt_grid")
+            # Publish world drone camera feed via OmniGraph
+            create_world_drone_cam_omnigraph()
+            print("[MazeEnv] World drone camera OmniGraph created -> /drone/front_cam/rgb")
+
+    except Exception as _env_exc:
+        import traceback
+        print(f"Error loading custom environment: {_env_exc}")
+        traceback.print_exc()
+        print("For warehouse/office envs, download from: https://drive.google.com/drive/folders/1vVGuO1KIX1K6mD6mBHDZGm9nk2vaRyj3?usp=sharing")
 
 
 def cmd_vel_cb(msg, num_robot):
@@ -697,8 +720,21 @@ def run_sim():
         else:
             print("[WARN] QuadcopterEnvCfg not found. Falling back to UnitreeGo2CustomEnvCfg.")
 
-    # add N robots to env 
+    # add N robots to env
     env_cfg.scene.num_envs = args_cli.robot_amount
+
+    # Maze use case: spawn dog just outside the south entrance, aligned with start cell (0,0)
+    if args_cli.custom_env == "maze":
+        try:
+            from maze_generator import ROWS, COLS, CELL_SIZE, get_cell_center_world
+            _start_x, _ = get_cell_center_world(0, 0, ROWS, COLS)
+            _south_border_y = -(ROWS * CELL_SIZE / 2.0)
+            _dog_x = _start_x
+            _dog_y = _south_border_y - CELL_SIZE / 2.0  # one half-cell outside the entrance
+            env_cfg.scene.robot.init_state.pos = (_dog_x, _dog_y, 0.5)
+            print(f"[MazeEnv] Dog spawn position set outside maze entrance ({_dog_x:.1f}, {_dog_y:.1f}, 0.5)")
+        except AttributeError:
+            print("[MazeEnv] WARNING: Could not set dog init_state.pos — will use default spawn.")
 
     # create ros2 camera stream omnigraph
     for i in range(env_cfg.scene.num_envs):
@@ -811,6 +847,24 @@ def run_sim():
         obs = {"policy": obs}
     print("[INFO] Environment reset complete, starting simulation loop...")
 
+    # Maze use case: teleport dog to outside the entrance (init_state.pos is not honoured by IsaacLab)
+    if args_cli.custom_env == "maze":
+        try:
+            import torch
+            from maze_generator import ROWS, COLS, CELL_SIZE, get_cell_center_world
+            _sx, _ = get_cell_center_world(0, 0, ROWS, COLS)
+            _sy = -(ROWS * CELL_SIZE / 2.0) - CELL_SIZE / 2.0
+            _base = env.unwrapped if hasattr(env, 'unwrapped') else env
+            _robot = _base.scene["robot"]
+            _dev = str(_base.device) if hasattr(_base, 'device') else "cpu"
+            _pos  = torch.tensor([[float(_sx), float(_sy), 0.5]], device=_dev)
+            _quat = torch.tensor([[1.0, 0.0, 0.0, 0.0]], device=_dev)
+            _robot.write_root_pose_to_sim(torch.cat([_pos, _quat], dim=-1))
+            _robot.write_root_velocity_to_sim(torch.zeros(1, 6, device=_dev))
+            print(f"[MazeEnv] Dog teleported to ({float(_sx):.1f}, {float(_sy):.1f}, 0.5)")
+        except Exception as _e:
+            print(f"[MazeEnv] Dog teleport failed: {_e}")
+
     # Spawn world-level drone (separate from env system)
     # Use Isaac Core USD API for standalone objects (not Isaac Lab Articulation)
     world_drone_path = None
@@ -838,10 +892,21 @@ def run_sim():
             print(f"[INFO] Spawning drone at {world_drone_path} (inside env for physics stepping)")
             
             # Spawn drone USD directly to stage (Isaac Core API, not Orbit)
+            # For maze use case: place drone grounded beside the dog (outside maze entrance)
+            if args_cli.custom_env == "maze":
+                try:
+                    from maze_generator import ROWS, COLS, CELL_SIZE, get_cell_center_world
+                    _sx, _ = get_cell_center_world(0, 0, ROWS, COLS)
+                    _sy = -(ROWS * CELL_SIZE / 2.0) - CELL_SIZE / 2.0
+                    drone_init_translation = (_sx + CELL_SIZE, _sy, 0.1)  # one cell-width east, grounded
+                except Exception:
+                    drone_init_translation = (0.0, 0.0, 0.1)
+            else:
+                drone_init_translation = (0.0, 0.0, 2.5)
             prim_utils.create_prim(
                 prim_path=world_drone_path,
                 usd_path=drone_usd_path,
-                translation=(0.0, 0.0, 2.5),  # 2.5m hover height
+                translation=drone_init_translation,
                 scale=(5.0, 5.0, 5.0)  # 5x scale for visibility
             )
             
@@ -970,8 +1035,9 @@ def run_sim():
     while simulation_app.is_running():
         # run everything in inference mode
         with torch.inference_mode():
-            # agent stepping
-            actions = policy(obs)
+            # agent stepping — policy expects a raw tensor, not a dict
+            _obs_tensor = obs["policy"] if isinstance(obs, dict) else obs
+            actions = policy(_obs_tensor)
             
             # FORCE-BASED VELOCITY CONTROL for drones (bypass motor actions)
             # Motor commands don't work because USD has no thrust physics
