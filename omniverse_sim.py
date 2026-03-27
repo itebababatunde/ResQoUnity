@@ -232,17 +232,15 @@ def setup_custom_env():
             cfg_scene.func("/World/office", cfg_scene, translation=(0.0, 0.0, 0.0))
 
         if args_cli.custom_env == "maze":
-            import omni.usd
-            from maze_generator import generate_maze_grid, get_occupancy_grid, spawn_walls_in_stage, spawn_markers
-            stage = omni.usd.get_context().get_stage()
+            # Load pre-built maze USD (same pattern as warehouse/office)
+            cfg_scene = sim_utils.UsdFileCfg(usd_path="./envs/maze.usda")
+            cfg_scene.func("/World/maze", cfg_scene, translation=(0.0, 0.0, 0.0))
+            # Store ground-truth occupancy grid for vision IoU evaluation
+            from maze_generator import generate_maze_grid, get_occupancy_grid
             maze_seed = getattr(args_cli, 'seed', 42) or 42
-            maze_grid = generate_maze_grid(seed=maze_seed)
-            spawn_walls_in_stage(maze_grid, stage)
-            spawn_markers(stage)
-            # Expose ground-truth grid for vision IoU evaluation
             import custom_rl_env as _cre
-            _cre.maze_gt_grid = get_occupancy_grid(maze_grid)
-            print("[MazeEnv] Maze spawned. Ground-truth grid stored in custom_rl_env.maze_gt_grid")
+            _cre.maze_gt_grid = get_occupancy_grid(generate_maze_grid(seed=maze_seed))
+            print("[MazeEnv] maze.usda loaded. Ground-truth grid stored.")
             # Publish world drone camera feed via OmniGraph
             create_world_drone_cam_omnigraph()
             print("[MazeEnv] World drone camera OmniGraph created -> /drone/front_cam/rgb")

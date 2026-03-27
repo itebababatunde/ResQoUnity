@@ -26,7 +26,7 @@ COLS = 6
 CELL_SIZE = 2.0       # meters between cell centers (wide enough for easy dog movement)
 WALL_THICKNESS = 0.2  # meters
 WALL_HEIGHT = 0.8     # meters
-ENTRANCE_GAP = CELL_SIZE * 2.0  # entrance/exit gap width — 2 cell-widths, clearly visible
+ENTRANCE_GAP = CELL_SIZE        # entrance/exit gap width = exactly 1 cell → single valid route
 
 # Directions: (row_delta, col_delta, wall_flag_name)
 DIRECTIONS = [

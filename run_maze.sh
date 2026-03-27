@@ -142,11 +142,18 @@ if [[ "$MODE" == "sim" ]]; then
     echo ""
 
     cd "$SCRIPT_DIR"
+
+    # (Re)generate maze.usda before launching so USD always matches the seed
+    MAZE_SEED="${MAZE_SEED:-42}"
+    echo -e "  ${GREEN}Generating maze.usda (seed=$MAZE_SEED)...${NC}"
+    ${ISAACSIM_PYTHON_EXE} generate_maze_usd.py "$MAZE_SEED" 2>&1 | grep '\[MazeUSD\]'
+
     ${ISAACSIM_PYTHON_EXE} -u main.py \
         --robot go2 \
         --robot_amount 1 \
         --terrain flat \
         --custom_env maze \
+        --seed "$MAZE_SEED" \
         --cpu \
         "$@" 2>&1 | tee -a "$LOG_FILE"
 
