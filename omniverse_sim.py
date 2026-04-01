@@ -976,7 +976,7 @@ def run_sim():
                         ),
                         offset=CameraCfg.OffsetCfg(
                             pos=(0.0, 0.0, -0.1),  # Bottom mount
-                            rot=(0.0, 0.707, 0.0, 0.707),  # 90° down (pitch down)
+                            rot=(0.0, 1.0, 0.0, 0.0),  # 180° around X → optical axis points down (-Z world)
                             convention="ros"
                         ),
                     )

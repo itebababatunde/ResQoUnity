@@ -7,7 +7,7 @@ The drone climbs to 10.5m, photographs the maze from above, the vision pipeline
 builds an occupancy grid, A* finds the shortest path, and the dog follows it.
 
 State machine:
-    INIT -> ARMING -> CLIMBING -> WAITING_HOVER -> PERCEIVING -> PLANNING
+    INIT -> ARMING -> CLIMBING -> CENTERING -> ALTITUDE_SURVEY -> PERCEIVING -> PLANNING
          -> GUIDING_DOG -> SUCCESS / FAILURE
                              ^
                          DOG_STUCK (re-enter PERCEIVING from current cell)
@@ -46,14 +46,21 @@ except ImportError:
     _CV_BRIDGE_AVAILABLE = False
     print("[MazeNode] WARNING: cv_bridge not available; camera frames will be skipped.")
 
+try:
+    import cv2
+    _CV2_AVAILABLE = True
+except ImportError:
+    _CV2_AVAILABLE = False
+    print("[MazeNode] WARNING: cv2 not available; display windows disabled.")
+
 # Project imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from maze_generator import (
     generate_maze_grid, get_occupancy_grid, get_cell_center_world,
-    ROWS, COLS,
+    ROWS, COLS, CELL_SIZE,
 )
 from maze_astar import MazeAstar
-from maze_vision import MazeVisionNode
+from maze_vision import MazeVisionNode, corners_visible_at
 from maze_dog_controller import MazeDogController
 
 
@@ -61,16 +68,18 @@ from maze_dog_controller import MazeDogController
 # State machine
 # ---------------------------------------------------------------------------
 class MissionState(Enum):
-    INIT          = auto()
-    ARMING        = auto()
-    CLIMBING      = auto()
-    WAITING_HOVER = auto()
-    PERCEIVING    = auto()
-    PLANNING      = auto()
-    GUIDING_DOG   = auto()
-    DOG_STUCK     = auto()
-    SUCCESS       = auto()
-    FAILURE       = auto()
+    INIT            = auto()
+    ARMING          = auto()
+    CLIMBING        = auto()
+    CENTERING       = auto()
+    ALTITUDE_SURVEY = auto()
+    PERCEIVING      = auto()
+    PLANNING        = auto()
+    SHOWING_PATH    = auto()
+    GUIDING_DOG     = auto()
+    DOG_STUCK       = auto()
+    SUCCESS         = auto()
+    FAILURE         = auto()
 
 
 # ---------------------------------------------------------------------------
@@ -85,10 +94,10 @@ def quat_to_yaw(x, y, z, w):
 
 def world_pos_to_cell(x, y, rows=ROWS, cols=COLS):
     """Convert world (x, y) to nearest maze cell (row, col)."""
-    half_w = (cols - 1) / 2.0
-    half_h = (rows - 1) / 2.0
-    col = int(round(x + half_w))
-    row = int(round(y + half_h))
+    half_w = (cols - 1) * CELL_SIZE / 2.0
+    half_h = (rows - 1) * CELL_SIZE / 2.0
+    col = int(round((x + half_w) / CELL_SIZE))
+    row = int(round((y + half_h) / CELL_SIZE))
     row = max(0, min(rows - 1, row))
     col = max(0, min(cols - 1, col))
     return (row, col)
@@ -99,21 +108,45 @@ def world_pos_to_cell(x, y, rows=ROWS, cols=COLS):
 # ---------------------------------------------------------------------------
 class MazeMissionNode(Node):
 
-    DRONE_HOVER_ALT     = 20.0   # m — target altitude for perception (covers full 12m×12m maze)
-    HOVER_ALT_THRESHOLD = 0.95   # fraction of target that counts as "reached"
-    HOVER_DWELL_SEC     = 5.0    # seconds to dwell at altitude before PERCEIVING
+    # Path display pause before dog starts moving
+    PATH_DISPLAY_SEC    = 3.0    # s — show path overlay before GUIDING_DOG
+
+    # Altitude survey parameters
+    SURVEY_START_ALT    = 15.0   # m — start climbing from here toward maze centre
+    SURVEY_STEP_M       = 1.0    # m — altitude increment per survey step
+    SURVEY_CHECK_SEC    = 2.0    # s — interval between coverage checks
+    SURVEY_CONFIRM_COUNT = 3     # consecutive passing checks before locking altitude
+    MAX_SURVEY_ALT      = 30.0   # m — give up if still not covered at this height
+    CENTER_TOL_M        = 0.5    # m — XY tolerance to consider drone "centred"
+
     PERCEIVE_FRAMES     = 10     # number of camera frames to accumulate
     PERCEIVE_TIMEOUT    = 30.0   # seconds before PERCEIVING gives up
     CONTROL_HZ          = 10.0   # Hz for main timer
 
-    def __init__(self):
+    def __init__(self, seed=42):
         super().__init__('maze_mission_node')
 
-        # Ground-truth occupancy grid (from maze_generator — used for IoU baseline)
-        self._gt_grid = None
+        # Hover altitude — set dynamically by ALTITUDE_SURVEY
+        self.DRONE_HOVER_ALT = self.SURVEY_START_ALT
 
-        # Vision
-        self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT)
+        # Altitude survey state
+        self.survey_alt = self.SURVEY_START_ALT
+        self.survey_confirm_count = 0
+        self._last_survey_check = 0.0   # monotonic time of last coverage check
+
+        # Display state
+        self._display_camera = False     # enabled after altitude survey confirms coverage
+        self._latest_frame = None        # most recent camera frame (RGB numpy array)
+        self._path_overlay_img = None    # BGR image with path drawn on camera frame
+
+        # Ground-truth occupancy grid — generated from seed, used for path planning.
+        # The perceived grid (from camera) is kept for IoU comparison only.
+        _gt_maze = generate_maze_grid(seed=seed)
+        self._gt_grid = get_occupancy_grid(_gt_maze)
+        self.get_logger().info(f'Ground-truth grid generated (seed={seed}).')
+
+        # Vision — altitude updated once survey completes
+        self.vision = MazeVisionNode(drone_altitude=self.SURVEY_START_ALT)
         if _CV_BRIDGE_AVAILABLE:
             self._bridge = CvBridge()
 
@@ -209,35 +242,38 @@ class MazeMissionNode(Node):
             self.get_logger().info(f'Dog odom: ({p.x:.2f}, {p.y:.2f}, {p.z:.2f})')
 
     def _camera_cb(self, msg: Image):
-        """Accumulate camera frames during PERCEIVING state."""
-        if self.state != MissionState.PERCEIVING:
-            return
+        """Store latest camera frame; accumulate during PERCEIVING."""
         if not _CV_BRIDGE_AVAILABLE:
             return
         try:
             cv_image = self._bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
             rgb = np.array(cv_image)
-            self.vision.add_frame(rgb)
-            if self.vision.frame_count() % 5 == 0:
-                self.get_logger().info(
-                    f'[PERCEIVING] Frames accumulated: {self.vision.frame_count()}/{self.PERCEIVE_FRAMES}')
+            self._latest_frame = rgb
+            if self.state == MissionState.PERCEIVING:
+                self.vision.add_frame(rgb)
+                if self.vision.frame_count() % 5 == 0:
+                    self.get_logger().info(
+                        f'[PERCEIVING] Frames accumulated: {self.vision.frame_count()}/{self.PERCEIVE_FRAMES}')
         except Exception as e:
             self.get_logger().warn(f'Camera callback error: {e}')
 
     # ------------------------------------------------------------------
     # Command helpers
     # ------------------------------------------------------------------
-    def _publish_drone_hover(self):
-        """Command drone to hover at its current XY at DRONE_HOVER_ALT."""
+    def _publish_drone_cmd(self, x, y, z):
+        """Send the drone to world position (x, y, z)."""
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'odom'
-        if self.drone_pos is not None:
-            msg.pose.position.x = float(self.drone_pos[0])
-            msg.pose.position.y = float(self.drone_pos[1])
-        msg.pose.position.z = float(self.DRONE_HOVER_ALT)
+        msg.pose.position.x = float(x)
+        msg.pose.position.y = float(y)
+        msg.pose.position.z = float(z)
         msg.pose.orientation.w = 1.0
         self.drone_cmd_pub.publish(msg)
+
+    def _publish_drone_hover(self):
+        """Command drone to hold at maze centre (0, 0) at DRONE_HOVER_ALT."""
+        self._publish_drone_cmd(0.0, 0.0, self.DRONE_HOVER_ALT)
 
     def _stop_dog(self):
         self.dog_cmd_pub.publish(Twist())
@@ -276,6 +312,43 @@ class MazeMissionNode(Node):
             ps.pose.orientation.w = 1.0
             msg.poses.append(ps)
         self.path_pub.publish(msg)
+
+    # ------------------------------------------------------------------
+    # Display helpers
+    # ------------------------------------------------------------------
+    def _draw_path_overlay(self, waypoints):
+        """Return a BGR image of the latest camera frame with the planned path drawn on it."""
+        if self._latest_frame is None or not _CV2_AVAILABLE:
+            return None
+        img = cv2.cvtColor(self._latest_frame, cv2.COLOR_RGB2BGR)
+        pts = []
+        for wp in waypoints:
+            px, py = self.vision.world_to_pixel(wp[0], wp[1], drone_x=0.0, drone_y=0.0)
+            pts.append((int(px), int(py)))
+        for i in range(len(pts) - 1):
+            cv2.line(img, pts[i], pts[i + 1], (0, 255, 0), 2)
+        for pt in pts:
+            cv2.circle(img, pt, 3, (0, 200, 0), -1)
+        if pts:
+            cv2.circle(img, pts[0],  8, (0, 255, 0), 2)   # start: green ring
+            cv2.circle(img, pts[-1], 8, (0, 0, 255), 2)   # end:   red ring
+        cv2.putText(img, f'Path: {len(waypoints)} waypoints  (dog starts in {self.PATH_DISPLAY_SEC:.0f}s)',
+                    (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+        return img
+
+    def _tick_display(self):
+        """Call once per control-loop tick to refresh the OpenCV window."""
+        if not _CV2_AVAILABLE or not self._display_camera:
+            return
+        if self.state == MissionState.SHOWING_PATH and self._path_overlay_img is not None:
+            cv2.imshow('Drone Camera', self._path_overlay_img)
+        elif self._latest_frame is not None:
+            img = cv2.cvtColor(self._latest_frame, cv2.COLOR_RGB2BGR)
+            alt = self.drone_pos[2] if self.drone_pos is not None else 0.0
+            cv2.putText(img, f'State: {self.state.name}  Alt: {alt:.1f}m',
+                        (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            cv2.imshow('Drone Camera', img)
+        cv2.waitKey(1)
 
     # ------------------------------------------------------------------
     # State machine helpers
@@ -324,6 +397,7 @@ class MazeMissionNode(Node):
     # Main control loop (10 Hz)
     # ------------------------------------------------------------------
     def _control_loop(self):
+        self._tick_display()
 
         # ---- INIT ----
         if self.state == MissionState.INIT:
@@ -366,24 +440,71 @@ class MazeMissionNode(Node):
                 result = self._takeoff_future.result()
                 if result is not None and result.success:
                     self.get_logger().info(f'Takeoff OK: {result.message}')
-                    self._transition(MissionState.WAITING_HOVER)
+                    self._transition(MissionState.CENTERING)
                 else:
                     msg = result.message if result else 'no response'
                     self.get_logger().warn(f'Takeoff failed: {msg}. Retrying...')
                     self._takeoff_future = None
-            self._publish_drone_hover()
+            # Already direct drone toward maze centre at survey start altitude
+            self._publish_drone_cmd(0.0, 0.0, self.SURVEY_START_ALT)
             return
 
-        # ---- WAITING_HOVER ----
-        if self.state == MissionState.WAITING_HOVER:
-            self._publish_drone_hover()
+        # ---- CENTERING ----
+        if self.state == MissionState.CENTERING:
+            self._publish_drone_cmd(0.0, 0.0, self.SURVEY_START_ALT)
             if self.drone_pos is not None:
-                alt = self.drone_pos[2]
-                alt_ok = alt >= self.DRONE_HOVER_ALT * self.HOVER_ALT_THRESHOLD
-                dwell_ok = self._time_in_state() >= self.HOVER_DWELL_SEC
-                if alt_ok and dwell_ok:
+                xy_err = math.hypot(self.drone_pos[0], self.drone_pos[1])
+                alt_ok = self.drone_pos[2] >= self.SURVEY_START_ALT - 1.0
+                if xy_err < self.CENTER_TOL_M and alt_ok:
                     self.get_logger().info(
-                        f'Hover stable at {alt:.2f}m. Starting PERCEIVING.')
+                        f'[CENTERING] Drone centred at ({self.drone_pos[0]:.2f}, '
+                        f'{self.drone_pos[1]:.2f}) alt={self.drone_pos[2]:.2f}m. '
+                        f'Starting altitude survey from {self.SURVEY_START_ALT:.0f}m.')
+                    self.survey_alt = self.SURVEY_START_ALT
+                    self.survey_confirm_count = 0
+                    self._last_survey_check = time.monotonic()
+                    self._transition(MissionState.ALTITUDE_SURVEY)
+            return
+
+        # ---- ALTITUDE_SURVEY ----
+        if self.state == MissionState.ALTITUDE_SURVEY:
+            self._publish_drone_cmd(0.0, 0.0, self.survey_alt)
+
+            if self.drone_pos is None:
+                return
+
+            now = time.monotonic()
+            if now - self._last_survey_check < self.SURVEY_CHECK_SEC:
+                return
+            self._last_survey_check = now
+
+            covered = corners_visible_at(0.0, 0.0, self.survey_alt)
+            if covered:
+                self.survey_confirm_count += 1
+                self.get_logger().info(
+                    f'[ALTITUDE_SURVEY] alt={self.survey_alt:.0f}m: corners visible '
+                    f'({self.survey_confirm_count}/{self.SURVEY_CONFIRM_COUNT})')
+                if self.survey_confirm_count >= self.SURVEY_CONFIRM_COUNT:
+                    self.DRONE_HOVER_ALT = self.survey_alt
+                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT)
+                    self._display_camera = True
+                    self.get_logger().info(
+                        f'[ALTITUDE_SURVEY] Survey complete. Locked altitude={self.DRONE_HOVER_ALT:.0f}m. '
+                        f'Camera window opened.')
+                    self._start_perceiving()
+            else:
+                self.survey_confirm_count = 0
+                if self.survey_alt < self.MAX_SURVEY_ALT:
+                    self.survey_alt += self.SURVEY_STEP_M
+                    self.get_logger().info(
+                        f'[ALTITUDE_SURVEY] Corners not visible. Climbing to {self.survey_alt:.0f}m...')
+                else:
+                    self.get_logger().error(
+                        f'[ALTITUDE_SURVEY] Reached MAX_SURVEY_ALT={self.MAX_SURVEY_ALT}m '
+                        f'without full coverage. Proceeding anyway.')
+                    self.DRONE_HOVER_ALT = self.survey_alt
+                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT)
+                    self._display_camera = True
                     self._start_perceiving()
             return
 
@@ -439,7 +560,7 @@ class MazeMissionNode(Node):
 
             self.get_logger().info(
                 f'Planning path: cell {start_cell} -> cell {end_cell}')
-            self.planner = MazeAstar(occ=self._current_occ)
+            self.planner = MazeAstar(occ=self._gt_grid)
             waypoints = self.planner.plan(start_cell=start_cell, end_cell=end_cell)
 
             if waypoints is None:
@@ -452,11 +573,21 @@ class MazeMissionNode(Node):
             self.get_logger().info(
                 f'Path found: {len(waypoints)} waypoints -> {len(smoothed)} after smoothing')
             self._publish_planned_path(smoothed)
+            self._path_overlay_img = self._draw_path_overlay(smoothed)
 
             self.dog_ctrl.reset(smoothed)
             self.wp_total = len(smoothed)
             self.wp_reached = 0
-            self._transition(MissionState.GUIDING_DOG)
+            self._transition(MissionState.SHOWING_PATH)
+            return
+
+        # ---- SHOWING_PATH ----
+        if self.state == MissionState.SHOWING_PATH:
+            self._publish_drone_hover()
+            self._stop_dog()
+            if self._time_in_state() >= self.PATH_DISPLAY_SEC:
+                self._path_overlay_img = None
+                self._transition(MissionState.GUIDING_DOG)
             return
 
         # ---- GUIDING_DOG ----
@@ -554,6 +685,8 @@ class MazeMissionNode(Node):
     def destroy_node(self):
         self._stop_dog()
         self._csv_file.close()
+        if _CV2_AVAILABLE:
+            cv2.destroyAllWindows()
         super().destroy_node()
 
     # ------------------------------------------------------------------
@@ -572,8 +705,13 @@ class MazeMissionNode(Node):
 # Entry point
 # ---------------------------------------------------------------------------
 def main(args=None):
-    rclpy.init(args=args)
-    node = MazeMissionNode()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--seed', type=int, default=42, help='Maze seed (must match sim)')
+    known, remaining = parser.parse_known_args(args)
+
+    rclpy.init(args=remaining)
+    node = MazeMissionNode(seed=known.seed)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

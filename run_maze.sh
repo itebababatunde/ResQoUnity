@@ -179,7 +179,8 @@ elif [[ "$MODE" == "node" ]]; then
     echo ""
 
     cd "$SCRIPT_DIR"
-    python3 maze_ros2_node.py "$@"
+    MAZE_SEED="${MAZE_SEED:-42}"
+    python3 maze_ros2_node.py --seed "$MAZE_SEED" "$@"
 
 else
     echo -e "${RED}Unknown mode: $MODE${NC}"

@@ -20,7 +20,7 @@ from maze_generator import (
     generate_maze_grid,
     get_occupancy_grid,
     get_cell_center_world,
-    ROWS, COLS,
+    ROWS, COLS, CELL_SIZE,
 )
 
 
@@ -91,10 +91,10 @@ def expanded_to_world(exp_r, exp_c, rows=ROWS, cols=COLS):
     # exp = 2*maze_idx + 1 for cell centers; 0.5-step for passages
     maze_r = (exp_r - 1) / 2.0
     maze_c = (exp_c - 1) / 2.0
-    half_w = (cols - 1) / 2.0
-    half_h = (rows - 1) / 2.0
-    x = maze_c - half_w
-    y = maze_r - half_h
+    half_w = (cols - 1) * CELL_SIZE / 2.0
+    half_h = (rows - 1) * CELL_SIZE / 2.0
+    x = maze_c * CELL_SIZE - half_w
+    y = maze_r * CELL_SIZE - half_h
     return (x, y)
 
 
@@ -184,10 +184,10 @@ class MazeAstar:
             x = wp_a[0] + t * (wp_b[0] - wp_a[0])
             y = wp_a[1] + t * (wp_b[1] - wp_a[1])
             # Convert world -> expanded grid
-            half_w = (self.cols - 1) / 2.0
-            half_h = (self.rows - 1) / 2.0
-            maze_c = x + half_w
-            maze_r = y + half_h
+            half_w = (self.cols - 1) * CELL_SIZE / 2.0
+            half_h = (self.rows - 1) * CELL_SIZE / 2.0
+            maze_c = (x + half_w) / CELL_SIZE
+            maze_r = (y + half_h) / CELL_SIZE
             exp_r = round(maze_r * 2 + 1)
             exp_c = round(maze_c * 2 + 1)
             H, W = self.occ.shape
@@ -224,10 +224,10 @@ if __name__ == "__main__":
     # Print path as ASCII overlay on the occupancy grid
     exp_path_set = set()
     for wp in waypoints:
-        half_w = (COLS - 1) / 2.0
-        half_h = (ROWS - 1) / 2.0
-        maze_c = wp[0] + half_w
-        maze_r = wp[1] + half_h
+        half_w = (COLS - 1) * CELL_SIZE / 2.0
+        half_h = (ROWS - 1) * CELL_SIZE / 2.0
+        maze_c = (wp[0] + half_w) / CELL_SIZE
+        maze_r = (wp[1] + half_h) / CELL_SIZE
         exp_r = round(maze_r * 2 + 1)
         exp_c = round(maze_c * 2 + 1)
         exp_path_set.add((exp_r, exp_c))

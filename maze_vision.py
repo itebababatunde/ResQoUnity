@@ -242,6 +242,50 @@ class MazeVisionNode:
 
 
 # ---------------------------------------------------------------------------
+# Coverage geometry helper (module-level, no class needed)
+# ---------------------------------------------------------------------------
+
+def corners_visible_at(drone_x, drone_y, altitude, margin_px=10):
+    """
+    Return True if all 4 maze border corners project within image bounds
+    at the given drone position and altitude.
+
+    Uses pinhole projection with the camera intrinsics defined in this module.
+    The camera is nadir-facing with a 180° rotation around X (convention="ros"),
+    so world +Y maps to image -Y (top of image = north).
+
+    Args:
+        drone_x, drone_y: drone world position (m)
+        altitude: drone height above ground (m)
+        margin_px: minimum pixel distance from edge required (default 10 px)
+
+    Returns:
+        bool
+    """
+    from maze_generator import ROWS, COLS, CELL_SIZE
+    fx = FOCAL_LENGTH_MM / HORIZONTAL_APERTURE * IMG_WIDTH   # ≈ 733 px
+    fy = fx                                                   # square pixels
+    cx = IMG_WIDTH  / 2.0
+    cy = IMG_HEIGHT / 2.0
+
+    half_x = COLS * CELL_SIZE / 2.0
+    half_y = ROWS * CELL_SIZE / 2.0
+    corners = [
+        (-half_x, -half_y),
+        ( half_x, -half_y),
+        ( half_x,  half_y),
+        (-half_x,  half_y),
+    ]
+    for wx, wy in corners:
+        px = fx * (wx - drone_x) / altitude + cx
+        py = fy * (-(wy - drone_y)) / altitude + cy   # Y flipped by 180° X rotation
+        if not (margin_px <= px <= IMG_WIDTH  - margin_px and
+                margin_px <= py <= IMG_HEIGHT - margin_px):
+            return False
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Standalone test (synthetic image)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
