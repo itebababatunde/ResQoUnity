@@ -204,11 +204,14 @@ class MazeMissionNode(Node):
         # Control timer
         self.timer = self.create_timer(1.0 / self.CONTROL_HZ, self._control_loop)
 
-        # CSV logger
+        # CSV logger + snapshot directory
         log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
         os.makedirs(log_dir, exist_ok=True)
         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.csv_path = os.path.join(log_dir, f'maze_{ts}.csv')
+        self._snapshot_dir = os.path.join(log_dir, 'snapshots')
+        os.makedirs(self._snapshot_dir, exist_ok=True)
+        self._snapshot_ts = ts   # shared prefix for all snapshots in this run
         self._csv_file = open(self.csv_path, 'w', newline='')
         self._csv_writer = csv.writer(self._csv_file)
         self._csv_writer.writerow([
@@ -335,6 +338,21 @@ class MazeMissionNode(Node):
         cv2.putText(img, f'Path: {len(waypoints)} waypoints  (dog starts in {self.PATH_DISPLAY_SEC:.0f}s)',
                     (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         return img
+
+    def _save_snapshot(self, label, img=None):
+        """Save a PNG to logs/snapshots/<ts>_<label>.png."""
+        if not _CV2_AVAILABLE:
+            return
+        if img is not None:
+            src = img
+        elif self._latest_frame is not None:
+            src = cv2.cvtColor(self._latest_frame, cv2.COLOR_RGB2BGR)
+        else:
+            return
+        fname = f'{self._snapshot_ts}_{label}.png'
+        path = os.path.join(self._snapshot_dir, fname)
+        cv2.imwrite(path, src)
+        self.get_logger().info(f'[Snapshot] {fname}')
 
     def _tick_display(self):
         """Call once per control-loop tick to refresh the OpenCV window."""
@@ -463,6 +481,7 @@ class MazeMissionNode(Node):
                     self.survey_alt = self.SURVEY_START_ALT
                     self.survey_confirm_count = 0
                     self._last_survey_check = time.monotonic()
+                    self._save_snapshot('1_survey_start')
                     self._transition(MissionState.ALTITUDE_SURVEY)
             return
 
@@ -491,6 +510,7 @@ class MazeMissionNode(Node):
                     self.get_logger().info(
                         f'[ALTITUDE_SURVEY] Survey complete. Locked altitude={self.DRONE_HOVER_ALT:.0f}m. '
                         f'Camera window opened.')
+                    self._save_snapshot('2_survey_complete')
                     self._start_perceiving()
             else:
                 self.survey_confirm_count = 0
@@ -516,7 +536,11 @@ class MazeMissionNode(Node):
             frames = self.vision.frame_count()
             elapsed = self._time_in_state()
 
+            if frames == self.PERCEIVE_FRAMES // 2:
+                self._save_snapshot('3_perceiving_mid')
+
             if frames >= self.PERCEIVE_FRAMES:
+                self._save_snapshot('4_perceiving_done')
                 self.get_logger().info(
                     f'PERCEIVING complete ({frames} frames). Running median filter...')
                 grid = self.vision.get_median_grid()
@@ -574,6 +598,7 @@ class MazeMissionNode(Node):
                 f'Path found: {len(waypoints)} waypoints -> {len(smoothed)} after smoothing')
             self._publish_planned_path(smoothed)
             self._path_overlay_img = self._draw_path_overlay(smoothed)
+            self._save_snapshot('5_path_planned', img=self._path_overlay_img)
 
             self.dog_ctrl.reset(smoothed)
             self.wp_total = len(smoothed)
@@ -607,6 +632,7 @@ class MazeMissionNode(Node):
                 self.wp_reached = new_wp_idx
                 self.get_logger().info(
                     f'Waypoint reached: {self.wp_reached}/{self.wp_total}')
+                self._save_snapshot(f'6_waypoint_{self.wp_reached:02d}of{self.wp_total:02d}')
 
             # Distance to current waypoint
             dist_to_wp = 0.0
@@ -648,6 +674,7 @@ class MazeMissionNode(Node):
             self._stop_dog()
             self._publish_drone_hover()
             if self._time_in_state() < 1.0:
+                self._save_snapshot('7_mission_success')
                 self._print_mission_summary()
             return
 
@@ -655,6 +682,7 @@ class MazeMissionNode(Node):
         if self.state == MissionState.FAILURE:
             self._stop_dog()
             if self._time_in_state() < 1.0:
+                self._save_snapshot('7_mission_failure')
                 self.get_logger().error('Mission FAILED. See logs.')
                 self._csv_file.flush()
             return
