@@ -87,6 +87,35 @@ The seed must match in both terminals. Default seed is `42`.
 
 ---
 
+## Changing Maze Size
+
+The maze size is set via `MAZE_ROWS` and `MAZE_COLS` environment variables (default 6×6). The drone does not use these values during flight — it discovers the maze position and extent purely from its camera. The variables only affect maze generation and path planning.
+
+**Step 1 — Verify in 2D first (no Isaac Sim needed):**
+```bash
+MAZE_ROWS=8 MAZE_COLS=8 python3 debug_maze_2d.py --seed 7
+```
+This opens a plot showing the maze walls and the A* planned path overlaid in orange. Confirm the path runs from the green start marker to the red end marker with no "NO PATH FOUND" warning before proceeding to the sim.
+
+**Step 2 — Run with the larger maze:**
+```bash
+# Terminal 1
+MAZE_ROWS=8 MAZE_COLS=8 MAZE_SEED=7 ./run_maze.sh sim
+
+# Terminal 2
+MAZE_ROWS=8 MAZE_COLS=8 MAZE_SEED=7 ./run_maze.sh node
+```
+
+Both terminals must use the same values. The drone will automatically climb to whatever altitude is needed to see the full maze — you do not need to adjust any constants.
+
+| Maze size | Approx. locked altitude |
+|---|---|
+| 6 × 6 (default) | ~20 m |
+| 8 × 8 | ~27 m |
+| 10 × 10 | ~34 m |
+
+---
+
 ## Viewing the Report
 
 After the mission completes, open the report PNG:
@@ -118,11 +147,13 @@ python3 maze_report.py logs/maze_<timestamp>.csv   # specific run
 
 ## Maze Specs
 
-- **Size:** 6 × 6 cells, 2 m per cell (12 × 12 m total footprint)
+- **Size:** N × M cells (default 6×6), 2 m per cell. Set `MAZE_ROWS` / `MAZE_COLS` env vars to change.
+- **Total footprint:** `ROWS × COLS × 2 m` (e.g. 12 × 12 m for 6×6, 16 × 16 m for 8×8)
 - **Walls:** 0.2 m thick, 0.8 m tall
 - **Start:** bottom-left corner of the maze
 - **Goal:** top-right corner of the maze
 - **Generation:** random (controlled by seed), guaranteed to have exactly one valid route
+- **Drone survey:** vision-based — the drone discovers the maze boundary from its camera with no prior knowledge of size or position
 
 ---
 

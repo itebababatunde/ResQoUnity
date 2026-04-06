@@ -39,6 +39,7 @@ except ImportError:
     _CV2_AVAILABLE = False
     print("[MazeVision] WARNING: OpenCV not available. process_image() will use fallback mode.")
 
+from maze_generator import ROWS, COLS, CELL_SIZE
 
 # ---------------------------------------------------------------------------
 # Camera parameters (must match ros2_bridge.py)
@@ -49,9 +50,9 @@ VERTICAL_APERTURE    = HORIZONTAL_APERTURE * (480 / 640)  # 15.716 mm — physic
 IMG_WIDTH            = 640
 IMG_HEIGHT           = 480
 
-# Maze occupancy grid size
-GRID_ROWS = 13
-GRID_COLS = 13
+# Maze occupancy grid size — derived from maze dimensions, not hardcoded
+GRID_ROWS = 2 * ROWS + 1
+GRID_COLS = 2 * COLS + 1
 
 
 class MazeVisionNode:
@@ -220,6 +221,85 @@ class MazeVisionNode:
         return len(self._frame_buffer)
 
     # ------------------------------------------------------------------
+    # Vision-based maze discovery (no prior knowledge of maze dimensions)
+    # ------------------------------------------------------------------
+
+    def detect_maze_bounds(self, rgb, margin_px=20):
+        """
+        Detect the bounding box of all visible maze structure in the image.
+        Uses the same threshold pipeline as process_image() — no prior knowledge
+        of maze size or position required.
+
+        Returns a dict:
+            found    (bool)  — True if enough wall pixels were detected
+            cx_px    (float) — centroid x of bounding rect in pixel space
+            cy_px    (float) — centroid y of bounding rect in pixel space
+            bbox     (tuple) — (x, y, w, h) bounding rect in pixels
+            dx_world (float) — world-space X offset: positive = maze centre is to
+                               the drone's right (drone should move +X to centre)
+            dy_world (float) — world-space Y offset: positive = maze centre is ahead
+            covered  (bool)  — True if bbox has >= margin_px clearance on all edges
+        """
+        if not _CV2_AVAILABLE or rgb is None:
+            return {'found': False}
+
+        # Reuse existing pipeline
+        if rgb.shape[2] == 4:
+            gray = cv2.cvtColor(rgb, cv2.COLOR_RGBA2GRAY)
+        else:
+            gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+
+        thresh = cv2.adaptiveThreshold(
+            gray, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            blockSize=31, C=5,
+        )
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN,  kernel, iterations=1)
+        cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel, iterations=2)
+
+        # Find bounding rect of all detected wall pixels
+        pts = cv2.findNonZero(cleaned)
+        if pts is None or len(pts) < 50:   # too few → noise, not a maze
+            return {'found': False}
+
+        x, y, w, h = cv2.boundingRect(pts)
+
+        # Centroid of bounding rect in pixel space
+        cx_px = x + w / 2.0
+        cy_px = y + h / 2.0
+
+        # World offset of maze centroid from drone position.
+        # pixel_to_world maps image centre → (drone_x, drone_y) and maze centroid
+        # → (maze_wx, maze_wy).  The difference is the offset the drone must travel.
+        img_cx = self.img_w / 2.0
+        img_cy = self.img_h / 2.0
+        wx_img_centre, wy_img_centre = self.pixel_to_world(img_cx, img_cy)
+        wx_maze,       wy_maze       = self.pixel_to_world(cx_px,  cy_px)
+        dx_world = wx_maze - wx_img_centre
+        dy_world = wy_maze - wy_img_centre
+
+        # Coverage: bounding rect must have margin_px clearance on all 4 edges
+        h_img, w_img = cleaned.shape
+        covered = (
+            x >= margin_px and
+            y >= margin_px and
+            (x + w) <= w_img - margin_px and
+            (y + h) <= h_img - margin_px
+        )
+
+        return {
+            'found':    True,
+            'cx_px':    cx_px,
+            'cy_px':    cy_px,
+            'bbox':     (x, y, w, h),
+            'dx_world': dx_world,
+            'dy_world': dy_world,
+            'covered':  covered,
+        }
+
+    # ------------------------------------------------------------------
     # Evaluation
     # ------------------------------------------------------------------
 
@@ -266,7 +346,6 @@ def corners_visible_at(drone_x, drone_y, altitude, margin_px=10,
     Returns:
         bool
     """
-    from maze_generator import ROWS, COLS, CELL_SIZE
     fx = FOCAL_LENGTH_MM / HORIZONTAL_APERTURE  * img_width   # px — horizontal focal length
     fy = FOCAL_LENGTH_MM / VERTICAL_APERTURE    * img_height  # px — vertical focal length
     cx = img_width  / 2.0
@@ -312,9 +391,9 @@ if __name__ == "__main__":
     # Synthetic image: white background with a dark grid pattern (mock maze)
     img = np.ones((IMG_HEIGHT, IMG_WIDTH, 3), dtype=np.uint8) * 200
     # Draw horizontal and vertical lines to simulate walls
-    for i in range(0, IMG_HEIGHT, IMG_HEIGHT // 13):
+    for i in range(0, IMG_HEIGHT, IMG_HEIGHT // GRID_ROWS):
         img[i:i+3, :, :] = 30
-    for j in range(0, IMG_WIDTH, IMG_WIDTH // 13):
+    for j in range(0, IMG_WIDTH, IMG_WIDTH // GRID_COLS):
         img[:, j:j+3, :] = 30
 
     grid = node.process_image(img)

@@ -10,49 +10,18 @@ Loaded in sim the same way as warehouse.usd / office.usd.
 
 import sys
 import os
-import random
 
 from pxr import Usd, UsdGeom, UsdPhysics, Gf, Sdf
 
-# ── Maze parameters ────────────────────────────────────────────────────────────
-ROWS          = 6
-COLS          = 6
-CELL_SIZE     = 2.0    # m between cell centres
-WALL_T        = 0.2    # wall thickness (m)
-WALL_H        = 0.8    # wall height (m)
-ENTRANCE_GAP  = CELL_SIZE          # opening width = exactly 1 cell → single valid route
-
-BORDER_HALF_X = COLS * CELL_SIZE / 2.0   # 6.0
-BORDER_HALF_Y = ROWS * CELL_SIZE / 2.0   # 6.0
-
-# ── Maze generation (DFS) ──────────────────────────────────────────────────────
-DIRECTIONS = [(-1,0,'N'),(0,1,'E'),(1,0,'S'),(0,-1,'W')]
-OPPOSITE   = {'N':'S','S':'N','E':'W','W':'E'}
-
-def generate_grid(seed):
-    rng  = random.Random(seed)
-    grid = [[{'N':False,'E':False,'S':False,'W':False}
-              for _ in range(COLS)] for _ in range(ROWS)]
-    vis  = [[False]*COLS for _ in range(ROWS)]
-
-    def carve(r, c):
-        vis[r][c] = True
-        dirs = DIRECTIONS[:]
-        rng.shuffle(dirs)
-        for dr, dc, wall in dirs:
-            nr, nc = r+dr, c+dc
-            if 0 <= nr < ROWS and 0 <= nc < COLS and not vis[nr][nc]:
-                grid[r][c][wall] = True
-                grid[nr][nc][OPPOSITE[wall]] = True
-                carve(nr, nc)
-    carve(0, 0)
-    return grid
-
-def cell_centre(row, col):
-    """World (x, y) of cell centre."""
-    x = col * CELL_SIZE - (COLS-1)*CELL_SIZE/2.0
-    y = row * CELL_SIZE - (ROWS-1)*CELL_SIZE/2.0
-    return x, y
+# ── Maze parameters — single source of truth ──────────────────────────────────
+from maze_generator import (
+    ROWS, COLS, CELL_SIZE, WALL_THICKNESS, WALL_HEIGHT, ENTRANCE_GAP,
+    generate_maze_grid, get_cell_center_world,
+)
+WALL_T        = WALL_THICKNESS
+WALL_H        = WALL_HEIGHT
+BORDER_HALF_X = COLS * CELL_SIZE / 2.0
+BORDER_HALF_Y = ROWS * CELL_SIZE / 2.0
 
 # ── USD helpers ────────────────────────────────────────────────────────────────
 def add_box(stage, path, cx, cy, cz, sx, sy, sz):
@@ -70,7 +39,7 @@ def add_box(stage, path, cx, cy, cz, sx, sy, sz):
 
 # ── Main USD build ─────────────────────────────────────────────────────────────
 def build_maze_usd(seed, out_path):
-    grid = generate_grid(seed)
+    grid = generate_maze_grid(rows=ROWS, cols=COLS, seed=seed)
 
     stage = Usd.Stage.CreateNew(out_path)
     stage.SetMetadata('metersPerUnit', 1.0)
@@ -91,7 +60,7 @@ def build_maze_usd(seed, out_path):
     gap_half = ENTRANCE_GAP / 2.0
 
     # ── South border: entrance gap centred on cell (0,0) ──────────────────────
-    entrance_x, _ = cell_centre(0, 0)
+    entrance_x, _ = get_cell_center_world(0, 0, ROWS, COLS)
     s_gap_l = max(entrance_x - gap_half, -BORDER_HALF_X)
     s_gap_r = min(entrance_x + gap_half,  BORDER_HALF_X)
 
@@ -104,7 +73,7 @@ def build_maze_usd(seed, out_path):
         wall(s_gap_r + seg/2, -BORDER_HALF_Y, seg, WALL_T, "bS_R")
 
     # ── North border: exit gap centred on cell (rows-1, cols-1) ───────────────
-    exit_x, _ = cell_centre(ROWS-1, COLS-1)
+    exit_x, _ = get_cell_center_world(ROWS-1, COLS-1, ROWS, COLS)
     n_gap_l = max(exit_x - gap_half, -BORDER_HALF_X)
     n_gap_r = min(exit_x + gap_half,  BORDER_HALF_X)
 
@@ -148,8 +117,8 @@ def build_maze_usd(seed, out_path):
         xf.AddTranslateOp().Set(Gf.Vec3d(cx, cy, height/2))
         cyl.GetDisplayColorAttr().Set([Gf.Vec3f(*color)])
 
-    sx, sy = cell_centre(0, 0)
-    ex, ey = cell_centre(ROWS-1, COLS-1)
+    sx, sy = get_cell_center_world(0, 0, ROWS, COLS)
+    ex, ey = get_cell_center_world(ROWS-1, COLS-1, ROWS, COLS)
     add_cylinder('/Maze/marker_start', sx, sy, 0.25, 0.05, (0,1,0))
     add_cylinder('/Maze/marker_end',   ex, ey, 0.25, 0.05, (1,0,0))
 

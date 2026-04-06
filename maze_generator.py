@@ -17,13 +17,14 @@ Expanded (13x13) occupancy grid:
   - 0 = free, 1 = wall
 """
 
+import os
 import random
 import numpy as np
 
-# Maze dimensions
-ROWS = 6
-COLS = 6
-CELL_SIZE = 2.0       # meters between cell centers (wide enough for easy dog movement)
+# Maze dimensions — configurable via env vars, defaults to 6×6
+ROWS = int(os.environ.get('MAZE_ROWS', 6))
+COLS = int(os.environ.get('MAZE_COLS', 6))
+CELL_SIZE = 2.0       # meters between cell centers (keep fixed — dog needs 2m corridors)
 WALL_THICKNESS = 0.2  # meters
 WALL_HEIGHT = 0.8     # meters
 ENTRANCE_GAP = CELL_SIZE        # entrance/exit gap width = exactly 1 cell → single valid route
@@ -47,6 +48,9 @@ def generate_maze_grid(rows=ROWS, cols=COLS, seed=None):
 
     grid[row][col]['N'] = True means the northern wall of cell (row, col) is open.
     """
+    import sys
+    sys.setrecursionlimit(max(1000, rows * cols * 4))
+
     rng = random.Random(seed)
 
     # Initialize all walls closed

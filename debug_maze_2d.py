@@ -1,8 +1,9 @@
 """
-debug_maze_2d.py — 2D visualisation of the exact walls that spawn_walls_in_stage creates.
+debug_maze_2d.py — 2D visualisation of the exact walls that spawn_walls_in_stage creates,
+with A* path overlay to confirm the maze is solvable before running Isaac Sim.
 
 Mirrors spawn_walls_in_stage() logic exactly (no Isaac Sim needed).
-Run:  python3 debug_maze_2d.py [seed]
+Run:  python3 debug_maze_2d.py [--seed N]
 """
 
 import sys
@@ -12,9 +13,10 @@ import matplotlib.patches as patches
 import numpy as np
 
 from maze_generator import (
-    generate_maze_grid, get_cell_center_world,
+    generate_maze_grid, get_cell_center_world, get_occupancy_grid,
     ROWS, COLS, CELL_SIZE, WALL_THICKNESS, WALL_HEIGHT, ENTRANCE_GAP,
 )
+from maze_astar import MazeAstar
 
 # ── reproduce spawn_walls_in_stage geometry ──────────────────────────────────
 
@@ -87,10 +89,17 @@ def draw(seed=42):
     grid = generate_maze_grid(ROWS, COLS, seed=seed)
     walls, bhx, bhy, ent_x, ext_x, s_gl, s_gr, n_gl, n_gr = collect_walls(grid)
 
+    # Run A* to verify solvability
+    occ = get_occupancy_grid(grid, rows=ROWS, cols=COLS)
+    planner   = MazeAstar(occ=occ, rows=ROWS, cols=COLS)
+    waypoints = planner.plan(start_cell=(0, 0), end_cell=(ROWS - 1, COLS - 1))
+    smoothed  = planner.smooth_path(waypoints) if waypoints else []
+    path_status = f'A*: {len(smoothed)} smoothed waypoints' if smoothed else 'A*: NO PATH FOUND'
+
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_aspect('equal')
     ax.set_facecolor('#e8e8e8')
-    ax.set_title(f'Maze 2-D layout (seed={seed})\n'
+    ax.set_title(f'Maze 2-D layout  ROWS={ROWS} COLS={COLS}  seed={seed}  |  {path_status}\n'
                  f'CELL={CELL_SIZE}m  WALL_T={WALL_THICKNESS}m  '
                  f'entrance gap x=[{s_gl:.1f},{s_gr:.1f}]  '
                  f'exit gap x=[{n_gl:.1f},{n_gr:.1f}]', fontsize=9)
@@ -129,8 +138,21 @@ def draw(seed=42):
     # start / end markers
     sx, sy = get_cell_center_world(0, 0, ROWS, COLS)
     ex, ey = get_cell_center_world(ROWS-1, COLS-1, ROWS, COLS)
-    ax.plot(sx, sy, 'go', markersize=12, label='Start cell (0,0)', zorder=5)
-    ax.plot(ex, ey, 'r^', markersize=12, label='End cell (5,5)',   zorder=5)
+    ax.plot(sx, sy, 'go', markersize=12, label=f'Start (0,0)', zorder=5)
+    ax.plot(ex, ey, 'r^', markersize=12, label=f'End ({ROWS-1},{COLS-1})', zorder=5)
+
+    # A* path overlay
+    if waypoints:
+        ax.plot([w[0] for w in waypoints], [w[1] for w in waypoints],
+                '-', color='orange', lw=1.5, alpha=0.5,
+                label=f'A* raw ({len(waypoints)} pts)', zorder=4)
+    if smoothed:
+        ax.plot([w[0] for w in smoothed], [w[1] for w in smoothed],
+                'o-', color='darkorange', lw=2.5, markersize=7,
+                label=f'A* smoothed ({len(smoothed)} pts)', zorder=5)
+    if not waypoints:
+        ax.text(0, 0, 'NO PATH FOUND', color='red', fontsize=20,
+                ha='center', va='center', fontweight='bold', zorder=10)
 
     # dog spawn position
     dog_x = sx
@@ -170,14 +192,19 @@ def draw(seed=42):
     print(f"  Dog x within south gap? {s_gl <= dog_x <= s_gr}")
     print(f"  Dog outside south border (y < {-bhy:.1f})? {dog_y < -bhy}")
     print(f"Total walls spawned: {len(walls)}")
+    print(f"A* path: {'FOUND' if waypoints else 'NOT FOUND'}  "
+          f"raw={len(waypoints) if waypoints else 0} pts  "
+          f"smoothed={len(smoothed)} pts")
 
     plt.tight_layout()
-    out = f"/tmp/maze_debug_seed{seed}.png"
+    out = f"/tmp/maze_debug_{ROWS}x{COLS}_seed{seed}.png"
     plt.savefig(out, dpi=150)
     print(f"\nSaved: {out}")
     plt.show()
 
 
 if __name__ == "__main__":
-    seed = int(sys.argv[1]) if len(sys.argv) > 1 else 42
-    draw(seed)
+    import argparse
+    ap = argparse.ArgumentParser(description='2D maze visualiser with A* path overlay')
+    ap.add_argument('--seed', type=int, default=42, help='Maze seed (default: 42)')
+    draw(ap.parse_args().seed)

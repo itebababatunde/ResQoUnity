@@ -2,8 +2,11 @@
 # run_maze.sh — Launch the aerial-assisted maze navigation scenario
 #
 # Usage:
-#   Terminal 1:  ./run_maze.sh sim   # Isaac Sim + Go2 + world drone + maze walls
-#   Terminal 2:  ./run_maze.sh node  # Maze coordination ROS2 node
+#   Terminal 1:  ./run_maze.sh sim                                    # default 6×6
+#   Terminal 2:  ./run_maze.sh node
+#
+#   Terminal 1:  MAZE_ROWS=8 MAZE_COLS=8 MAZE_SEED=7 ./run_maze.sh sim
+#   Terminal 2:  MAZE_ROWS=8 MAZE_COLS=8 MAZE_SEED=7 ./run_maze.sh node
 
 set -e
 
@@ -145,6 +148,9 @@ if [[ "$MODE" == "sim" ]]; then
 
     # (Re)generate maze.usda before launching so USD always matches the seed
     MAZE_SEED="${MAZE_SEED:-42}"
+    MAZE_ROWS="${MAZE_ROWS:-6}"
+    MAZE_COLS="${MAZE_COLS:-6}"
+    export MAZE_ROWS MAZE_COLS
     echo -e "  ${GREEN}Generating maze.usda (seed=$MAZE_SEED)...${NC}"
     ${ISAACSIM_PYTHON_EXE} generate_maze_usd.py "$MAZE_SEED" 2>&1 | grep '\[MazeUSD\]'
 
@@ -180,6 +186,9 @@ elif [[ "$MODE" == "node" ]]; then
 
     cd "$SCRIPT_DIR"
     MAZE_SEED="${MAZE_SEED:-42}"
+    MAZE_ROWS="${MAZE_ROWS:-6}"
+    MAZE_COLS="${MAZE_COLS:-6}"
+    export MAZE_ROWS MAZE_COLS
     python3 maze_ros2_node.py --seed "$MAZE_SEED" "$@"
 
 else

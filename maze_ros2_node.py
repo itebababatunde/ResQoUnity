@@ -61,7 +61,7 @@ from maze_generator import (
     ROWS, COLS, CELL_SIZE,
 )
 from maze_astar import MazeAstar
-from maze_vision import MazeVisionNode, corners_visible_at
+from maze_vision import MazeVisionNode
 from maze_dog_controller import MazeDogController
 
 
@@ -112,13 +112,15 @@ class MazeMissionNode(Node):
     # Path display pause before dog starts moving
     PATH_DISPLAY_SEC    = 3.0    # s — show path overlay before GUIDING_DOG
 
-    # Altitude survey parameters
-    SURVEY_START_ALT    = 15.0   # m — start climbing from here toward maze centre
-    SURVEY_STEP_M       = 1.0    # m — altitude increment per survey step
-    SURVEY_CHECK_SEC    = 2.0    # s — interval between coverage checks
+    # Altitude survey parameters — vision-based, no prior maze knowledge needed
+    CLIMB_ALT           = 10.0   # m — initial look altitude (enough to see some walls)
+    SURVEY_STEP_M       = 1.5    # m — climb increment per survey step
+    SURVEY_CHECK_SEC    = 1.5    # s — interval between coverage checks
     SURVEY_CONFIRM_COUNT = 3     # consecutive passing checks before locking altitude
-    MAX_SURVEY_ALT      = 30.0   # m — give up if still not covered at this height
-    CENTER_TOL_M        = 0.5    # m — XY tolerance to consider drone "centred"
+    SURVEY_MARGIN_PX    = 20     # px — clearance on all edges required to confirm coverage
+    MAX_SURVEY_ALT      = 60.0   # m — hard ceiling (generous: maze size unknown)
+    CENTER_TOL_WORLD    = 0.4    # m — world-space XY tolerance to consider drone "centred"
+    CENTER_TIMEOUT      = 30.0   # s — give up centering if maze never detected
 
     PERCEIVE_FRAMES     = 10     # number of camera frames to accumulate
     PERCEIVE_TIMEOUT    = 30.0   # seconds before PERCEIVING gives up
@@ -128,11 +130,11 @@ class MazeMissionNode(Node):
         super().__init__('maze_mission_node')
         self._seed = seed
 
-        # Hover altitude — set dynamically by ALTITUDE_SURVEY
-        self.DRONE_HOVER_ALT = self.SURVEY_START_ALT
+        # Hover altitude — discovered dynamically by ALTITUDE_SURVEY
+        self.DRONE_HOVER_ALT = self.CLIMB_ALT
 
         # Altitude survey state
-        self.survey_alt = self.SURVEY_START_ALT
+        self.survey_alt = self.CLIMB_ALT
         self.survey_confirm_count = 0
         self._last_survey_check = 0.0   # monotonic time of last coverage check
 
@@ -493,46 +495,80 @@ class MazeMissionNode(Node):
                     msg = result.message if result else 'no response'
                     self.get_logger().warn(f'Takeoff failed: {msg}. Retrying...')
                     self._takeoff_future = None
-            # Already direct drone toward maze centre at survey start altitude
-            self._publish_drone_cmd(0.0, 0.0, self.SURVEY_START_ALT)
+            # Climb toward initial look altitude
+            self._publish_drone_cmd(0.0, 0.0, self.CLIMB_ALT)
             return
 
-        # ---- CENTERING ----
+        # ---- CENTERING — vision-based: fly toward detected maze centroid ----
         if self.state == MissionState.CENTERING:
-            self._publish_drone_cmd(0.0, 0.0, self.SURVEY_START_ALT)
-            if self.drone_pos is not None:
-                xy_err = math.hypot(self.drone_pos[0], self.drone_pos[1])
-                alt_ok = self.drone_pos[2] >= self.SURVEY_START_ALT - 1.0
-                if xy_err < self.CENTER_TOL_M and alt_ok:
-                    self.get_logger().info(
-                        f'[CENTERING] Drone centred at ({self.drone_pos[0]:.2f}, '
-                        f'{self.drone_pos[1]:.2f}) alt={self.drone_pos[2]:.2f}m. '
-                        f'Starting altitude survey from {self.SURVEY_START_ALT:.0f}m.')
-                    self.survey_alt = self.SURVEY_START_ALT
-                    self.survey_confirm_count = 0
-                    self._last_survey_check = time.monotonic()
-                    self._save_snapshot('1_survey_start')
-                    self._transition(MissionState.ALTITUDE_SURVEY)
+            if self.drone_pos is None:
+                self._publish_drone_cmd(0.0, 0.0, self.CLIMB_ALT)
+                return
+
+            target_alt = max(self.drone_pos[2], self.CLIMB_ALT)
+
+            if self._latest_frame is None:
+                self._publish_drone_cmd(self.drone_pos[0], self.drone_pos[1], target_alt)
+                return
+
+            bounds = self.vision.detect_maze_bounds(self._latest_frame,
+                                                     margin_px=self.SURVEY_MARGIN_PX)
+
+            if not bounds['found']:
+                if self._time_in_state() > self.CENTER_TIMEOUT:
+                    self.get_logger().error('[CENTERING] Maze not detected after timeout. FAILURE.')
+                    self._transition(MissionState.FAILURE)
+                else:
+                    self._publish_drone_cmd(self.drone_pos[0], self.drone_pos[1], target_alt)
+                return
+
+            dx, dy = bounds['dx_world'], bounds['dy_world']
+            self.get_logger().info(
+                f'[CENTERING] Maze detected. Centroid offset: ({dx:.2f}, {dy:.2f})m')
+
+            target_x = self.drone_pos[0] + dx
+            target_y = self.drone_pos[1] + dy
+            self._publish_drone_cmd(target_x, target_y, target_alt)
+
+            if math.hypot(dx, dy) < self.CENTER_TOL_WORLD:
+                self.get_logger().info(
+                    f'[CENTERING] Centred at drone pos ({self.drone_pos[0]:.2f}, '
+                    f'{self.drone_pos[1]:.2f}) alt={self.drone_pos[2]:.2f}m.')
+                self.survey_alt = self.drone_pos[2]
+                self.survey_confirm_count = 0
+                self._last_survey_check = time.monotonic()
+                self._save_snapshot('1_survey_start')
+                self._transition(MissionState.ALTITUDE_SURVEY)
             return
 
-        # ---- ALTITUDE_SURVEY ----
+        # ---- ALTITUDE_SURVEY — vision-based: climb until full maze fits in frame ----
         if self.state == MissionState.ALTITUDE_SURVEY:
-            self._publish_drone_cmd(0.0, 0.0, self.survey_alt)
-
-            if self.drone_pos is None:
+            if self.drone_pos is None or self._latest_frame is None:
+                self._publish_drone_cmd(0.0, 0.0, self.survey_alt)
                 return
+
+            bounds = self.vision.detect_maze_bounds(self._latest_frame,
+                                                     margin_px=self.SURVEY_MARGIN_PX)
+
+            # Gentle re-centering correction while climbing
+            if bounds['found']:
+                dx, dy = bounds['dx_world'], bounds['dy_world']
+                target_x = self.drone_pos[0] + dx * 0.3
+                target_y = self.drone_pos[1] + dy * 0.3
+            else:
+                target_x = self.drone_pos[0]
+                target_y = self.drone_pos[1]
+            self._publish_drone_cmd(target_x, target_y, self.survey_alt)
 
             now = time.monotonic()
             if now - self._last_survey_check < self.SURVEY_CHECK_SEC:
                 return
             self._last_survey_check = now
 
-            covered = corners_visible_at(0.0, 0.0, self.survey_alt,
-                                         img_width=self._cam_w, img_height=self._cam_h)
-            if covered:
+            if bounds['found'] and bounds['covered']:
                 self.survey_confirm_count += 1
                 self.get_logger().info(
-                    f'[ALTITUDE_SURVEY] alt={self.survey_alt:.0f}m: corners visible '
+                    f'[ALTITUDE_SURVEY] alt={self.survey_alt:.1f}m: full maze visible '
                     f'({self.survey_confirm_count}/{self.SURVEY_CONFIRM_COUNT})')
                 if self.survey_confirm_count >= self.SURVEY_CONFIRM_COUNT:
                     self.DRONE_HOVER_ALT = self.survey_alt
@@ -540,20 +576,19 @@ class MazeMissionNode(Node):
                                                  img_width=self._cam_w, img_height=self._cam_h)
                     self._display_camera = True
                     self.get_logger().info(
-                        f'[ALTITUDE_SURVEY] Survey complete. Locked altitude={self.DRONE_HOVER_ALT:.0f}m. '
-                        f'Camera window opened.')
+                        f'[ALTITUDE_SURVEY] Locked altitude={self.DRONE_HOVER_ALT:.1f}m.')
                     self._save_snapshot('2_survey_complete')
                     self._start_perceiving()
             else:
                 self.survey_confirm_count = 0
+                reason = 'not detected' if not bounds['found'] else 'no margin yet'
                 if self.survey_alt < self.MAX_SURVEY_ALT:
                     self.survey_alt += self.SURVEY_STEP_M
                     self.get_logger().info(
-                        f'[ALTITUDE_SURVEY] Corners not visible. Climbing to {self.survey_alt:.0f}m...')
+                        f'[ALTITUDE_SURVEY] Maze {reason}. Climbing to {self.survey_alt:.1f}m...')
                 else:
                     self.get_logger().error(
-                        f'[ALTITUDE_SURVEY] Reached MAX_SURVEY_ALT={self.MAX_SURVEY_ALT}m '
-                        f'without full coverage. Proceeding anyway.')
+                        f'[ALTITUDE_SURVEY] Reached MAX_SURVEY_ALT={self.MAX_SURVEY_ALT}m. Proceeding.')
                     self.DRONE_HOVER_ALT = self.survey_alt
                     self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT,
                                                  img_width=self._cam_w, img_height=self._cam_h)
