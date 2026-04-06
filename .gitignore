@@ -6,3 +6,10 @@ __pycache__
 .env
 IsaacSim-ros_workspaces/build_ws
 envs
+
+# Log files — ignore raw logs but keep snapshots and reports
+*.log
+logs/simulation/
+# Keep snapshot images and report images
+!logs/snapshots/**
+!logs/reports/**

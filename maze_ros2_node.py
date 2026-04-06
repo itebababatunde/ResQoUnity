@@ -25,6 +25,7 @@ import os
 import csv
 import math
 import time
+import threading
 from datetime import datetime
 from enum import Enum, auto
 
@@ -125,6 +126,7 @@ class MazeMissionNode(Node):
 
     def __init__(self, seed=42):
         super().__init__('maze_mission_node')
+        self._seed = seed
 
         # Hover altitude — set dynamically by ALTITUDE_SURVEY
         self.DRONE_HOVER_ALT = self.SURVEY_START_ALT
@@ -138,6 +140,8 @@ class MazeMissionNode(Node):
         self._display_camera = False     # enabled after altitude survey confirms coverage
         self._latest_frame = None        # most recent camera frame (RGB numpy array)
         self._path_overlay_img = None    # BGR image with path drawn on camera frame
+        self._cam_w = 640                # actual camera frame width  (updated on first frame)
+        self._cam_h = 480                # actual camera frame height (updated on first frame)
 
         # Ground-truth occupancy grid — generated from seed, used for path planning.
         # The perceived grid (from camera) is kept for IoU comparison only.
@@ -180,6 +184,11 @@ class MazeMissionNode(Node):
         self.stuck_count = 0
         self.vision_iou = None
         self.collision_count = 0  # placeholder (requires contact sensor topic)
+
+        # ---- Last command (for per-tick CSV logging across all states) ----
+        self._last_vel_x = 0.0
+        self._last_ang_z = 0.0
+        self._last_dist_to_wp = 0.0
 
         # ---- ROS2 setup ----
         qos = QoSProfile(depth=10)
@@ -252,6 +261,10 @@ class MazeMissionNode(Node):
             cv_image = self._bridge.imgmsg_to_cv2(msg, desired_encoding='rgb8')
             rgb = np.array(cv_image)
             self._latest_frame = rgb
+            h, w = rgb.shape[:2]
+            if w != self._cam_w or h != self._cam_h:
+                self._cam_w, self._cam_h = w, h
+                self.get_logger().info(f'[Camera] Frame size detected: {w}×{h}')
             if self.state == MissionState.PERCEIVING:
                 self.vision.add_frame(rgb)
                 if self.vision.frame_count() % 5 == 0:
@@ -324,17 +337,33 @@ class MazeMissionNode(Node):
         if self._latest_frame is None or not _CV2_AVAILABLE:
             return None
         img = cv2.cvtColor(self._latest_frame, cv2.COLOR_RGB2BGR)
+        h, w = img.shape[:2]
+        # Build a vision node sized to the actual camera frame so world_to_pixel
+        # returns coordinates in the correct pixel space (camera may differ from
+        # the hardcoded 640×480 defaults in MazeVisionNode).
+        if w != self.vision.img_w or h != self.vision.img_h:
+            _vis = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT,
+                                  img_width=w, img_height=h)
+        else:
+            _vis = self.vision
+        drone_x = self.drone_pos[0] if self.drone_pos is not None else 0.0
+        drone_y = self.drone_pos[1] if self.drone_pos is not None else 0.0
         pts = []
         for wp in waypoints:
-            px, py = self.vision.world_to_pixel(wp[0], wp[1], drone_x=0.0, drone_y=0.0)
+            px, py = _vis.world_to_pixel(wp[0], wp[1], drone_x=drone_x, drone_y=drone_y)
             pts.append((int(px), int(py)))
+        # Scale line/marker thickness relative to image width so it looks right
+        # at any camera resolution (e.g. 640×480 vs 1280×720).
+        thickness = max(2, w // 320)
+        dot_r    = max(3, w // 160)
+        ring_r   = max(8, w // 80)
         for i in range(len(pts) - 1):
-            cv2.line(img, pts[i], pts[i + 1], (0, 255, 0), 2)
+            cv2.line(img, pts[i], pts[i + 1], (0, 255, 0), thickness)
         for pt in pts:
-            cv2.circle(img, pt, 3, (0, 200, 0), -1)
+            cv2.circle(img, pt, dot_r, (0, 200, 0), -1)
         if pts:
-            cv2.circle(img, pts[0],  8, (0, 255, 0), 2)   # start: green ring
-            cv2.circle(img, pts[-1], 8, (0, 0, 255), 2)   # end:   red ring
+            cv2.circle(img, pts[0],  ring_r, (0, 255, 0), thickness)   # start: green ring
+            cv2.circle(img, pts[-1], ring_r, (0, 0, 255), thickness)   # end:   red ring
         cv2.putText(img, f'Path: {len(waypoints)} waypoints  (dog starts in {self.PATH_DISPLAY_SEC:.0f}s)',
                     (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         return img
@@ -416,6 +445,7 @@ class MazeMissionNode(Node):
     # ------------------------------------------------------------------
     def _control_loop(self):
         self._tick_display()
+        self._log_csv(self._last_vel_x, self._last_ang_z, self._last_dist_to_wp)
 
         # ---- INIT ----
         if self.state == MissionState.INIT:
@@ -497,7 +527,8 @@ class MazeMissionNode(Node):
                 return
             self._last_survey_check = now
 
-            covered = corners_visible_at(0.0, 0.0, self.survey_alt)
+            covered = corners_visible_at(0.0, 0.0, self.survey_alt,
+                                         img_width=self._cam_w, img_height=self._cam_h)
             if covered:
                 self.survey_confirm_count += 1
                 self.get_logger().info(
@@ -505,7 +536,8 @@ class MazeMissionNode(Node):
                     f'({self.survey_confirm_count}/{self.SURVEY_CONFIRM_COUNT})')
                 if self.survey_confirm_count >= self.SURVEY_CONFIRM_COUNT:
                     self.DRONE_HOVER_ALT = self.survey_alt
-                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT)
+                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT,
+                                                 img_width=self._cam_w, img_height=self._cam_h)
                     self._display_camera = True
                     self.get_logger().info(
                         f'[ALTITUDE_SURVEY] Survey complete. Locked altitude={self.DRONE_HOVER_ALT:.0f}m. '
@@ -523,7 +555,8 @@ class MazeMissionNode(Node):
                         f'[ALTITUDE_SURVEY] Reached MAX_SURVEY_ALT={self.MAX_SURVEY_ALT}m '
                         f'without full coverage. Proceeding anyway.')
                     self.DRONE_HOVER_ALT = self.survey_alt
-                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT)
+                    self.vision = MazeVisionNode(drone_altitude=self.DRONE_HOVER_ALT,
+                                                 img_width=self._cam_w, img_height=self._cam_h)
                     self._display_camera = True
                     self._start_perceiving()
             return
@@ -640,8 +673,10 @@ class MazeMissionNode(Node):
             if wp is not None:
                 dist_to_wp = float(np.linalg.norm(self.dog_pos[:2] - wp[:2]))
 
+            self._last_vel_x = lin_x
+            self._last_ang_z = ang_z
+            self._last_dist_to_wp = dist_to_wp
             self._publish_dog_twist(lin_x, ang_z)
-            self._log_csv(lin_x, ang_z, dist_to_wp)
 
             # Check stuck
             if self.dog_ctrl.is_stuck(self.dog_pos[:2]):
@@ -676,6 +711,7 @@ class MazeMissionNode(Node):
             if self._time_in_state() < 1.0:
                 self._save_snapshot('7_mission_success')
                 self._print_mission_summary()
+                threading.Thread(target=self._generate_report, daemon=True).start()
             return
 
         # ---- FAILURE ----
@@ -684,7 +720,7 @@ class MazeMissionNode(Node):
             if self._time_in_state() < 1.0:
                 self._save_snapshot('7_mission_failure')
                 self.get_logger().error('Mission FAILED. See logs.')
-                self._csv_file.flush()
+                threading.Thread(target=self._generate_report, daemon=True).start()
             return
 
     # ------------------------------------------------------------------
@@ -709,6 +745,18 @@ class MazeMissionNode(Node):
         for line in lines:
             self.get_logger().info(line)
         self._csv_file.flush()
+
+    # ------------------------------------------------------------------
+    # Report generation (runs in background thread to avoid blocking spin)
+    # ------------------------------------------------------------------
+    def _generate_report(self):
+        try:
+            from maze_report import build_report
+            self._csv_file.flush()
+            out = build_report(self.csv_path, seed=self._seed)
+            self.get_logger().info(f'[Report] Saved: {out}')
+        except Exception as e:
+            self.get_logger().error(f'[Report] Generation failed: {e}')
 
     def destroy_node(self):
         self._stop_dog()

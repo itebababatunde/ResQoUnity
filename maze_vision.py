@@ -45,6 +45,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 FOCAL_LENGTH_MM      = 24.0   # mm (Isaac Sim PinholeCameraCfg)
 HORIZONTAL_APERTURE  = 20.955 # mm
+VERTICAL_APERTURE    = HORIZONTAL_APERTURE * (480 / 640)  # 15.716 mm — physical 4:3 sensor
 IMG_WIDTH            = 640
 IMG_HEIGHT           = 480
 
@@ -68,10 +69,11 @@ class MazeVisionNode:
         self.img_w = img_width
         self.img_h = img_height
 
-        # Compute FOV and visible footprint
+        # Compute FOV from physical apertures (constant regardless of output resolution).
+        # Using VERTICAL_APERTURE derived from the original 4:3 design ratio keeps
+        # footprint_y stable when the camera outputs at a different aspect (e.g. 1280×720).
         fov_h = 2.0 * math.atan(HORIZONTAL_APERTURE / (2.0 * FOCAL_LENGTH_MM))
-        aspect = img_height / img_width
-        fov_v = 2.0 * math.atan(math.tan(fov_h / 2.0) * aspect)
+        fov_v = 2.0 * math.atan(VERTICAL_APERTURE   / (2.0 * FOCAL_LENGTH_MM))
 
         self.footprint_x = 2.0 * drone_altitude * math.tan(fov_h / 2.0)  # metres, X (width)
         self.footprint_y = 2.0 * drone_altitude * math.tan(fov_v / 2.0)  # metres, Y (height)
@@ -245,7 +247,8 @@ class MazeVisionNode:
 # Coverage geometry helper (module-level, no class needed)
 # ---------------------------------------------------------------------------
 
-def corners_visible_at(drone_x, drone_y, altitude, margin_px=10):
+def corners_visible_at(drone_x, drone_y, altitude, margin_px=10,
+                        img_width=IMG_WIDTH, img_height=IMG_HEIGHT):
     """
     Return True if all 4 maze border corners project within image bounds
     at the given drone position and altitude.
@@ -258,15 +261,16 @@ def corners_visible_at(drone_x, drone_y, altitude, margin_px=10):
         drone_x, drone_y: drone world position (m)
         altitude: drone height above ground (m)
         margin_px: minimum pixel distance from edge required (default 10 px)
+        img_width, img_height: actual camera frame size (defaults to 640×480)
 
     Returns:
         bool
     """
     from maze_generator import ROWS, COLS, CELL_SIZE
-    fx = FOCAL_LENGTH_MM / HORIZONTAL_APERTURE * IMG_WIDTH   # ≈ 733 px
-    fy = fx                                                   # square pixels
-    cx = IMG_WIDTH  / 2.0
-    cy = IMG_HEIGHT / 2.0
+    fx = FOCAL_LENGTH_MM / HORIZONTAL_APERTURE  * img_width   # px — horizontal focal length
+    fy = FOCAL_LENGTH_MM / VERTICAL_APERTURE    * img_height  # px — vertical focal length
+    cx = img_width  / 2.0
+    cy = img_height / 2.0
 
     half_x = COLS * CELL_SIZE / 2.0
     half_y = ROWS * CELL_SIZE / 2.0
@@ -279,8 +283,8 @@ def corners_visible_at(drone_x, drone_y, altitude, margin_px=10):
     for wx, wy in corners:
         px = fx * (wx - drone_x) / altitude + cx
         py = fy * (-(wy - drone_y)) / altitude + cy   # Y flipped by 180° X rotation
-        if not (margin_px <= px <= IMG_WIDTH  - margin_px and
-                margin_px <= py <= IMG_HEIGHT - margin_px):
+        if not (margin_px <= px <= img_width  - margin_px and
+                margin_px <= py <= img_height - margin_px):
             return False
     return True
 
